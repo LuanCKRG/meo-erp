@@ -1,14 +1,21 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { cookies } from "next/headers"
 
-const DashboardLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+import { AppSidebar } from "@/components/app-sidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+
+const DashboardLayout = async ({ children }: Readonly<{ children: React.ReactNode }>) => {
+	const cookieStore = await cookies()
+	const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
+
 	return (
-		<SidebarProvider>
+		<SidebarProvider defaultOpen={defaultOpen}>
 			<AppSidebar />
-			<main>
-				<SidebarTrigger />
-				{children}
-			</main>
+			<SidebarInset>
+				<main className="p-4">
+					<SidebarTrigger />
+					{children}
+				</main>
+			</SidebarInset>
 		</SidebarProvider>
 	)
 }
