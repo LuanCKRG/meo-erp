@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint:biome": "biome check src",
+    "fix:biome": "biome check --write src",
+    "add": "npx shadcn@latest add",
+    "gen-types": "npx supabase gen types typescript --project-id ztadakijxdleljqjslfh --schema public > src/types/supabase.d.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
