@@ -9,7 +9,7 @@
     "lint:biome": "biome check src",
     "fix:biome": "biome check --write src",
     "add": "npx shadcn@latest add",
-    "gen-types": "npx supabase gen types typescript --project-id ztadakijxdleljqjslfh --schema public > src/types/supabase.d.ts"
+    "gen-types": "npx supabase gen types typescript --project-id ztadakijxdleljqjslfh --schema public > src/lib/supabase.d.ts"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.2",
