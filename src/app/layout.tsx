@@ -27,11 +27,11 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="en">
+		<html lang="pt-BR">
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 				<QueryProvider>
-				{children}
-				<Toaster richColors />
+					{children}
+					<Toaster richColors />
 				</QueryProvider>
 			</body>
 		</html>
