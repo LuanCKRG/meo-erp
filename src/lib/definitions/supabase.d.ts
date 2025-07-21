@@ -82,36 +82,99 @@ export type Database = {
 						isOneToOne: false
 						referencedRelation: "sellers"
 						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "partners_user_id_fkey1"
+						columns: ["user_id"]
+						isOneToOne: false
+						referencedRelation: "users"
+						referencedColumns: ["id"]
 					}
 				]
 			}
 			sellers: {
 				Row: {
+					cep: string
+					city: string
+					complement: string | null
 					cpf: string
 					created_at: string | null
-					email: string | null
+					email: string
 					id: string
 					name: string
-					phone: string | null
+					neighborhood: string
+					number: string
+					phone: string
+					state: string
+					street: string
 					updated_at: string | null
+					user_id: string
 				}
 				Insert: {
+					cep: string
+					city: string
+					complement?: string | null
 					cpf: string
 					created_at?: string | null
-					email?: string | null
+					email: string
 					id?: string
 					name: string
-					phone?: string | null
+					neighborhood: string
+					number: string
+					phone: string
+					state: string
+					street: string
 					updated_at?: string | null
+					user_id: string
 				}
 				Update: {
+					cep?: string
+					city?: string
+					complement?: string | null
 					cpf?: string
 					created_at?: string | null
-					email?: string | null
+					email?: string
 					id?: string
 					name?: string
-					phone?: string | null
+					neighborhood?: string
+					number?: string
+					phone?: string
+					state?: string
+					street?: string
 					updated_at?: string | null
+					user_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "sellers_user_id_fkey"
+						columns: ["user_id"]
+						isOneToOne: false
+						referencedRelation: "users"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			users: {
+				Row: {
+					created_at: string
+					email: string
+					id: string
+					role: Database["public"]["Enums"]["user_role"]
+					updated_at: string
+				}
+				Insert: {
+					created_at?: string
+					email: string
+					id: string
+					role: Database["public"]["Enums"]["user_role"]
+					updated_at?: string
+				}
+				Update: {
+					created_at?: string
+					email?: string
+					id?: string
+					role?: Database["public"]["Enums"]["user_role"]
+					updated_at?: string
 				}
 				Relationships: []
 			}
@@ -120,31 +183,11 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
-			rpc_register_partner: {
-				Args: {
-					_contact_email: string
-					_password: string
-					_cnpj: string
-					_legal_business_name: string
-					_contact_name: string
-					_contact_mobile: string
-					_cep: string
-					_street: string
-					_number: string
-					_neighborhood: string
-					_city: string
-					_state: string
-					_complement?: string
-					_seller_id?: string
-				}
-				Returns: {
-					user_id: string
-					partner_id: string
-				}[]
-			}
+			[_ in never]: never
 		}
 		Enums: {
 			enum_partners_status: "pending" | "approved" | "rejected"
+			user_role: "partner" | "seller"
 		}
 		CompositeTypes: {
 			[_ in never]: never
@@ -260,7 +303,8 @@ export type CompositeTypes<
 export const Constants = {
 	public: {
 		Enums: {
-			enum_partners_status: ["pending", "approved", "rejected"]
+			enum_partners_status: ["pending", "approved", "rejected"],
+			user_role: ["partner", "seller"]
 		}
 	}
 } as const
