@@ -48,7 +48,6 @@ const editPartnerSchema = z.object({
 		.string()
 		.refine((val) => val.length === 14 || val.length === 15, { message: "Celular inválido. Use (00) 00000-0000 ou (00) 0000-0000" })
 		.transform((val) => val.replace(/\D/g, "")),
-	contact_email: z.email({ message: "Por favor, insira um email válido." }),
 	// Step 2
 	cep: z
 		.string()

@@ -2,50 +2,45 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, ArrowRight, UserPlus } from "lucide-react"
+import { ArrowLeft, ArrowRight, Save } from "lucide-react"
 import { motion } from "motion/react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-import { registerPartner } from "@/actions/partners"
+import { updatePartner } from "@/actions/partners"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { brazilianStates } from "@/lib/constants"
+import type { Partner } from "@/lib/definitions/partners"
 import { maskCep, maskCnpj, maskPhone } from "@/lib/masks"
 import { cn } from "@/lib/utils"
-import { type RegisterPartnerData, registerPartnerSchema } from "@/lib/validations/partner"
+import { type EditPartnerData, editPartnerSchema } from "@/lib/validations/partner"
 
-const RegisterPartnerForm = ({ className }: { className?: string }) => {
+const EditPartnerForm = ({ partner, className }: { partner: Partner; className?: string }) => {
 	const [step, setStep] = useState(1)
 	const [isFetchingCep, setIsFetchingCep] = useState(false)
 	const queryClient = useQueryClient()
 
-	const registerPartnerForm = useForm<RegisterPartnerData>({
-		resolver: zodResolver(registerPartnerSchema),
+	const form = useForm<EditPartnerData>({
+		resolver: zodResolver(editPartnerSchema),
 		defaultValues: {
-			cnpj: "",
-			legalBusinessName: "",
-			contactName: "",
-			contactMobile: "",
-			contactEmail: "",
-			cep: "",
-			street: "",
-			number: "",
-			complement: "",
-			neighborhood: "",
-			city: "",
-			state: "",
-			confirmEmail: "",
-			password: "",
-			confirmPassword: ""
+			contact_name: partner.contact_name,
+			contact_mobile: maskPhone(partner.contact_mobile),
+			cep: maskCep(partner.cep),
+			street: partner.street,
+			number: partner.number,
+			complement: partner.complement || "",
+			neighborhood: partner.neighborhood,
+			city: partner.city,
+			state: partner.state
 		}
 	})
 
-	const { control, handleSubmit, formState, setValue, setFocus, trigger, reset, resetField } = registerPartnerForm
+	const { control, handleSubmit, formState, setValue, setFocus, trigger, resetField } = form
 
 	async function handleCepBlur(e: React.FocusEvent<HTMLInputElement>) {
 		const cep = e.target.value.replace(/\D/g, "")
@@ -84,9 +79,9 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 	const prevStep = () => setStep((prev) => prev - 1)
 
 	async function nextStep(currentStep: number) {
-		let fieldsToValidate: (keyof RegisterPartnerData)[] = []
+		let fieldsToValidate: (keyof EditPartnerData)[] = []
 		if (currentStep === 1) {
-			fieldsToValidate = ["cnpj", "legalBusinessName", "contactName", "contactMobile"]
+			fieldsToValidate = ["contact_name", "contact_mobile"]
 		} else if (currentStep === 2) {
 			fieldsToValidate = ["cep", "street", "number", "neighborhood", "city", "state"]
 		}
@@ -97,27 +92,17 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 		}
 	}
 
-	function onSubmit(data: RegisterPartnerData) {
-		toast.promise(registerPartner(data), {
-			loading: "Enviando cadastro...",
-			success: (result) => {
-				if (result.success) {
-					queryClient.invalidateQueries({ queryKey: ["partners"] })
-					reset()
-					setStep(1)
-					return {
-						message: "Cadastro realizado com sucesso!",
-						description: "Seu cadastro foi enviado para análise."
-					}
-				} else {
-					throw new Error(result.message)
-				}
-			},
-			error: (err: Error) => ({
-				message: "Erro no cadastro",
-				description: err.message
+	async function onSubmit(data: EditPartnerData) {
+		const result = await updatePartner(partner.id, data)
+
+		if (result.success) {
+			toast.success("Dados atualizados com sucesso!")
+			queryClient.invalidateQueries({ queryKey: ["partners"] })
+		} else {
+			toast.error("Erro na atualização", {
+				description: result.message
 			})
-		})
+		}
 	}
 
 	const motionVariants = {
@@ -153,23 +138,11 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 						</div>
 						<p className={cn("mt-2 text-sm font-medium", step >= 2 ? "text-primary" : "text-muted-foreground")}>Endereço</p>
 					</div>
-					<div className={cn("flex-1 h-1 bg-border mt-4 transition-colors", step > 2 && "bg-primary")} />
-					<div className="flex flex-col items-center flex-1">
-						<div
-							className={cn(
-								"w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg transition-all",
-								step >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-							)}
-						>
-							3
-						</div>
-						<p className={cn("mt-2 text-sm font-medium", step >= 3 ? "text-primary" : "text-muted-foreground")}>Cadastro</p>
-					</div>
 				</div>
 			</CardHeader>
 
 			<CardContent>
-				<Form {...registerPartnerForm}>
+				<Form {...form}>
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 						<motion.div
 							key={step}
@@ -182,14 +155,38 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 							{step === 1 && (
 								<div className="space-y-6">
 									<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+										<FormItem>
+											<FormLabel>CNPJ</FormLabel>
+											<FormControl>
+												<Input value={maskCnpj(partner.cnpj)} disabled />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+										<FormItem>
+											<FormLabel>Razão Social</FormLabel>
+											<FormControl>
+												<Input value={partner.legal_business_name} disabled />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									</div>
+									<div className="grid grid-cols-1 gap-6">
+										<FormItem>
+											<FormLabel>Email</FormLabel>
+											<FormControl>
+												<Input value={partner.contact_email} disabled />
+											</FormControl>
+										</FormItem>
+									</div>
+									<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 										<FormField
 											control={control}
-											name="cnpj"
+											name="contact_name"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>CNPJ</FormLabel>
+													<FormLabel>Nome do Responsável</FormLabel>
 													<FormControl>
-														<Input placeholder="00.000.000/0000-00" {...field} onChange={(e) => field.onChange(maskCnpj(e.target.value))} />
+														<Input placeholder="João da Silva" {...field} />
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -197,44 +194,18 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 										/>
 										<FormField
 											control={control}
-											name="legalBusinessName"
+											name="contact_mobile"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel>Razão Social</FormLabel>
+													<FormLabel>Celular do Responsável</FormLabel>
 													<FormControl>
-														<Input placeholder="Nome da sua empresa" {...field} />
+														<Input placeholder="(11) 99999-9999" {...field} onChange={(e) => field.onChange(maskPhone(e.target.value))} />
 													</FormControl>
 													<FormMessage />
 												</FormItem>
 											)}
 										/>
 									</div>
-									<FormField
-										control={control}
-										name="contactName"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Nome do Responsável</FormLabel>
-												<FormControl>
-													<Input placeholder="João da Silva" {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={control}
-										name="contactMobile"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Celular do Responsável</FormLabel>
-												<FormControl>
-													<Input placeholder="(11) 99999-9999" {...field} onChange={(e) => field.onChange(maskPhone(e.target.value))} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
 								</div>
 							)}
 
@@ -350,81 +321,26 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 									</div>
 								</div>
 							)}
-
-							{step === 3 && (
-								<div className="space-y-6">
-									<FormField
-										control={control}
-										name="contactEmail"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Email do Responsável</FormLabel>
-												<FormControl>
-													<Input placeholder="contato@suaempresa.com" {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={control}
-										name="confirmEmail"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Confirmar Email do Responsável</FormLabel>
-												<FormControl>
-													<Input type="email" placeholder="confirme.contato@suaempresa.com" {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={control}
-										name="password"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Senha</FormLabel>
-												<FormControl>
-													<Input type="password" placeholder="********" {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={control}
-										name="confirmPassword"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Confirmar Senha</FormLabel>
-												<FormControl>
-													<Input type="password" placeholder="********" {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-							)}
 						</motion.div>
-
 						<div className="flex justify-between pt-4">
-							{step > 1 && (
-								<Button type="button" variant="outline" onClick={prevStep}>
-									<ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-								</Button>
+							{step === 1 && (
+								<>
+									<div />
+									<Button type="button" onClick={() => nextStep(1)}>
+										Próximo <ArrowRight className="ml-2 h-4 w-4" />
+									</Button>
+								</>
 							)}
-							{step < 3 && (
-								<Button type="button" onClick={() => nextStep(step)} className={cn(step === 1 && "w-full")}>
-									Próximo <ArrowRight className="ml-2 h-4 w-4" />
-								</Button>
-							)}
-							{step === 3 && (
-								<Button type="submit" disabled={formState.isSubmitting}>
-									<UserPlus className="mr-2 h-4 w-4" />
-									Cadastrar
-								</Button>
+							{step === 2 && (
+								<>
+									<Button type="button" variant="outline" onClick={prevStep}>
+										<ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+									</Button>
+									<Button type="submit" disabled={formState.isSubmitting}>
+										<Save className="mr-2 h-4 w-4" />
+										Salvar Alterações
+									</Button>
+								</>
 							)}
 						</div>
 					</form>
@@ -434,4 +350,4 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 	)
 }
 
-export { RegisterPartnerForm }
+export { EditPartnerForm }

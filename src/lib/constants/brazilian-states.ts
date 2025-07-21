@@ -28,4 +28,4 @@ const brazilianStates = [
 	{ value: "TO", label: "Tocantins" }
 ]
 
-export { brazilianStates }
+export default brazilianStates

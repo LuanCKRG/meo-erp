@@ -8,6 +8,90 @@ export type Database = {
 	}
 	public: {
 		Tables: {
+			equipment: {
+				Row: {
+					brand_id: string | null
+					cod: number
+					created_at: string
+					name: string
+					type_id: string
+					updated_at: string
+				}
+				Insert: {
+					brand_id?: string | null
+					cod?: number
+					created_at?: string
+					name: string
+					type_id: string
+					updated_at?: string
+				}
+				Update: {
+					brand_id?: string | null
+					cod?: number
+					created_at?: string
+					name?: string
+					type_id?: string
+					updated_at?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "equipment_brand_id_fkey"
+						columns: ["brand_id"]
+						isOneToOne: false
+						referencedRelation: "equipment_brands"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "equipment_type_id_fkey"
+						columns: ["type_id"]
+						isOneToOne: false
+						referencedRelation: "equipment_types"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			equipment_brands: {
+				Row: {
+					created_at: string
+					id: string
+					name: string
+					updated_at: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					name: string
+					updated_at?: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					name?: string
+					updated_at?: string
+				}
+				Relationships: []
+			}
+			equipment_types: {
+				Row: {
+					created_at: string
+					id: string
+					name: string
+					updated_at: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					name: string
+					updated_at?: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					name?: string
+					updated_at?: string
+				}
+				Relationships: []
+			}
 			partners: {
 				Row: {
 					cep: string
@@ -153,6 +237,27 @@ export type Database = {
 						referencedColumns: ["id"]
 					}
 				]
+			}
+			structure_types: {
+				Row: {
+					created_at: string
+					id: string
+					name: string
+					updated_at: string
+				}
+				Insert: {
+					created_at?: string
+					id?: string
+					name: string
+					updated_at?: string
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					name?: string
+					updated_at?: string
+				}
+				Relationships: []
 			}
 			users: {
 				Row: {

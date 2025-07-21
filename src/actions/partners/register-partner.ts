@@ -1,71 +1,98 @@
 "use server"
 
+import { PostgrestError } from "@supabase/supabase-js"
+
+import { createUser } from "@/actions/auth"
 import { createClient } from "@/lib/supabase/server"
 import type { RegisterPartnerData } from "@/lib/validations/partner"
 import type { ActionResponse } from "@/types/action-response"
 
-const rpcErrorMessages: Record<string, string> = {
-	P0001: "Já existe um parceiro cadastrado com este CNPJ.",
-	P0002: "Este e-mail já está em uso por outro parceiro.",
-	P0003: "Erro ao criar o usuário de autenticação. Tente novamente mais tarde.",
-	P0004: "Erro ao registrar os dados do parceiro. Tente novamente mais tarde.",
-	P0005: "Erro de referência de usuário. Contate o suporte.",
-	"23505": "Dados duplicados. Verifique as informações e tente novamente.", // Código genérico para violação de unicidade
-	default: "Ocorreu um erro inesperado durante o cadastro. Tente novamente."
+const partnerRegistrationErrorMessages: Record<string, string> = {
+	"23505": "Este CNPJ já está cadastrado.", // Específico para a tabela partners
+	userCreationFailed: "Não foi possível criar o usuário. Tente novamente.",
+	partnerInsertionFailed: "O usuário foi criado, mas não foi possível registrar os dados do parceiro. A operação foi cancelada.",
+	default: "Ocorreu um erro inesperado. Por favor, tente novamente."
 }
 
-async function registerPartner(data: RegisterPartnerData): Promise<ActionResponse<{ userId: string; partnerId: string }>> {
+async function registerPartner(data: RegisterPartnerData): Promise<ActionResponse<{ partnerId: string }>> {
+	const supabase = await createClient()
+	let newAuthUserId: string | null = null
+
 	try {
-		const supabase = await createClient()
+		// 1. Verificar se o CNPJ já existe na tabela 'partners' (lógica específica do parceiro)
+		const { data: existingPartner, error: cnpjError } = await supabase.from("partners").select("user_id").eq("cnpj", data.cnpj).maybeSingle()
 
-		const { data: rpcData, error: rpcError } = await supabase
-			.rpc("rpc_register_partner", {
-				_contact_email: data.contactEmail,
-				_password: data.password,
-				_cnpj: data.cnpj,
-				_legal_business_name: data.legalBusinessName,
-				_contact_name: data.contactName,
-				_contact_mobile: data.contactMobile,
-				_cep: data.cep,
-				_street: data.street,
-				_number: data.number,
-				_complement: data.complement,
-				_neighborhood: data.neighborhood,
-				_city: data.city,
-				_state: data.state
-			})
-			.single()
-
-		if (rpcError) {
-			console.error("Erro na RPC 'register_partner':", rpcError)
-			const errorCode = rpcError.code || "default"
-			const message = rpcErrorMessages[errorCode] || rpcErrorMessages.default
-			return {
-				success: false,
-				message
-			}
+		if (cnpjError) throw cnpjError
+		if (existingPartner) {
+			return { success: false, message: partnerRegistrationErrorMessages["23505"] }
 		}
 
-		if (!rpcData) {
-			return {
-				success: false,
-				message: "Não foi possível obter os dados do novo parceiro."
-			}
+		// 2. Chamar a action centralizada para criar o usuário em auth.users e public.users
+		const userResponse = await createUser({
+			email: data.contactEmail,
+			password: data.password,
+			role: "partner"
+		})
+
+		if (!userResponse.success) {
+			// Propaga a mensagem de erro específica da action createUser (ex: email já existe, senha fraca)
+			return { success: false, message: userResponse.message }
+		}
+
+		newAuthUserId = userResponse.data.id
+
+		// 3. Tentar inserir os dados específicos do parceiro na tabela 'partners'
+		const { data: partnerData, error: partnerError } = await supabase
+			.from("partners")
+			.insert({
+				user_id: newAuthUserId,
+				cnpj: data.cnpj,
+				legal_business_name: data.legalBusinessName,
+				contact_name: data.contactName,
+				contact_email: data.contactEmail,
+				contact_mobile: data.contactMobile,
+				cep: data.cep,
+				street: data.street,
+				number: data.number,
+				complement: data.complement,
+				neighborhood: data.neighborhood,
+				city: data.city,
+				state: data.state
+			})
+			.select("user_id")
+			.single()
+
+		if (partnerError) {
+			// Se esta inserção falhar, a ação de compensação (deletar usuário) será acionada no bloco catch
+			throw partnerError
 		}
 
 		return {
 			success: true,
-			message: "Parceiro cadastrado com sucesso!",
+			message: "Parceiro cadastrado com sucesso! Seu cadastro está em análise.",
 			data: {
-				userId: rpcData.user_id,
-				partnerId: rpcData.partner_id
+				partnerId: partnerData.user_id
 			}
 		}
 	} catch (error) {
-		console.error("Erro inesperado na action 'registerPartner':", error)
+		console.error("Erro no processo de registro de parceiro:", error)
+
+		// Ação de compensação: se o usuário de autenticação foi criado, mas algo deu errado depois,
+		// deletamos o usuário de autenticação para manter a consistência.
+		// A trigger ON DELETE CASCADE cuidará de remover da public.users
+		if (newAuthUserId) {
+			await supabase.auth.admin.deleteUser(newAuthUserId)
+		}
+
+		if (error instanceof PostgrestError) {
+			const errorCode = error.code || "default"
+			const message = partnerRegistrationErrorMessages[errorCode] || partnerRegistrationErrorMessages.default
+			return { success: false, message }
+		}
+
 		return {
 			success: false,
-			message: "Ocorreu um erro inesperado. Por favor, contate o suporte."
+			message: partnerRegistrationErrorMessages.default
 		}
 	}
 }

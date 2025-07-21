@@ -10,11 +10,12 @@ const DashboardLayout = async ({ children }: Readonly<{ children: React.ReactNod
 	return (
 		<SidebarProvider defaultOpen={defaultOpen}>
 			<AppSidebar />
-			<SidebarInset>
-				<main className="p-4">
+
+			<SidebarInset className="overflow-auto">
+				<div className="p-4 space-y-3">
 					<SidebarTrigger />
-					{children}
-				</main>
+					<main className="container mx-auto flex flex-1 flex-col justify-center gap-8">{children}</main>
+				</div>
 			</SidebarInset>
 		</SidebarProvider>
 	)

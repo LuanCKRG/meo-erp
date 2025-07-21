@@ -1,10 +1,20 @@
-const ReportsPage = () => {
+import { PartnerTable } from "@/components/data-tables/partners/partner-table"
+import { AddPartnerDialog } from "@/components/dialogs/add-partner-dialog"
+
+const PartnersPage = () => {
 	return (
-		<div className="flex h-full w-full flex-col items-center justify-center">
-			<h1 className="text-2xl font-bold">Relatórios</h1>
-			<p className="mt-4 text-gray-600">Esta página está em desenvolvimento.</p>
-		</div>
+		<>
+			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+				<div className="text-center md:text-left">
+					<h1 className="text-3xl font-bold tracking-tight text-foreground">Parceiros</h1>
+					<p className="text-muted-foreground">Gerencie os parceiros cadastrados no sistema.</p>
+				</div>
+
+				<AddPartnerDialog />
+			</div>
+			<PartnerTable />
+		</>
 	)
 }
 
-export default ReportsPage
+export default PartnersPage

@@ -2,36 +2,34 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
+import { motion } from "framer-motion"
 import { ArrowLeft, ArrowRight, UserPlus } from "lucide-react"
-import { motion } from "motion/react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-import { registerPartner } from "@/actions/partners"
+import { registerSeller } from "@/actions/sellers"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { brazilianStates } from "@/lib/constants"
-import { maskCep, maskCnpj, maskPhone } from "@/lib/masks"
+import { maskCep, maskCpf, maskPhone } from "@/lib/masks"
 import { cn } from "@/lib/utils"
-import { type RegisterPartnerData, registerPartnerSchema } from "@/lib/validations/partner"
+import { type RegisterSellerData, registerSellerSchema } from "@/lib/validations/seller"
 
-const RegisterPartnerForm = ({ className }: { className?: string }) => {
+const RegisterSellerForm = ({ className }: { className?: string }) => {
 	const [step, setStep] = useState(1)
 	const [isFetchingCep, setIsFetchingCep] = useState(false)
 	const queryClient = useQueryClient()
 
-	const registerPartnerForm = useForm<RegisterPartnerData>({
-		resolver: zodResolver(registerPartnerSchema),
+	const registerSellerForm = useForm<RegisterSellerData>({
+		resolver: zodResolver(registerSellerSchema),
 		defaultValues: {
-			cnpj: "",
-			legalBusinessName: "",
-			contactName: "",
-			contactMobile: "",
-			contactEmail: "",
+			name: "",
+			cpf: "",
+			phone: "",
 			cep: "",
 			street: "",
 			number: "",
@@ -39,13 +37,14 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 			neighborhood: "",
 			city: "",
 			state: "",
+			email: "",
 			confirmEmail: "",
 			password: "",
 			confirmPassword: ""
 		}
 	})
 
-	const { control, handleSubmit, formState, setValue, setFocus, trigger, reset, resetField } = registerPartnerForm
+	const { control, handleSubmit, formState, setValue, setFocus, trigger, reset, resetField } = registerSellerForm
 
 	async function handleCepBlur(e: React.FocusEvent<HTMLInputElement>) {
 		const cep = e.target.value.replace(/\D/g, "")
@@ -84,9 +83,9 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 	const prevStep = () => setStep((prev) => prev - 1)
 
 	async function nextStep(currentStep: number) {
-		let fieldsToValidate: (keyof RegisterPartnerData)[] = []
+		let fieldsToValidate: (keyof RegisterSellerData)[] = []
 		if (currentStep === 1) {
-			fieldsToValidate = ["cnpj", "legalBusinessName", "contactName", "contactMobile"]
+			fieldsToValidate = ["name", "cpf", "phone"]
 		} else if (currentStep === 2) {
 			fieldsToValidate = ["cep", "street", "number", "neighborhood", "city", "state"]
 		}
@@ -97,27 +96,21 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 		}
 	}
 
-	function onSubmit(data: RegisterPartnerData) {
-		toast.promise(registerPartner(data), {
-			loading: "Enviando cadastro...",
-			success: (result) => {
-				if (result.success) {
-					queryClient.invalidateQueries({ queryKey: ["partners"] })
-					reset()
-					setStep(1)
-					return {
-						message: "Cadastro realizado com sucesso!",
-						description: "Seu cadastro foi enviado para análise."
-					}
-				} else {
-					throw new Error(result.message)
-				}
-			},
-			error: (err: Error) => ({
-				message: "Erro no cadastro",
-				description: err.message
+	async function onSubmit(data: RegisterSellerData) {
+		const result = await registerSeller(data)
+
+		if (result.success) {
+			toast.success("Cadastro realizado com sucesso!", {
+				description: "O novo vendedor foi cadastrado."
 			})
-		})
+			queryClient.invalidateQueries({ queryKey: ["sellers"] })
+			reset()
+			setStep(1)
+		} else {
+			toast.error("Erro no cadastro", {
+				description: result.message
+			})
+		}
 	}
 
 	const motionVariants = {
@@ -139,7 +132,7 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 						>
 							1
 						</div>
-						<p className={cn("mt-2 text-sm font-medium", step >= 1 ? "text-primary" : "text-muted-foreground")}>Empresa</p>
+						<p className={cn("mt-2 text-sm font-medium", step >= 1 ? "text-primary" : "text-muted-foreground")}>Dados Pessoais</p>
 					</div>
 					<div className={cn("flex-1 h-1 bg-border mt-4 transition-colors", step > 1 && "bg-primary")} />
 					<div className="flex flex-col items-center flex-1">
@@ -163,13 +156,13 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 						>
 							3
 						</div>
-						<p className={cn("mt-2 text-sm font-medium", step >= 3 ? "text-primary" : "text-muted-foreground")}>Cadastro</p>
+						<p className={cn("mt-2 text-sm font-medium", step >= 3 ? "text-primary" : "text-muted-foreground")}>Acesso</p>
 					</div>
 				</div>
 			</CardHeader>
 
 			<CardContent>
-				<Form {...registerPartnerForm}>
+				<Form {...registerSellerForm}>
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 						<motion.div
 							key={step}
@@ -181,40 +174,12 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 						>
 							{step === 1 && (
 								<div className="space-y-6">
-									<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-										<FormField
-											control={control}
-											name="cnpj"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>CNPJ</FormLabel>
-													<FormControl>
-														<Input placeholder="00.000.000/0000-00" {...field} onChange={(e) => field.onChange(maskCnpj(e.target.value))} />
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-										<FormField
-											control={control}
-											name="legalBusinessName"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Razão Social</FormLabel>
-													<FormControl>
-														<Input placeholder="Nome da sua empresa" {...field} />
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
 									<FormField
 										control={control}
-										name="contactName"
+										name="name"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Nome do Responsável</FormLabel>
+												<FormLabel>Nome Completo</FormLabel>
 												<FormControl>
 													<Input placeholder="João da Silva" {...field} />
 												</FormControl>
@@ -222,19 +187,34 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 											</FormItem>
 										)}
 									/>
-									<FormField
-										control={control}
-										name="contactMobile"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Celular do Responsável</FormLabel>
-												<FormControl>
-													<Input placeholder="(11) 99999-9999" {...field} onChange={(e) => field.onChange(maskPhone(e.target.value))} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<FormField
+											control={control}
+											name="cpf"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>CPF</FormLabel>
+													<FormControl>
+														<Input placeholder="000.000.000-00" {...field} onChange={(e) => field.onChange(maskCpf(e.target.value))} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={control}
+											name="phone"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Celular</FormLabel>
+													<FormControl>
+														<Input placeholder="(11) 99999-9999" {...field} onChange={(e) => field.onChange(maskPhone(e.target.value))} />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
 								</div>
 							)}
 
@@ -355,12 +335,12 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 								<div className="space-y-6">
 									<FormField
 										control={control}
-										name="contactEmail"
+										name="email"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Email do Responsável</FormLabel>
+												<FormLabel>Email</FormLabel>
 												<FormControl>
-													<Input placeholder="contato@suaempresa.com" {...field} />
+													<Input placeholder="vendedor@email.com" {...field} />
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -371,9 +351,9 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 										name="confirmEmail"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Confirmar Email do Responsável</FormLabel>
+												<FormLabel>Confirmar Email</FormLabel>
 												<FormControl>
-													<Input type="email" placeholder="confirme.contato@suaempresa.com" {...field} />
+													<Input type="email" placeholder="confirme.vendedor@email.com" {...field} />
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -416,14 +396,14 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 								</Button>
 							)}
 							{step < 3 && (
-								<Button type="button" onClick={() => nextStep(step)} className={cn(step === 1 && "w-full")}>
+								<Button type="button" onClick={() => nextStep(step)} className={cn(step === 1 && "w-full", step > 1 && "ml-auto")}>
 									Próximo <ArrowRight className="ml-2 h-4 w-4" />
 								</Button>
 							)}
 							{step === 3 && (
 								<Button type="submit" disabled={formState.isSubmitting}>
 									<UserPlus className="mr-2 h-4 w-4" />
-									Cadastrar
+									Cadastrar Vendedor
 								</Button>
 							)}
 						</div>
@@ -434,4 +414,4 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 	)
 }
 
-export { RegisterPartnerForm }
+export { RegisterSellerForm }
