@@ -43,4 +43,37 @@ function maskDate(value: string) {
 		.replace(/(\d{4})\d+?$/, "$1")
 }
 
-export { maskCnpj, maskPhone, maskCep, maskCpf, maskDate }
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+	style: "currency",
+	currency: "BRL",
+	minimumFractionDigits: 2
+})
+
+const numberFormatter = new Intl.NumberFormat("pt-BR", {
+	minimumFractionDigits: 2,
+	maximumFractionDigits: 2
+})
+
+function formatAsCurrency(value: string) {
+	const numberValue = parseFloat(value.replace(/\D/g, "")) / 100
+
+	if (Number.isNaN(numberValue)) return ""
+
+	return currencyFormatter.format(numberValue).replace("R$", "").trim()
+}
+
+const maskNumber = (value: string, maxLength: number = 9) => {
+	let justDigits = value.replace(/\D/g, "")
+
+	if (justDigits.length > maxLength) {
+		justDigits = justDigits.slice(0, maxLength)
+	}
+
+	const numberValue = parseFloat(justDigits) / 100
+
+	if (Number.isNaN(numberValue)) return ""
+
+	return numberFormatter.format(numberValue)
+}
+
+export { maskCnpj, maskPhone, maskCep, maskCpf, maskDate, formatAsCurrency, maskNumber }
