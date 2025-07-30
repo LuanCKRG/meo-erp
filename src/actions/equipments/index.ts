@@ -1,4 +1,6 @@
-import getEquipmentBrands from "@/actions/equipments/get-all-brands"
-import getModulesByBrand from "@/actions/equipments/get-modules-by-brands"
+import getBrandsByEquipmentType from "@/actions/equipments/get-brands-by-type"
+import getEquipmentTypes from "@/actions/equipments/get-equipment-types"
+import getEquipmentsByBrandAndType from "@/actions/equipments/get-equipments-by-brand-and-type"
+import getStructureTypes from "@/actions/equipments/get-structure-types"
 
-export { getEquipmentBrands, getModulesByBrand }
+export { getBrandsByEquipmentType, getEquipmentsByBrandAndType, getEquipmentTypes, getStructureTypes }
