@@ -11,7 +11,7 @@ import { createStructureType } from "@/actions/equipments"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { type AddStructureTypeData, addStructureTypeSchema } from "@/lib/validations/structure-types"
+import { type AddStructureTypeData, addStructureTypeSchema } from "@/lib/validations/structure-type"
 
 interface AddStructureTypeFormProps {
 	onSuccess?: () => void
