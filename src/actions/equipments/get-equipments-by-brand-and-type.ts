@@ -1,7 +1,7 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
 import type { Equipment } from "@/lib/definitions/equipments"
+import { createClient } from "@/lib/supabase/server"
 
 async function getEquipmentsByBrandAndType(typeId: string, brandId: string | null): Promise<Equipment[]> {
 	if (!typeId) return []

@@ -1,7 +1,7 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
 import type { StructureType } from "@/lib/definitions/equipments"
+import { createClient } from "@/lib/supabase/server"
 
 async function getStructureTypes(): Promise<StructureType[]> {
 	try {
