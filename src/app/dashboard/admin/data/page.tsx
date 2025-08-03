@@ -19,7 +19,7 @@ const AdminDataPage = () => {
 					<TabsTrigger value="equipments">Equipamentos</TabsTrigger>
 				</TabsList>
 
-				<TabsContent value="structures">
+				<TabsContent value="structures" forceMount className="data-[state=inactive]:hidden">
 					<Card>
 						<CardHeader>
 							<div className="flex items-center justify-between">
@@ -36,7 +36,7 @@ const AdminDataPage = () => {
 					</Card>
 				</TabsContent>
 
-				<TabsContent value="brands">
+				<TabsContent value="brands" forceMount className="data-[state=inactive]:hidden">
 					<Card>
 						<CardHeader>
 							<div className="flex items-center justify-between">
@@ -53,7 +53,7 @@ const AdminDataPage = () => {
 					</Card>
 				</TabsContent>
 
-				<TabsContent value="equipments">
+				<TabsContent value="equipments" forceMount className="data-[state=inactive]:hidden">
 					<Card>
 						<CardHeader>
 							<CardTitle>Equipamentos (Kits)</CardTitle>
