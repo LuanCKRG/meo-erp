@@ -1,4 +1,6 @@
+import { BrandsTable } from "@/components/data-tables/brands/brands-table"
 import { StructureTypesTable } from "@/components/data-tables/strutucture-types/structure-types-table"
+import { AddBrandDialog } from "@/components/dialogs/add-brand-dialog"
 import { AddStructureTypeDialog } from "@/components/dialogs/add-structure-type-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,6 +18,7 @@ const AdminDataPage = () => {
 					<TabsTrigger value="brands">Marcas</TabsTrigger>
 					<TabsTrigger value="equipments">Equipamentos</TabsTrigger>
 				</TabsList>
+
 				<TabsContent value="structures">
 					<Card>
 						<CardHeader>
@@ -32,18 +35,24 @@ const AdminDataPage = () => {
 						</CardContent>
 					</Card>
 				</TabsContent>
+
 				<TabsContent value="brands">
 					<Card>
 						<CardHeader>
-							<CardTitle>Marcas de Equipamento</CardTitle>
-							<CardDescription>Gerencie as marcas dos equipamentos.</CardDescription>
+							<div className="flex items-center justify-between">
+								<div>
+									<CardTitle>Marcas de Equipamento</CardTitle>
+									<CardDescription>Gerencie as marcas dos equipamentos.</CardDescription>
+								</div>
+								<AddBrandDialog />
+							</div>
 						</CardHeader>
-						<CardContent className="space-y-2">
-							{/* TODO: Implementar tabela para gerenciar Marcas */}
-							<p className="text-center text-muted-foreground py-8">Tabela de gerenciamento em breve.</p>
+						<CardContent>
+							<BrandsTable />
 						</CardContent>
 					</Card>
 				</TabsContent>
+
 				<TabsContent value="equipments">
 					<Card>
 						<CardHeader>
