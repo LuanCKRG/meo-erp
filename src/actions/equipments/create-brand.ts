@@ -37,7 +37,7 @@ async function createBrand(name: string): Promise<ActionResponse<EquipmentBrand>
 		}
 
 		// Revalidate the path to show the new data in the table
-		revalidatePath("/admin/data")
+		revalidatePath("/dashboard/admin/data")
 
 		return {
 			success: true,
