@@ -1,6 +1,10 @@
-import { Briefcase, Calendar, ChevronDown, FileChartLine, Handshake, Home, Inbox, Search, Settings } from "lucide-react"
+import { ChevronDown } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
-import { NavAdmin } from "@/components/app-sidebar/nav/nav-admin"
+
+import { navItems } from "@/components/app-sidebar/nav-items"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Separator } from "@/components/ui/separator"
 import {
 	Sidebar,
 	SidebarContent,
@@ -13,81 +17,30 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem
 } from "@/components/ui/sidebar"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
 
-// Menu items.
-const items = [
-	{
-		title: "Home",
-		url: "/dashboard/home",
-		icon: Handshake
-	},
-	{
-		title: "Vendedores",
-		url: "/dashboard/sellers",
-		icon: Briefcase
-	},
-	{
-		title: "Parceiros",
-		url: "/dashboard/partners",
-		icon: Handshake
-	},
-	{
-		title: "Relatórios",
-		url: "/dashboard/reports",
-		icon: FileChartLine
-	},
-	{
-		title: "Search",
-		url: "#",
-		icon: Search
-	},
-	{
-		title: "Configurações",
-		url: "/dashboard/settings",
-		icon: Settings
-	}
-]
+const AppSidebar = () => (
+	<Sidebar collapsible="icon" variant="inset">
+		<SidebarHeader>
+			<Image alt="MEO Ernegia" src="/logo.png" width={300} height={200} />
+		</SidebarHeader>
 
-export const AppSidebar = () => {
-	return (
-		<Sidebar collapsible="icon" variant="inset">
-			<SidebarHeader />
+		<Separator className="data-[orientation=horizontal]:h-0.5" />
 
-			<SidebarContent>
-				{/* <NavAdmin /> */}
-
-				<SidebarGroup>
-					<SidebarGroupLabel>Admin</SidebarGroupLabel>
-
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{items.map(({ icon: Icon, ...item }) => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton asChild>
-										<Link href={item.url}>
-											<Icon />
-											<span>{item.title}</span>
-										</Link>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
-
-				<Collapsible defaultOpen className="group/collapsible">
+		<SidebarContent>
+			{navItems.map((nav) => (
+				<Collapsible key={nav.id} defaultOpen className="group/collapsible">
 					<SidebarGroup>
 						<SidebarGroupLabel asChild>
 							<CollapsibleTrigger>
-								Configurações
+								{nav.title}
 								<ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
 							</CollapsibleTrigger>
 						</SidebarGroupLabel>
+
 						<CollapsibleContent>
 							<SidebarGroupContent>
 								<SidebarMenu>
-									{items.map(({ icon: Icon, ...item }) => (
+									{nav.items.map(({ icon: Icon, ...item }) => (
 										<SidebarMenuItem key={item.title}>
 											<SidebarMenuButton asChild>
 												<Link href={item.url}>
@@ -102,9 +55,11 @@ export const AppSidebar = () => {
 						</CollapsibleContent>
 					</SidebarGroup>
 				</Collapsible>
-			</SidebarContent>
+			))}
+		</SidebarContent>
 
-			<SidebarFooter />
-		</Sidebar>
-	)
-}
+		<SidebarFooter />
+	</Sidebar>
+)
+
+export { AppSidebar }
