@@ -1,7 +1,8 @@
 import { cookies } from "next/headers"
 
 import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarInsetHeader } from "@/components/sidebar-inset-header"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 const DashboardLayout = async ({ children }: Readonly<{ children: React.ReactNode }>) => {
 	const cookieStore = await cookies()
@@ -12,9 +13,9 @@ const DashboardLayout = async ({ children }: Readonly<{ children: React.ReactNod
 			<AppSidebar />
 
 			<SidebarInset className="overflow-auto">
-				<div className="p-4 space-y-3">
-					<SidebarTrigger />
-					<main className="container mx-auto flex flex-1 flex-col justify-center gap-8">{children}</main>
+				<SidebarInsetHeader />
+				<div className="p-4 lg:p-8">
+					<div className="container mx-auto flex flex-1 flex-col justify-center gap-8">{children}</div>
 				</div>
 			</SidebarInset>
 		</SidebarProvider>
