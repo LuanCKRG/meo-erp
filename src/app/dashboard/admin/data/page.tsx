@@ -1,6 +1,8 @@
 import { BrandsTable } from "@/components/data-tables/brands/brands-table"
+import { EquipmentsTable } from "@/components/data-tables/equipment/equipments-table"
 import { StructureTypesTable } from "@/components/data-tables/strutucture-types/structure-types-table"
 import { AddBrandDialog } from "@/components/dialogs/add-brand-dialog"
+import { AddEquipmentDialog } from "@/components/dialogs/add-equipment-dialog"
 import { AddStructureTypeDialog } from "@/components/dialogs/add-structure-type-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -22,7 +24,7 @@ const AdminDataPage = () => {
 				<TabsContent value="structures" forceMount className="data-[state=inactive]:hidden">
 					<Card>
 						<CardHeader>
-							<div className="flex items-center justify-between">
+							<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 								<div>
 									<CardTitle>Tipos de Estrutura</CardTitle>
 									<CardDescription>Gerencie os tipos de estrutura disponíveis para as simulações.</CardDescription>
@@ -39,7 +41,7 @@ const AdminDataPage = () => {
 				<TabsContent value="brands" forceMount className="data-[state=inactive]:hidden">
 					<Card>
 						<CardHeader>
-							<div className="flex items-center justify-between">
+							<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 								<div>
 									<CardTitle>Marcas de Equipamento</CardTitle>
 									<CardDescription>Gerencie as marcas dos equipamentos.</CardDescription>
@@ -56,12 +58,16 @@ const AdminDataPage = () => {
 				<TabsContent value="equipments" forceMount className="data-[state=inactive]:hidden">
 					<Card>
 						<CardHeader>
-							<CardTitle>Equipamentos (Kits)</CardTitle>
-							<CardDescription>Gerencie os equipamentos individuais que compõem os kits.</CardDescription>
+							<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+								<div>
+									<CardTitle>Equipamentos (Kits)</CardTitle>
+									<CardDescription>Gerencie os equipamentos individuais que compõem os kits.</CardDescription>
+								</div>
+								<AddEquipmentDialog />
+							</div>
 						</CardHeader>
-						<CardContent className="space-y-2">
-							{/* TODO: Implementar tabela para gerenciar Equipamentos */}
-							<p className="text-center text-muted-foreground py-8">Tabela de gerenciamento em breve.</p>
+						<CardContent>
+							<EquipmentsTable />
 						</CardContent>
 					</Card>
 				</TabsContent>
