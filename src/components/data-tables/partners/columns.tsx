@@ -7,7 +7,7 @@ import { PartnerActions } from "@/components/data-tables/partners/partner-table-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { PartnerWithSellerName, PartnerStatus } from "@/lib/definitions/partners"
+import type { PartnerStatus, PartnerWithSellerName } from "@/lib/definitions/partners"
 import { formatCnpj, formatPhone } from "@/lib/formatters"
 import { cn, formatDate } from "@/lib/utils"
 
