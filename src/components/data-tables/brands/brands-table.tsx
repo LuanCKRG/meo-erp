@@ -61,7 +61,7 @@ const BrandsTable = () => {
 					placeholder="Filtrar por nome da marca..."
 					value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
 					onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
-					className="h-8 w-[150px] lg:w-[250px]"
+					className="h-8 w-full md:w-[250px]"
 				/>
 			</div>
 		</div>
