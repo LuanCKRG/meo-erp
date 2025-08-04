@@ -7,8 +7,8 @@ const navItems = [
 		items: [
 			{ title: "Admin Dashboard", url: "/dashboard/admin", icon: Home },
 			{ title: "Gerenciar Dados", url: "/dashboard/admin/data", icon: Package },
-			{ title: "Configurações", url: "/dashboard/admin/settings", icon: Settings },
-			{ title: "Usuários", url: "/dashboard/admin/users", icon: Users }
+			{ title: "Configurações", url: "/dashboard/admin/settings", icon: Settings }
+			// { title: "Usuários", url: "/dashboard/admin/users", icon: Users }
 		]
 	},
 	{
@@ -17,9 +17,9 @@ const navItems = [
 		items: [
 			{ title: "Home", url: "/dashboard/home", icon: Handshake },
 			{ title: "Vendedores", url: "/dashboard/sellers", icon: Briefcase },
-			{ title: "Parceiros", url: "/dashboard/partners", icon: Handshake },
-			{ title: "Relatórios", url: "/dashboard/reports", icon: FileChartLine },
-			{ title: "Configurações", url: "/dashboard/settings", icon: Settings }
+			{ title: "Parceiros", url: "/dashboard/partners", icon: Handshake }
+			// { title: "Relatórios", url: "/dashboard/reports", icon: FileChartLine },
+			// { title: "Configurações", url: "/dashboard/settings", icon: Settings }
 		]
 	}
 ]
