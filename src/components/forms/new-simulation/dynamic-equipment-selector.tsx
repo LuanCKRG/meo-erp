@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { useQuery } from "@tanstack/react-query"
+import * as React from "react"
 import { useFormContext } from "react-hook-form"
 
 import { getBrandsByEquipmentType, getEquipmentsByBrandAndType } from "@/actions/equipments"
@@ -50,15 +50,11 @@ export function DynamicEquipmentSelect({ equipmentTypeId, formFieldName, formLab
 
 	if (brandsLoading) {
 		return (
-			<CardContent>
+			<CardContent className="space-y-4">
 				<Skeleton className="h-10 w-full" />
-				<Skeleton className="h-10 w-full mt-4" />
+				<Skeleton className="h-10 w-full" />
 			</CardContent>
 		)
-	}
-
-	if (!hasNoBrands && equipments.length === 0 && !selectedBrand) {
-		// Não mostra nada se não houver marcas e nenhum equipamento sem marca
 	}
 
 	return (
@@ -89,34 +85,32 @@ export function DynamicEquipmentSelect({ equipmentTypeId, formFieldName, formLab
 				render={({ field }) => (
 					<FormItem>
 						<FormLabel>{formLabel}</FormLabel>
-						<Select
-							onValueChange={field.onChange}
-							value={field.value || ""}
-							disabled={equipmentsLoading || (!hasNoBrands && !selectedBrand) || equipments.length === 0}
-						>
-							<FormControl>
-								<SelectTrigger>
-									<SelectValue
-										placeholder={
-											equipmentsLoading
-												? "Carregando..."
-												: !hasNoBrands && !selectedBrand
-													? "Selecione uma marca"
-													: equipments.length === 0
-														? "Nenhum disponível"
-														: "Selecione um equipamento"
-										}
-									/>
-								</SelectTrigger>
-							</FormControl>
-							<SelectContent>
-								{equipments.map((equipment) => (
-									<SelectItem key={equipment.cod} value={String(equipment.cod)}>
-										{equipment.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						{equipmentsLoading ? (
+							<Skeleton className="h-10 w-full" />
+						) : (
+							<Select
+								onValueChange={field.onChange}
+								value={field.value || ""}
+								disabled={equipmentsLoading || (!hasNoBrands && !selectedBrand) || equipments.length === 0}
+							>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue
+											placeholder={
+												!hasNoBrands && !selectedBrand ? "Selecione uma marca" : equipments.length === 0 ? "Nenhum disponível" : "Selecione um equipamento"
+											}
+										/>
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{equipments.map((equipment) => (
+										<SelectItem key={equipment.cod} value={String(equipment.cod)}>
+											{equipment.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
 						<FormMessage />
 					</FormItem>
 				)}

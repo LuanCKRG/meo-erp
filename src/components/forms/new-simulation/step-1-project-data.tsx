@@ -1,162 +1,194 @@
 "use client"
 
-import * as React from "react"
-import { useFormContext } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
+import { ArrowRight } from "lucide-react"
+import * as React from "react"
+import { useForm } from "react-hook-form"
 
-import { connectionVoltageTypes, energyProviders } from "@/lib/constants"
-import { maskNumber } from "@/lib/masks"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { getStructureTypes } from "@/actions/equipments"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { Card, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useSimulation } from "@/contexts/simulation-context"
+import { connectionVoltageTypes, energyProviders, INVERTER_TYPE_ID, MODULE_TYPE_ID, OTHERS_TYPE_ID } from "@/lib/constants"
+import { maskNumber } from "@/lib/masks"
 import { DynamicEquipmentSelect } from "./dynamic-equipment-selector"
-import { getStructureTypes } from "@/actions/equipments"
-
-// IDs estáticos para os tipos de equipamento que esperamos ter no banco de dados.
-const MODULE_TYPE_ID = "e070febb-6e62-480f-a398-bb02139e4d80" // Assumindo que o ID para 'Módulo Fotovoltaico' é 1
-const INVERTER_TYPE_ID = "1a0c272e-0cd6-460a-a765-339cdee27c72" // Assumindo que o ID para 'Inversor' é 2
-const OTHERS_TYPE_ID = "e5667c3c-7933-483a-9c2f-c015af369e33" // Assumindo que o ID para 'Estruturas' é 3
+import { type SimulationStep1Data, simulationStep1Schema } from "./validation/new-simulation"
 
 export function SimulationStep1() {
-	const { control } = useFormContext()
+	const { simulationData, setSimulationData, nextStep } = useSimulation()
+
+	const form = useForm<SimulationStep1Data>({
+		resolver: zodResolver(simulationStep1Schema),
+		defaultValues: {
+			systemPower: simulationData.systemPower || "",
+			currentConsumption: simulationData.currentConsumption || "",
+			energyProvider: simulationData.energyProvider,
+			structureType: simulationData.structureType || "",
+			connectionVoltage: simulationData.connectionVoltage,
+			kit_module: simulationData.kit_module || "",
+			kit_inverter: simulationData.kit_inverter || "",
+			kit_others: simulationData.kit_others || ""
+		}
+	})
 
 	const { data: structureTypes, isLoading: isLoadingStructureTypes } = useQuery({
 		queryKey: ["structureTypes"],
 		queryFn: getStructureTypes
 	})
 
+	function onSubmit(data: SimulationStep1Data) {
+		setSimulationData(data)
+		nextStep()
+	}
+
 	return (
-		<div className="space-y-6">
-			<h3 className="text-lg font-medium">Passo 1: Dados do Projeto</h3>
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<FormField
-					control={control}
-					name="systemPower"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Potência (kWp) *</FormLabel>
-							<FormControl>
-								<Input type="text" placeholder="9.999,99" {...field} onChange={(e) => field.onChange(maskNumber(e.target.value, 9))} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={control}
-					name="currentConsumption"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Consumo Atual (kWh) *</FormLabel>
-							<FormControl>
-								<Input type="text" placeholder="9.999,99" {...field} onChange={(e) => field.onChange(maskNumber(e.target.value, 9))} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-			</div>
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<FormField
-					control={control}
-					name="energyProvider"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Concessionária *</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+				<h3 className="text-lg font-medium">Passo 1: Dados do Projeto</h3>
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+					<FormField
+						control={form.control}
+						name="systemPower"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Potência (kWp) *</FormLabel>
 								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecione a concessionária" />
-									</SelectTrigger>
+									<Input type="text" placeholder="9.999,99" {...field} onChange={(e) => field.onChange(maskNumber(e.target.value, 9))} />
 								</FormControl>
-								<SelectContent>
-									{energyProviders.map((provider) => (
-										<SelectItem key={provider} value={provider}>
-											{provider}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={control}
-					name="structureType"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Tipo de Estrutura *</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={isLoadingStructureTypes}>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="currentConsumption"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Consumo Atual (kWh) *</FormLabel>
 								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder={isLoadingStructureTypes ? "Carregando..." : "Selecione o tipo"} />
-									</SelectTrigger>
+									<Input type="text" placeholder="9.999,99" {...field} onChange={(e) => field.onChange(maskNumber(e.target.value, 9))} />
 								</FormControl>
-								<SelectContent>
-									{structureTypes?.map((type) => (
-										<SelectItem key={type.id} value={type.id}>
-											{type.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={control}
-					name="connectionVoltage"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Conexão e Tensão *</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecione o tipo de conexão" />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{connectionVoltageTypes.map((type) => (
-										<SelectItem key={type} value={type}>
-											{type}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-			</div>
-			<Separator className="my-8" />
-			<div className="space-y-2">
-				<h3 className="text-lg font-medium">Kit de Equipamentos</h3>
-				<p className="text-sm text-muted-foreground">Selecione os equipamentos para a simulação.</p>
-			</div>
-			<div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-lg">Módulos</CardTitle>
-					</CardHeader>
-					<DynamicEquipmentSelect equipmentTypeId={MODULE_TYPE_ID} formFieldName="kit_module" formLabel="Módulo *" />
-				</Card>
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-lg">Inversores</CardTitle>
-					</CardHeader>
-					<DynamicEquipmentSelect equipmentTypeId={INVERTER_TYPE_ID} formFieldName="kit_inverter" formLabel="Inversor *" />
-				</Card>
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-lg">Outros</CardTitle>
-					</CardHeader>
-					<DynamicEquipmentSelect equipmentTypeId={OTHERS_TYPE_ID} formFieldName="kit_others" formLabel="Outros *" />
-				</Card>
-			</div>
-		</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+					<FormField
+						control={form.control}
+						name="energyProvider"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Concessionária *</FormLabel>
+								<Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Selecione a concessionária" />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{energyProviders.map((provider) => (
+											<SelectItem key={provider} value={provider}>
+												{provider}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="structureType"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Tipo de Estrutura *</FormLabel>
+								{isLoadingStructureTypes ? (
+									<Skeleton className="h-10 w-full" />
+								) : (
+									<Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={isLoadingStructureTypes}>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder={isLoadingStructureTypes ? "Carregando..." : "Selecione o tipo"} />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{structureTypes?.map((type) => (
+												<SelectItem key={type.id} value={type.id}>
+													{type.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								)}
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="connectionVoltage"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Conexão e Tensão *</FormLabel>
+								<Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Selecione o tipo de conexão" />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{connectionVoltageTypes.map((type) => (
+											<SelectItem key={type} value={type}>
+												{type}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+				<Separator className="my-8" />
+				<div className="space-y-2">
+					<h3 className="text-lg font-medium">Kit de Equipamentos</h3>
+					<p className="text-sm text-muted-foreground">Selecione os equipamentos para a simulação.</p>
+				</div>
+				<div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+					<Card>
+						<CardHeader>
+							<CardTitle className="text-lg">Módulos</CardTitle>
+						</CardHeader>
+						<DynamicEquipmentSelect equipmentTypeId={MODULE_TYPE_ID} formFieldName="kit_module" formLabel="Módulo *" />
+					</Card>
+					<Card>
+						<CardHeader>
+							<CardTitle className="text-lg">Inversores</CardTitle>
+						</CardHeader>
+						<DynamicEquipmentSelect equipmentTypeId={INVERTER_TYPE_ID} formFieldName="kit_inverter" formLabel="Inversor *" />
+					</Card>
+					<Card>
+						<CardHeader>
+							<CardTitle className="text-lg">Outros</CardTitle>
+						</CardHeader>
+						<DynamicEquipmentSelect equipmentTypeId={OTHERS_TYPE_ID} formFieldName="kit_others" formLabel="Outros *" />
+					</Card>
+				</div>
+
+				<div className="flex justify-end pt-8">
+					<Button type="submit">
+						Próximo <ArrowRight className="ml-2 h-4 w-4" />
+					</Button>
+				</div>
+			</form>
+		</Form>
 	)
 }

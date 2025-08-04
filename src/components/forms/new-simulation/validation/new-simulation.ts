@@ -8,7 +8,7 @@ const validStates = brazilianStates.map((state) => state.value) as [string, ...s
 // Helper para validação de string numérica com limite de dígitos
 const numericString = (maxLength: number = 9, errorMessage: string = "Valor é obrigatório.") =>
 	z
-		.string(errorMessage)
+		.string()
 		.min(1, errorMessage)
 		.refine((val) => {
 			const justDigits = val.replace(/\D/g, "")
@@ -31,14 +31,13 @@ export const simulationStep2Schema = z.object({
 	cnpj: z
 		.string()
 		.min(1, "CNPJ é obrigatório.")
-		.refine((value) => /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(value), "CNPJ inválido. Formato esperado: 00.000.000/0000-00")
-		.transform((val) => val.replace(/\D/g, "")),
+		.refine((value) => /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(value), "CNPJ inválido. Formato esperado: 00.000.000/0000-00"),
 	legalName: z.string().min(2, "Razão social é obrigatória."),
 	incorporationDate: z
 		.string()
 		.min(1, "Data de fundação é obrigatória.")
 		.refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), "Formato de data inválido. Use DD/MM/AAAA."),
-	annualRevenue: numericString(15).optional().or(z.literal("")),
+	annualRevenue: numericString(15, "Faturamento anual é obrigatório."),
 	contactName: z.string().min(3, "Nome do responsável é obrigatório."),
 	contactPhone: z
 		.string()
@@ -48,11 +47,7 @@ export const simulationStep2Schema = z.object({
 })
 
 export const simulationStep3Schema = z.object({
-	cep: z
-		.string()
-		.min(1, "CEP é obrigatório.")
-		.length(9, "CEP deve conter 8 dígitos. Formato: 00000-000")
-		.transform((val) => val.replace(/\D/g, "")),
+	cep: z.string().min(1, "CEP é obrigatório.").length(9, "CEP deve conter 8 dígitos. Formato: 00000-000"),
 	street: z.string().min(1, "Rua é obrigatória."),
 	number: z.string().min(1, "Número é obrigatório."),
 	complement: z.string().optional(),
@@ -75,4 +70,9 @@ export const newSimulationSchema = z.object({
 	...simulationStep4Schema.shape
 })
 
+// Tipos de dados para cada passo
+export type SimulationStep1Data = z.infer<typeof simulationStep1Schema>
+export type SimulationStep2Data = z.infer<typeof simulationStep2Schema>
+export type SimulationStep3Data = z.infer<typeof simulationStep3Schema>
+export type SimulationStep4Data = z.infer<typeof simulationStep4Schema>
 export type NewSimulationData = z.infer<typeof newSimulationSchema>
