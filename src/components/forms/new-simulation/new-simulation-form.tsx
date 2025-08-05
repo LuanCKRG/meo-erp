@@ -78,7 +78,7 @@ function SimulationContent() {
 			if (!value) return undefined
 			const sanitizedValue = value.replace(/\./g, "").replace(",", ".")
 			const numberValue = parseFloat(sanitizedValue)
-			return isNaN(numberValue) ? undefined : numberValue
+			return Number.isNaN(numberValue) ? undefined : numberValue
 		}
 
 		const processedData = {

@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, ArrowRight, Loader2, X } from "lucide-react"
-import * as React from "react"
 import { useForm } from "react-hook-form"
+import * as React from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,9 @@ import { Input } from "@/components/ui/input"
 import { useSimulation } from "@/contexts/simulation-context"
 import { formatCep } from "@/lib/formatters"
 import { maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
-import { type SimulationStep2Data, simulationStep2Schema } from "./validation/new-simulation"
+import { simulationStep2Schema, type SimulationStep2Data } from "./validation/new-simulation"
+
+const fieldsToClear = ["legalName", "incorporationDate"] as const
 
 export function SimulationStep2() {
 	const { simulationData, setSimulationData, nextStep, backStep } = useSimulation()
@@ -34,8 +36,6 @@ export function SimulationStep2() {
 	const [isFetchingCnpj, setIsFetchingCnpj] = React.useState(false)
 	const cnpjValue = watch("cnpj")
 
-	const fieldsToClear = ["legalName", "incorporationDate"] as const
-
 	const clearCnpjRelatedFields = React.useCallback(() => {
 		fieldsToClear.forEach((field) => resetField(field, { defaultValue: "" }))
 		setSimulationData({
@@ -47,9 +47,9 @@ export function SimulationStep2() {
 			city: "",
 			state: ""
 		})
-	}, [resetField, setSimulationData, fieldsToClear.forEach])
+	}, [resetField, setSimulationData])
 
-	const handleClearCnpj = () => {
+	function handleClearCnpj() {
 		setValue("cnpj", "")
 		clearCnpjRelatedFields()
 		setFocus("cnpj")
@@ -123,7 +123,9 @@ export function SimulationStep2() {
 										<Input
 											placeholder="00.000.000/0000-00"
 											{...field}
-											onChange={(e) => field.onChange(maskCnpj(e.target.value))}
+											onChange={(e) => {
+												field.onChange(maskCnpj(e.target.value))
+											}}
 											onBlur={handleCnpjBlur}
 											disabled={isFetchingCnpj}
 										/>
@@ -182,7 +184,14 @@ export function SimulationStep2() {
 								<FormControl>
 									<div className="relative">
 										<span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">R$</span>
-										<Input placeholder="1.000.000,00" className="pl-9" {...field} onChange={(e) => field.onChange(maskNumber(e.target.value, 15))} />
+										<Input
+											placeholder="1.000.000,00"
+											className="pl-9"
+											{...field}
+											onChange={(e) => {
+												field.onChange(maskNumber(e.target.value, 15))
+											}}
+										/>
 									</div>
 								</FormControl>
 								<FormMessage />
@@ -212,7 +221,13 @@ export function SimulationStep2() {
 							<FormItem>
 								<FormLabel>Celular do Responsável *</FormLabel>
 								<FormControl>
-									<Input placeholder="(11) 99999-9999" {...field} onChange={(e) => field.onChange(maskPhone(e.target.value))} />
+									<Input
+										placeholder="(11) 99999-9999"
+										{...field}
+										onChange={(e) => {
+											field.onChange(maskPhone(e.target.value))
+										}}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>

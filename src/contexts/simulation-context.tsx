@@ -1,14 +1,13 @@
 "use client"
 
 import * as React from "react"
-import type { NewSimulationData } from "@/lib/validations/simulation"
 
-type SimulationState = Partial<NewSimulationData>
+import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 
 type SimulationContextType = {
 	currentStep: number
-	simulationData: SimulationState
-	setSimulationData: (data: SimulationState) => void
+	simulationData: Partial<SimulationData>
+	setSimulationData: (data: Partial<SimulationData>) => void
 	nextStep: () => void
 	backStep: () => void
 }
@@ -17,11 +16,11 @@ const SimulationContext = React.createContext<SimulationContextType | undefined>
 
 export function SimulationProvider({ children }: { children: React.ReactNode }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
-	const [simulationData, setSimulationDataState] = React.useState<SimulationState>({})
+	const [simulationData, setSimulationDataState] = React.useState<Partial<SimulationData>>({})
 
-	const setSimulationData = (newData: Partial<NewSimulationData>) => {
+	const setSimulationData = React.useCallback((newData: Partial<SimulationData>) => {
 		setSimulationDataState((prev) => ({ ...prev, ...newData }))
-	}
+	}, [])
 
 	const nextStep = () => {
 		setCurrentStep((prev) => Math.min(prev + 1, 4))

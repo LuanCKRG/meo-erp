@@ -3,12 +3,10 @@
 import { z } from "zod"
 import { brazilianStates, connectionVoltageTypes, energyProviders } from "@/lib/constants"
 
-const validStates = brazilianStates.map((state) => state.value) as [string, ...string[]]
-
 // Helper para validação de string numérica com limite de dígitos
 const numericString = (maxLength: number = 9, errorMessage: string = "Valor é obrigatório.") =>
 	z
-		.string()
+		.string(errorMessage)
 		.min(1, errorMessage)
 		.refine((val) => {
 			const justDigits = val.replace(/\D/g, "")
@@ -43,7 +41,7 @@ export const simulationStep2Schema = z.object({
 		.string()
 		.min(1, "Celular do responsável é obrigatório.")
 		.refine((val) => val.length === 14 || val.length === 15, "Número de celular inválido. Use (00) 00000-0000."),
-	contactEmail: z.email("Email de contato inválido.")
+	contactEmail: z.string().email("Email de contato inválido.")
 })
 
 export const simulationStep3Schema = z.object({
@@ -53,7 +51,7 @@ export const simulationStep3Schema = z.object({
 	complement: z.string().optional(),
 	neighborhood: z.string().min(1, "Bairro é obrigatório."),
 	city: z.string().min(1, "Cidade é obrigatória."),
-	state: z.enum(validStates, "Selecione um estado válido.")
+	state: z.enum(brazilianStates.map((s) => s.value) as [string, ...string[]], "Selecione um estado válido.")
 })
 
 export const simulationStep4Schema = z.object({
@@ -61,6 +59,12 @@ export const simulationStep4Schema = z.object({
 	laborValue: numericString(14, "Valor da mão de obra é obrigatório."),
 	otherCosts: numericString(14, "Outros custos são obrigatórios.")
 })
+
+// Tipos de dados para cada passo
+export type SimulationStep1Data = z.infer<typeof simulationStep1Schema>
+export type SimulationStep2Data = z.infer<typeof simulationStep2Schema>
+export type SimulationStep3Data = z.infer<typeof simulationStep3Schema>
+export type SimulationStep4Data = z.infer<typeof simulationStep4Schema>
 
 // Schema completo combinando as 'shapes' de todos os steps
 export const newSimulationSchema = z.object({
@@ -70,9 +74,5 @@ export const newSimulationSchema = z.object({
 	...simulationStep4Schema.shape
 })
 
-// Tipos de dados para cada passo
-export type SimulationStep1Data = z.infer<typeof simulationStep1Schema>
-export type SimulationStep2Data = z.infer<typeof simulationStep2Schema>
-export type SimulationStep3Data = z.infer<typeof simulationStep3Schema>
-export type SimulationStep4Data = z.infer<typeof simulationStep4Schema>
-export type NewSimulationData = z.infer<typeof newSimulationSchema>
+// Tipo unificado para todos os dados do formulário
+export type SimulationData = z.infer<typeof newSimulationSchema>

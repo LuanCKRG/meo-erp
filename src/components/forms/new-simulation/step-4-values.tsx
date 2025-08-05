@@ -1,18 +1,20 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowLeft, DollarSign, Send } from "lucide-react"
-import * as React from "react"
+import { ArrowLeft, Send, DollarSign } from "lucide-react"
 import { useForm } from "react-hook-form"
+import * as React from "react"
+
+import { maskNumber } from "@/lib/masks"
+import { useSimulation } from "@/contexts/simulation-context"
+import { simulationStep4Schema, type SimulationStep4Data } from "./validation/new-simulation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { useSimulation } from "@/contexts/simulation-context"
-import { maskNumber } from "@/lib/masks"
 import { cn } from "@/lib/utils"
-import { type SimulationStep4Data, simulationStep4Schema } from "./validation/new-simulation"
+import { useSidebar } from "@/components/ui/sidebar"
 
 const formatCurrency = (value: number): string => {
 	return new Intl.NumberFormat("pt-BR", {
@@ -63,6 +65,7 @@ const getFontSizeForValue = (value: string): string => {
 
 export function SimulationStep4({ onSubmitFinal }: StepProps) {
 	const { simulationData, setSimulationData, backStep } = useSimulation()
+	const { state } = useSidebar()
 
 	const form = useForm<SimulationStep4Data>({
 		resolver: zodResolver(simulationStep4Schema),
@@ -159,8 +162,15 @@ export function SimulationStep4({ onSubmitFinal }: StepProps) {
 							<CardContent className="space-y-4">
 								<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
 									<span className="text-sm text-muted-foreground">Total do Investimento</span>
-									<span className="hidden sm:flex font-bold sm:text-xl lg:text-2xl">{formattedTotalInvestment}</span>
-									<span className={cn("font-bold sm:hidden", getFontSizeForValue(formattedTotalInvestment))}>{formattedTotalInvestment}</span>
+									<span
+										className={cn(
+											"hidden sm:flex font-bold",
+											state === "expanded" ? `${getFontSizeForValue(formattedTotalInvestment)} lg:text-xl xl:text-2xl` : "md:text-xl lg:text-2xl"
+										)}
+									>
+										{formattedTotalInvestment}
+									</span>
+									<span className={cn("font-bold md:hidden", getFontSizeForValue(formattedTotalInvestment))}>{formattedTotalInvestment}</span>
 								</div>
 								<Separator />
 								<h4 className="font-medium">Parcelamento (Taxa de {interestRate * 100}%)</h4>
