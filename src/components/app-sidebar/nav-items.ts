@@ -1,4 +1,4 @@
-import { Briefcase, FileChartLine, Handshake, Home, Package, Settings, Users } from "lucide-react"
+import { Briefcase, FileChartLine, Handshake, Home, Package, Settings, Users, Activity } from "lucide-react"
 
 const navItems = [
 	{
@@ -17,7 +17,8 @@ const navItems = [
 		items: [
 			{ title: "Home", url: "/dashboard/home", icon: Handshake },
 			{ title: "Vendedores", url: "/dashboard/sellers", icon: Briefcase },
-			{ title: "Parceiros", url: "/dashboard/partners", icon: Handshake }
+			{ title: "Parceiros", url: "/dashboard/partners", icon: Handshake },
+			{ title: "Simulações", url: "/dashboard/simulations", icon: Activity }
 			// { title: "Relatórios", url: "/dashboard/reports", icon: FileChartLine },
 			// { title: "Configurações", url: "/dashboard/settings", icon: Settings }
 		]
