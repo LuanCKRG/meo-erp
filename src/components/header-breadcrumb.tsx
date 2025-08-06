@@ -26,7 +26,8 @@ const breadcrumbMap: Record<string, { href: string; label: string }[]> = {
 	"/dashboard/sellers": [{ href: "/dashboard/sellers", label: "Vendedores" }],
 	"/dashboard/partners": [{ href: "/dashboard/partners", label: "Parceiros" }],
 	"/dashboard/reports": [{ href: "/dashboard/reports", label: "Relatórios" }],
-	"/dashboard/settings": [{ href: "/dashboard/settings", label: "Configurações" }]
+	"/dashboard/settings": [{ href: "/dashboard/settings", label: "Configurações" }],
+	"/dashboard/simulations": [{ href: "/dashboard/settings", label: "Nova Simulação" }]
 }
 
 const HeaderBreadcrumb = () => {
