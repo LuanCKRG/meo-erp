@@ -82,7 +82,7 @@ const SimulationStep4 = ({ onSubmitFinal }: StepProps) => {
 	useEffect(() => {
 		const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
 		const total = equipment + labor + others
-		setTotalInvestment(isNaN(total) ? 0 : total)
+		setTotalInvestment(Number.isNaN(total) ? 0 : total)
 	}, [watchedStringValues])
 
 	const calculateInstallment = (term: number) => {
