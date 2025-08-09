@@ -38,7 +38,6 @@ interface StepProps {
 // Função para determinar a classe de tamanho da fonte com base no comprimento do valor
 const getFontSizeForValue = (value: string): string => {
 	const length = value.length
-	console.log(length)
 	if (length <= 12) {
 		// ex: R$ 99.999,99
 		return "text-2xl"
