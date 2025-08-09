@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
-import * as React from "react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { brazilianStates } from "@/lib/constants"
@@ -33,7 +33,7 @@ const SimulationStep3 = () => {
 	})
 
 	const { control, setValue, setFocus, trigger } = form
-	const [isFetchingCep, setIsFetchingCep] = React.useState(false)
+	const [isFetchingCep, setIsFetchingCep] = useState<boolean>(false)
 
 	async function handleCepBlur(e: React.FocusEvent<HTMLInputElement>) {
 		const cep = e.target.value.replace(/\D/g, "")

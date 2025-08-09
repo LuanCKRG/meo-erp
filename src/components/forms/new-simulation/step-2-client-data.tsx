@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, ArrowRight, Loader2, X } from "lucide-react"
 import { useForm } from "react-hook-form"
-import * as React from "react"
+import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -33,10 +33,10 @@ const SimulationStep2 = () => {
 	})
 
 	const { control, setValue, setFocus, trigger, watch, resetField } = form
-	const [isFetchingCnpj, setIsFetchingCnpj] = React.useState(false)
+	const [isFetchingCnpj, setIsFetchingCnpj] = useState<boolean>(false)
 	const cnpjValue = watch("cnpj")
 
-	const clearCnpjRelatedFields = React.useCallback(() => {
+	const clearCnpjRelatedFields = useCallback(() => {
 		fieldsToClear.forEach((field) => resetField(field, { defaultValue: "" }))
 		setSimulationData({
 			cep: "",

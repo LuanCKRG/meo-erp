@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, Send, DollarSign } from "lucide-react"
 import { useForm } from "react-hook-form"
-import * as React from "react"
+import { useEffect, useState } from "react"
 
 import { maskNumber } from "@/lib/masks"
 import { useSimulation } from "@/contexts/simulation-context"
@@ -77,9 +77,9 @@ const SimulationStep4 = ({ onSubmitFinal }: StepProps) => {
 	})
 
 	const watchedStringValues = form.watch(["equipmentValue", "laborValue", "otherCosts"])
-	const [totalInvestment, setTotalInvestment] = React.useState(0)
+	const [totalInvestment, setTotalInvestment] = useState(0)
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
 		const total = equipment + labor + others
 		setTotalInvestment(isNaN(total) ? 0 : total)

@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowRight } from "lucide-react"
 import { useForm } from "react-hook-form"
-import * as React from "react"
 
 import { getStructureTypes } from "@/actions/equipments"
 import { Button } from "@/components/ui/button"
