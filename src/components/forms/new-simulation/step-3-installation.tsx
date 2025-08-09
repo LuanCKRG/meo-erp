@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export function SimulationStep3() {
+const SimulationStep3 = () => {
 	const { simulationData, setSimulationData, nextStep, backStep } = useSimulation()
 
 	const form = useForm<SimulationStep3Data>({
@@ -198,3 +198,5 @@ export function SimulationStep3() {
 		</Form>
 	)
 }
+
+export { SimulationStep3 }

@@ -16,7 +16,7 @@ import { simulationStep2Schema, type SimulationStep2Data } from "./validation/ne
 
 const fieldsToClear = ["legalName", "incorporationDate"] as const
 
-export function SimulationStep2() {
+const SimulationStep2 = () => {
 	const { simulationData, setSimulationData, nextStep, backStep } = useSimulation()
 
 	const form = useForm<SimulationStep2Data>({
@@ -259,3 +259,5 @@ export function SimulationStep2() {
 		</Form>
 	)
 }
+
+export { SimulationStep2 }

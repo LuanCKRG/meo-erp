@@ -63,7 +63,7 @@ const getFontSizeForValue = (value: string): string => {
 	return "text-xs"
 }
 
-export function SimulationStep4({ onSubmitFinal }: StepProps) {
+const SimulationStep4 = ({ onSubmitFinal }: StepProps) => {
 	const { simulationData, setSimulationData, backStep } = useSimulation()
 	const { state } = useSidebar()
 
@@ -200,3 +200,5 @@ export function SimulationStep4({ onSubmitFinal }: StepProps) {
 		</Form>
 	)
 }
+
+export { SimulationStep4 }

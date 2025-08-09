@@ -20,7 +20,7 @@ import { maskNumber } from "@/lib/masks"
 import { simulationStep1Schema, type SimulationStep1Data } from "./validation/new-simulation"
 import { DynamicEquipmentSelect } from "./dynamic-equipment-selector"
 
-export function SimulationStep1() {
+const SimulationStep1 = () => {
 	const { simulationData, setSimulationData, nextStep } = useSimulation()
 
 	const form = useForm<SimulationStep1Data>({
@@ -192,3 +192,5 @@ export function SimulationStep1() {
 		</Form>
 	)
 }
+
+export { SimulationStep1 }
