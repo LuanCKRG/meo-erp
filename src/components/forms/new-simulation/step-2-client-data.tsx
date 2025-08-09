@@ -92,10 +92,13 @@ const SimulationStep2 = () => {
 			toast.success("Dados do CNPJ preenchidos.")
 			trigger(["legalName", "incorporationDate"])
 			setFocus("annualRevenue")
-		} catch (error: any) {
+		} catch (error) {
 			console.error("Falha ao buscar CNPJ:", error)
+
+			const errorMessage = error instanceof Error ? error.message : "Não foi possível buscar os dados. Tente novamente."
+
 			toast.error("Erro ao buscar CNPJ", {
-				description: error.message || "Não foi possível buscar os dados. Tente novamente."
+				description: errorMessage
 			})
 		} finally {
 			setIsFetchingCnpj(false)
