@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useSimulation } from "@/contexts/simulation-context"
 import { connectionVoltageTypes, energyProviders, INVERTER_TYPE_ID, MODULE_TYPE_ID, OTHERS_TYPE_ID } from "@/lib/constants"
 import { maskNumber } from "@/lib/masks"
-import { simulationStep1Schema, type SimulationStep1Data } from "./validation/new-simulation"
 import { DynamicEquipmentSelect } from "./dynamic-equipment-selector"
+import { type SimulationStep1Data, simulationStep1Schema } from "./validation/new-simulation"
 
 const SimulationStep1 = () => {
 	const { simulationData, setSimulationData, nextStep } = useSimulation()

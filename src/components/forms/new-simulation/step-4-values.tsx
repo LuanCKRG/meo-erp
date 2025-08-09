@@ -1,20 +1,20 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowLeft, Send, DollarSign } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { ArrowLeft, DollarSign, Send } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
 
-import { maskNumber } from "@/lib/masks"
-import { useSimulation } from "@/contexts/simulation-context"
-import { simulationStep4Schema, type SimulationStep4Data } from "./validation/new-simulation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
 import { useSidebar } from "@/components/ui/sidebar"
+import { useSimulation } from "@/contexts/simulation-context"
+import { maskNumber } from "@/lib/masks"
+import { cn } from "@/lib/utils"
+import { type SimulationStep4Data, simulationStep4Schema } from "./validation/new-simulation"
 
 const formatCurrency = (value: number): string => {
 	return new Intl.NumberFormat("pt-BR", {

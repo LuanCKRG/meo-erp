@@ -2,18 +2,18 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
-import { useForm } from "react-hook-form"
 import { useState } from "react"
+import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-import { brazilianStates } from "@/lib/constants"
-import { maskCep } from "@/lib/masks"
-import { useSimulation } from "@/contexts/simulation-context"
-import { simulationStep3Schema, type SimulationStep3Data } from "./validation/new-simulation"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useSimulation } from "@/contexts/simulation-context"
+import { brazilianStates } from "@/lib/constants"
+import { maskCep } from "@/lib/masks"
+import { type SimulationStep3Data, simulationStep3Schema } from "./validation/new-simulation"
 
 const SimulationStep3 = () => {
 	const { simulationData, setSimulationData, nextStep, backStep } = useSimulation()

@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, ArrowRight, Loader2, X } from "lucide-react"
-import { useForm } from "react-hook-form"
 import { useCallback, useState } from "react"
+import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { useSimulation } from "@/contexts/simulation-context"
 import { formatCep } from "@/lib/formatters"
 import { maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
-import { simulationStep2Schema, type SimulationStep2Data } from "./validation/new-simulation"
+import { type SimulationStep2Data, simulationStep2Schema } from "./validation/new-simulation"
 
 const fieldsToClear = ["legalName", "incorporationDate"] as const
 
