@@ -41,7 +41,7 @@ async function updateSession(request: NextRequest) {
 	const pathname = request.nextUrl.pathname
 
 	// rotas públicas (adapte conforme seus paths)
-	const publicPaths = ["/", "/_next", "/favicon.ico"]
+	const publicPaths = ["/", "/_next", "/favicon.ico", "/register-partner"]
 
 	const isPublic = publicPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`))
 
