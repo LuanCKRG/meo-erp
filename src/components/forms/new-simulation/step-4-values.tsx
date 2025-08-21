@@ -140,7 +140,7 @@ const SimulationStep4 = ({ onSubmitFinal }: StepProps) => {
 							name="otherCosts"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Outros Custos *</FormLabel>
+									<FormLabel>Outros Custos (Opcional)</FormLabel>
 									<FormControl>
 										<div className="relative">
 											<DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -172,7 +172,7 @@ const SimulationStep4 = ({ onSubmitFinal }: StepProps) => {
 									<span className={cn("font-bold md:hidden", getFontSizeForValue(formattedTotalInvestment))}>{formattedTotalInvestment}</span>
 								</div>
 								<Separator />
-								<h4 className="font-medium">Parcelamento (Taxa de {interestRate * 100}%)</h4>
+								<h4 className="font-medium">Parcelamento</h4>
 								<div className="space-y-2">
 									{installmentTerms.map((term) => (
 										<div key={term} className="flex items-center justify-between text-sm">

@@ -1,7 +1,18 @@
+import { redirect } from "next/navigation"
+
+import { hasPermission } from "@/actions/auth"
 import { PartnerTable } from "@/components/data-tables/partners/partner-table"
 import { AddPartnerDialog } from "@/components/dialogs/add-partner-dialog"
 
-const PartnersPage = () => {
+const PartnersPage = async () => {
+	const canViewPartners = await hasPermission("partners:view")
+
+	if (!canViewPartners) {
+		redirect("/dashboard/home")
+	}
+
+	const canManagePartners = await hasPermission("partners:manage")
+
 	return (
 		<>
 			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -10,7 +21,7 @@ const PartnersPage = () => {
 					<p className="text-muted-foreground">Gerencie os parceiros cadastrados no sistema.</p>
 				</div>
 
-				<AddPartnerDialog />
+				{canManagePartners && <AddPartnerDialog />}
 			</div>
 			<PartnerTable />
 		</>

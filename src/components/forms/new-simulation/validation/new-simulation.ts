@@ -57,7 +57,7 @@ export const simulationStep3Schema = z.object({
 export const simulationStep4Schema = z.object({
 	equipmentValue: numericString(14, "Valor dos equipamentos é obrigatório."),
 	laborValue: numericString(14, "Valor da mão de obra é obrigatório."),
-	otherCosts: numericString(14, "Outros custos são obrigatórios.")
+	otherCosts: numericString(14, "Outros custos são obrigatórios.").optional().or(z.literal(""))
 })
 
 // Tipos de dados para cada passo

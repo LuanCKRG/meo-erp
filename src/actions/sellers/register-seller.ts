@@ -31,7 +31,8 @@ async function registerSeller(data: RegisterSellerData): Promise<ActionResponse<
 		const userResponse = await createUser({
 			email: data.email,
 			password: data.password,
-			role: "seller"
+			role: "seller",
+			name: data.name
 		})
 
 		if (!userResponse.success) {

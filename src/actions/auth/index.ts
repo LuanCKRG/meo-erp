@@ -1,4 +1,8 @@
 import createUser from "@/actions/auth/create-user"
+import getCurrentUser from "@/actions/auth/get-current-user"
+import getUserPermissions from "@/actions/auth/get-user-permissions"
+import hasPermission from "@/actions/auth/has-permissions"
 import signIn from "@/actions/auth/sign-in"
+import signOut from "@/actions/auth/sign-out"
 
-export { createUser, signIn }
+export { createUser, signIn, signOut, getCurrentUser, getUserPermissions, hasPermission }

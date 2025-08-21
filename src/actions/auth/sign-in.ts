@@ -1,6 +1,6 @@
 "use server"
 
-import { AuthError } from "@supabase/supabase-js"
+import { isAuthApiError } from "@supabase/supabase-js"
 
 import { createClient } from "@/lib/supabase/server"
 import type { SignInData } from "@/lib/validations/auth/sign-in"
@@ -16,7 +16,7 @@ async function signIn(credentials: SignInData): Promise<ActionResponse<{ userId:
 
 	if (error) {
 		console.error("Erro de login (Supabase):", error)
-		if (error instanceof AuthError) {
+		if (isAuthApiError(error)) {
 			return { success: false, message: "Credenciais inválidas. Verifique seu email e senha." }
 		}
 		return { success: false, message: "Ocorreu um erro inesperado. Tente novamente." }

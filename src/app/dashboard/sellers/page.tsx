@@ -1,7 +1,18 @@
+import { redirect } from "next/navigation"
+
+import { hasPermission } from "@/actions/auth"
 import { SellerTable } from "@/components/data-tables/sellers/seller-table"
 import { AddSellerDialog } from "@/components/dialogs/add-seller-dialog"
 
-const SellersPage = () => {
+const SellersPage = async () => {
+	const canViewSellers = await hasPermission("sellers:view")
+
+	if (!canViewSellers) {
+		redirect("/dashboard/home")
+	}
+
+	const canManageSellers = await hasPermission("sellers:manage")
+
 	return (
 		<>
 			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -9,8 +20,7 @@ const SellersPage = () => {
 					<h1 className="text-3xl font-bold tracking-tight text-foreground">Vendedores</h1>
 					<p className="text-muted-foreground">Gerencie os vendedores cadastrados no sistema.</p>
 				</div>
-
-				<AddSellerDialog />
+				{canManageSellers && <AddSellerDialog />}
 			</div>
 			<SellerTable />
 		</>

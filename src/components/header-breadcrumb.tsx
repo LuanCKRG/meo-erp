@@ -24,7 +24,15 @@ const breadcrumbMap: Record<string, { href: string; label: string }[]> = {
 	],
 	"/dashboard/home": [{ href: "/dashboard/home", label: "Home" }],
 	"/dashboard/sellers": [{ href: "/dashboard/sellers", label: "Vendedores" }],
+	"/dashboard/sellers/add": [
+		{ href: "/dashboard/sellers", label: "Vendedores" },
+		{ href: "/dashboard/sellers/add", label: "Adicionar" }
+	],
 	"/dashboard/partners": [{ href: "/dashboard/partners", label: "Parceiros" }],
+	"/dashboard/partners/add": [
+		{ href: "/dashboard/partners", label: "Parceiros" },
+		{ href: "/dashboard/partners/add", label: "Adicionar" }
+	],
 	"/dashboard/reports": [{ href: "/dashboard/reports", label: "Relatórios" }],
 	"/dashboard/settings": [{ href: "/dashboard/settings", label: "Configurações" }],
 	"/dashboard/simulations": [{ href: "/dashboard/settings", label: "Nova Simulação" }]

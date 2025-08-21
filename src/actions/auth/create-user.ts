@@ -10,11 +10,13 @@ type UserInsert = Database["public"]["Tables"]["users"]["Insert"]
 
 interface CreateUserParams extends Omit<UserInsert, "id"> {
 	password: string
+	name: string
 }
 
 interface CreateUserOutput {
 	id: string
 	email: string
+	name: string
 	role: UserInsert["role"]
 }
 
@@ -62,9 +64,10 @@ async function createUser(params: CreateUserParams): Promise<ActionResponse<Crea
 			.insert({
 				id: newAuthUserId,
 				email: params.email,
-				role: params.role
+				role: params.role,
+				name: params.name
 			})
-			.select("id, email, role")
+			.select("id, email, role, name")
 			.single()
 
 		if (publicUserError) {
@@ -84,7 +87,8 @@ async function createUser(params: CreateUserParams): Promise<ActionResponse<Crea
 			data: {
 				id: publicUserData.id,
 				email: publicUserData.email,
-				role: publicUserData.role
+				role: publicUserData.role,
+				name: publicUserData.name
 			}
 		}
 	} catch (error) {

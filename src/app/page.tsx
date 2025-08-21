@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 
 import { AuthFormTabs } from "@/components/auth-form-tabs"
 
@@ -8,8 +9,24 @@ const HomePage = () => {
 			<div className="w-full max-w-sm md:max-w-md">
 				<Image src="/logo.png" alt="MEO Ernegia" width={300} height={200} className="w-full" />
 				<AuthFormTabs />
-				<div className="text-muted-foreground *:[a]:hover:text-primary mt-6 text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-					Ao continuar, você concorda com nossos Termos de Serviço e Política de Privacidade.
+				<div className="text-muted-foreground mt-6 text-center text-xs text-balance">
+					<p>
+						Ao continuar, você concorda com nossos{" "}
+						<Link href="#" className="underline underline-offset-4 hover:text-primary">
+							Termos de Serviço
+						</Link>{" "}
+						e{" "}
+						<Link href="#" className="underline underline-offset-4 hover:text-primary">
+							Política de Privacidade
+						</Link>
+						.
+					</p>
+					<p className="mt-2">
+						É um parceiro?{" "}
+						<Link href="/register-partner" className="font-semibold text-primary underline underline-offset-4">
+							Cadastre sua empresa aqui.
+						</Link>
+					</p>
 				</div>
 			</div>
 		</div>

@@ -1,4 +1,4 @@
-import { DollarSign, HardHat, Package } from "lucide-react"
+import { DollarSign, HardHat, Package, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,14 +36,14 @@ const AdminDashboardPage = () => {
 					</Link>
 				</Card>
 				<Card className="hover:border-primary/80 hover:shadow-lg transition-all">
-					<Link href="/dashboard/admin/users">
+					<Link href="/dashboard/admin/permissions">
 						<CardHeader className="flex flex-row items-center justify-between pb-2">
-							<CardTitle className="text-sm font-medium">Usuários</CardTitle>
-							<HardHat className="h-5 w-5 text-muted-foreground" />
+							<CardTitle className="text-sm font-medium">Permissões</CardTitle>
+							<ShieldCheck className="h-5 w-5 text-muted-foreground" />
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">Permissões</div>
-							<p className="text-xs text-muted-foreground">Gerencie usuários e suas permissões de acesso. (Em breve)</p>
+							<div className="text-2xl font-bold">Regras de Acesso</div>
+							<p className="text-xs text-muted-foreground">Gerencie o que cada função de usuário pode fazer.</p>
 						</CardContent>
 					</Link>
 				</Card>

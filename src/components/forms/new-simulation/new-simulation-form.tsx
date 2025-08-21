@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion"
 import * as React from "react"
 import { toast } from "sonner"
+
+import { createSimulation } from "@/actions/simulations"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { SimulationProvider, useSimulation } from "@/contexts/simulation-context"
 import { cn } from "@/lib/utils"
@@ -74,30 +76,19 @@ function SimulationContent() {
 			return
 		}
 
-		const parseCurrencyStringToNumber = (value: string | undefined | null): number | undefined => {
-			if (!value) return undefined
-			const sanitizedValue = value.replace(/\./g, "").replace(",", ".")
-			const numberValue = parseFloat(sanitizedValue)
-			return Number.isNaN(numberValue) ? undefined : numberValue
-		}
-
-		const processedData = {
-			...result.data,
-			systemPower: parseCurrencyStringToNumber(result.data.systemPower),
-			currentConsumption: parseCurrencyStringToNumber(result.data.currentConsumption),
-			annualRevenue: parseCurrencyStringToNumber(result.data.annualRevenue),
-			equipmentValue: parseCurrencyStringToNumber(result.data.equipmentValue),
-			laborValue: parseCurrencyStringToNumber(result.data.laborValue),
-			otherCosts: parseCurrencyStringToNumber(result.data.otherCosts)
-		}
-
-		console.log("Dados do formulário válidos e processados:", processedData)
-		toast.success("Simulação enviada com sucesso!", {
-			description: (
-				<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-					<code className="text-white">{JSON.stringify(processedData, null, 2)}</code>
-				</pre>
-			)
+		toast.promise(createSimulation(result.data), {
+			loading: "Salvando simulação...",
+			success: (res) => {
+				if (res.success) {
+					// Aqui você pode resetar o formulário ou redirecionar o usuário
+					return `Simulação #${res.data.kdi} salva com sucesso!`
+				}
+				// Se success for false, o toast.promise trata como erro
+				throw new Error(res.message)
+			},
+			error: (err: Error) => {
+				return err.message || "Ocorreu um erro inesperado."
+			}
 		})
 	}
 

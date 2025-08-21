@@ -1,7 +1,7 @@
 "use client"
 
 import { SignInForm } from "@/components/forms/sign-in-form"
-import { SignUpForm } from "@/components/forms/sign-up-form"
+import { RegisterCustomerForm } from "@/components/forms/register-customer-form"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -24,7 +24,7 @@ const AuthFormTabs = () => {
 			<TabsContent value="signup">
 				<Card>
 					<CardContent className="p-0">
-						<SignUpForm />
+						<RegisterCustomerForm />
 					</CardContent>
 				</Card>
 			</TabsContent>

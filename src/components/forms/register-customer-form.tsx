@@ -6,18 +6,18 @@ import { useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-import { createUser } from "@/actions/auth"
+import { registerCustomer } from "@/actions/customers"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { type SignUpData, signUpSchema } from "@/lib/validations/auth/sign-up"
+import { type RegisterCustomerData, registerCustomerSchema } from "@/lib/validations/customer"
 
-const SignUpForm = () => {
+const RegisterCustomerForm = () => {
 	const [isPending, startTransition] = useTransition()
 	const queryClient = useQueryClient()
 
-	const form = useForm<SignUpData>({
-		resolver: zodResolver(signUpSchema),
+	const form = useForm<RegisterCustomerData>({
+		resolver: zodResolver(registerCustomerSchema),
 		defaultValues: {
 			name: "",
 			email: "",
@@ -26,22 +26,16 @@ const SignUpForm = () => {
 		}
 	})
 
-	function onSubmit(data: SignUpData) {
+	function onSubmit(data: RegisterCustomerData) {
 		startTransition(async () => {
-			const result = await createUser({
-				email: data.email,
-				password: data.password,
-				role: "partner"
-			})
+			const result = await registerCustomer(data)
 
 			if (result.success) {
 				toast.success("Conta criada com sucesso!", {
 					description: "Você já pode fazer login com suas novas credenciais."
 				})
-				queryClient.invalidateQueries({ queryKey: ["users"] })
+				queryClient.invalidateQueries({ queryKey: ["users"] }) // Pode ser ajustado para 'customers' se necessário
 				form.reset()
-				// Idealmente, a aba de login deveria ser ativada aqui.
-				// O usuário será notificado e pode trocar de aba.
 			} else {
 				toast.error("Erro no Cadastro", {
 					description: result.message
@@ -55,8 +49,8 @@ const SignUpForm = () => {
 			<form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
 				<div className="flex flex-col gap-6">
 					<div className="flex flex-col items-center text-center">
-						<h1 className="text-2xl font-bold">Crie sua Conta</h1>
-						<p className="text-muted-foreground text-balance">Preencha os campos para se registrar como parceiro.</p>
+						<h1 className="text-2xl font-bold">Crie sua Conta de Cliente</h1>
+						<p className="text-muted-foreground text-balance">Preencha os campos para se registrar.</p>
 					</div>
 					<FormField
 						control={form.control}
@@ -119,4 +113,4 @@ const SignUpForm = () => {
 	)
 }
 
-export { SignUpForm }
+export { RegisterCustomerForm }
