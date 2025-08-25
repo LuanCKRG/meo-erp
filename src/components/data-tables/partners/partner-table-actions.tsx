@@ -1,11 +1,11 @@
 "use client"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { CheckCircle, Eye, MoreHorizontal, Pencil, XCircle } from "lucide-react"
+import { CheckCircle, Eye, MoreHorizontal, Pencil, ToggleLeft, ToggleRight, XCircle } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
-import { rejectPartner } from "@/actions/partners"
+import { rejectPartner, setPartnerActiveStatus } from "@/actions/partners"
 import { ApprovePartnerDialog } from "@/components/dialogs/approve-partner-dialog"
 import { EditPartnerDialog } from "@/components/dialogs/edit-partner-dialog"
 import { Button } from "@/components/ui/button"
@@ -31,6 +31,18 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 	function handleReject() {
 		startTransition(async () => {
 			const result = await rejectPartner(partner.id)
+			if (result.success) {
+				toast.success(result.message)
+				queryClient.invalidateQueries({ queryKey: ["partners"] })
+			} else {
+				toast.error(result.message)
+			}
+		})
+	}
+
+	function handleToggleActive(isActive: boolean) {
+		startTransition(async () => {
+			const result = await setPartnerActiveStatus({ partnerId: partner.id, isActive })
 			if (result.success) {
 				toast.success(result.message)
 				queryClient.invalidateQueries({ queryKey: ["partners"] })
@@ -139,6 +151,19 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 								</DropdownMenuItem>
 							</>
 						)}
+
+						{partner.status === "approved" &&
+							(partner.is_active ? (
+								<DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleToggleActive(false)} disabled={isPending}>
+									<ToggleLeft />
+									Inativar
+								</DropdownMenuItem>
+							) : (
+								<DropdownMenuItem onClick={() => handleToggleActive(true)} disabled={isPending}>
+									<ToggleRight />
+									Reativar
+								</DropdownMenuItem>
+							))}
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
