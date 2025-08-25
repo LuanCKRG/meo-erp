@@ -5,7 +5,8 @@ const registerPartnerSchema = z
 		// Step 1
 		cnpj: z
 			.string()
-			.length(18, { message: "CNPJ deve conter 14 dígitos. Formato: 00.000.000/0000-00" })
+			.min(1, "CNPJ é obrigatório.")
+			.refine((value) => /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(value), "CNPJ inválido. Formato esperado: 00.000.000/0000-00")
 			.transform((val) => val.replace(/\D/g, "")),
 		legalBusinessName: z.string().min(2, { message: "Razão social deve ter no mínimo 2 caracteres." }),
 		contactName: z.string().min(3, { message: "Nome do responsável deve ter no mínimo 3 caracteres." }),
