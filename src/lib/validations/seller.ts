@@ -42,5 +42,32 @@ const registerSellerSchema = z
 
 type RegisterSellerData = z.infer<typeof registerSellerSchema>
 
-export { registerSellerSchema }
-export type { RegisterSellerData }
+const editSellerSchema = z.object({
+	// Step 1: Dados Pessoais
+	name: z.string().min(3, { message: "O nome deve ter no mínimo 3 caracteres." }),
+	cpf: z
+		.string()
+		.length(14, { message: "CPF deve conter 11 dígitos. Formato: 000.000.000-00" })
+		.transform((val) => val.replace(/\D/g, "")),
+	phone: z
+		.string()
+		.refine((val) => val.length === 14 || val.length === 15, { message: "Celular inválido. Use (00) 00000-0000 ou (00) 0000-0000" })
+		.transform((val) => val.replace(/\D/g, "")),
+
+	// Step 2: Endereço
+	cep: z
+		.string()
+		.length(9, { message: "CEP deve conter 8 dígitos. Formato: 00000-000" })
+		.transform((val) => val.replace(/\D/g, "")),
+	street: z.string().min(1, { message: "Rua é obrigatória." }),
+	number: z.string().min(1, { message: "Número é obrigatório." }),
+	complement: z.string().optional(),
+	neighborhood: z.string().min(1, { message: "Bairro é obrigatório." }),
+	city: z.string().min(1, { message: "Cidade é obrigatória." }),
+	state: z.string().length(2, { message: "Estado deve ter 2 caracteres." })
+})
+
+type EditSellerData = z.infer<typeof editSellerSchema>
+
+export { registerSellerSchema, editSellerSchema }
+export type { RegisterSellerData, EditSellerData }
