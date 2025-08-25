@@ -6,7 +6,7 @@ import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { approvePartner } from "@/actions/partners"
-import { getAllSellers } from "@/actions/sellers"
+import { getAllApprovedSellers } from "@/actions/sellers"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -25,8 +25,8 @@ export const ApprovePartnerDialog = ({ partner, open, onOpenChange }: ApprovePar
 	const queryClient = useQueryClient()
 
 	const { data: sellers, isLoading: isLoadingSellers } = useQuery({
-		queryKey: ["sellers"],
-		queryFn: getAllSellers,
+		queryKey: ["approved-sellers"],
+		queryFn: getAllApprovedSellers,
 		enabled: open
 	})
 
