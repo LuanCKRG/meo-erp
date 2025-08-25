@@ -258,11 +258,13 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
+          is_active: boolean
           name: string
           neighborhood: string
           number: string
           phone: string
           state: string
+          status: Database["public"]["Enums"]["enum_partners_status"]
           street: string
           updated_at: string | null
           user_id: string
@@ -275,11 +277,13 @@ export type Database = {
           created_at?: string | null
           email: string
           id?: string
+          is_active?: boolean
           name: string
           neighborhood: string
           number: string
           phone: string
           state: string
+          status?: Database["public"]["Enums"]["enum_partners_status"]
           street: string
           updated_at?: string | null
           user_id: string
@@ -292,11 +296,13 @@ export type Database = {
           created_at?: string | null
           email?: string
           id?: string
+          is_active?: boolean
           name?: string
           neighborhood?: string
           number?: string
           phone?: string
           state?: string
+          status?: Database["public"]["Enums"]["enum_partners_status"]
           street?: string
           updated_at?: string | null
           user_id?: string
