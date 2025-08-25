@@ -13,6 +13,17 @@ interface SellerTableToolbarProps<TData> {
 	table: Table<TData>
 }
 
+const statuses = [
+	{ value: "approved", label: "Aprovado" },
+	{ value: "pending", label: "Ag. Aprovação" },
+	{ value: "rejected", label: "Negado" }
+]
+
+const activeStatuses = [
+	{ value: "true", label: "Ativo" },
+	{ value: "false", label: "Inativo" }
+]
+
 export const SellerTableToolbar = <TData,>({ table }: SellerTableToolbarProps<TData>) => {
 	const isFiltered = table.getState().columnFilters.length > 0
 
@@ -43,6 +54,8 @@ export const SellerTableToolbar = <TData,>({ table }: SellerTableToolbarProps<TD
 					onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
 					className="h-8 w-[150px] lg:w-[250px]"
 				/>
+				{table.getColumn("status") && <DataTableFacetedFilter column={table.getColumn("status")} title="Status" options={statuses} />}
+				{table.getColumn("is_active") && <DataTableFacetedFilter column={table.getColumn("is_active")} title="Ativo" options={activeStatuses} />}
 				{table.getColumn("state") && <DataTableFacetedFilter column={table.getColumn("state")} title="Estado" options={uniqueStates} />}
 				{table.getColumn("city") && <DataTableFacetedFilter column={table.getColumn("city")} title="Cidade" options={uniqueCities} />}
 				{isFiltered && (

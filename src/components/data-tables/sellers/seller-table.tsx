@@ -69,7 +69,9 @@ const SellerTable = () => {
 		phone: "Celular",
 		created_at: "Data de Cadastro",
 		city: "Cidade",
-		state: "Estado"
+		state: "Estado",
+		status: "Status",
+		is_active: "Ativo"
 	}
 
 	const toolbar = (
