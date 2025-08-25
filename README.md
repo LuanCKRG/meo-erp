@@ -2,9 +2,34 @@
 
 - [X] Sidebar footer Suport and feedback
 - [X] Sidebar Logout
-- [ ] Configurar o admin para setar as permissões para roles e users
+- [X] Configurar o admin para setar as permissões users
+- [ ] Configurar o admin para setar as permissões para roles
 
+## APONTAMENTOS:
 
+- [X] *VENDEDOR* - Na lista não tem opção de Editar
+- [X] *PARCEIRO* : Não puxa CNPJ - CEP puxa
+- [X] *SIMULACOES* : Aqui puxa CNPJ e CEP
+- [ ] *Falta* : no final falta: botão de gravar simulação e imprimir
+- [X] *Dados do Projeto* - *Campo “Outros”* – Está como obrigatório mudar para opcional
+- [X] *Dados do Cliente* - *Campo “Faturamento Obrigatório”* – Está como obrigatório mudar para opcional
+
+## RESPOSTA
+Agora é possível editar o Vendedor na tabela, Parceiros agora busca dados pelo cnpj, Campos
+
+Vendedores:
+- Agora é possível editar vendedores dentro da tabela
+
+Parceiros:
+- Agora busca dados pelo cnpj
+
+Cliente:
+<!-- - É criado um cliente novo com os dados do Passo 2 do formulário de nova simulação -->
+
+Simulações:
+- Campo "Outros", dentro do kit de Equipamentos(Passo 1) se tornou opcional
+- Campo "Faturamento", dentro de Dados do Client(Passo 2) se tornou opcional
+<!-- - Usamos os Dados do Client(Passo 2) para criar um cliente novo automaticamente, porém agora é obrigatório inserir uma senha dentro do formulário -->
 
 # Permissions
 - admin:dashboard:view

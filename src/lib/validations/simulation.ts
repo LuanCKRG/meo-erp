@@ -8,7 +8,7 @@ const validStates = brazilianStates.map((state) => state.value) as [string, ...s
 // Helper para validação de string numérica com limite de dígitos
 const numericString = (maxLength: number = 9, errorMessage: string = "Valor é obrigatório.") =>
 	z
-		.string(errorMessage)
+		.string()
 		.min(1, errorMessage)
 		.refine((val) => {
 			const justDigits = val.replace(/\D/g, "")
