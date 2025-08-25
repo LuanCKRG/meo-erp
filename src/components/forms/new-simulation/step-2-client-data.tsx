@@ -183,7 +183,7 @@ const SimulationStep2 = () => {
 						name="annualRevenue"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Faturamento Anual *</FormLabel>
+								<FormLabel>Faturamento Anual (Opcional)</FormLabel>
 								<FormControl>
 									<div className="relative">
 										<span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">R$</span>

@@ -178,7 +178,7 @@ const SimulationStep1 = () => {
 						<CardHeader>
 							<CardTitle className="text-lg">Outros</CardTitle>
 						</CardHeader>
-						<DynamicEquipmentSelect equipmentTypeId={OTHERS_TYPE_ID} formFieldName="kit_others" formLabel="Outros *" />
+						<DynamicEquipmentSelect equipmentTypeId={OTHERS_TYPE_ID} formFieldName="kit_others" formLabel="Outros (Opcional)" />
 					</Card>
 				</div>
 
