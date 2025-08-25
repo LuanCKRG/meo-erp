@@ -35,7 +35,7 @@ export const simulationStep2Schema = z.object({
 		.string()
 		.min(1, "Data de fundação é obrigatória.")
 		.refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), "Formato de data inválido. Use DD/MM/AAAA."),
-	annualRevenue: numericString(15, "Faturamento anual é obrigatório."),
+	annualRevenue: numericString(15, "").optional().or(z.literal("")),
 	contactName: z.string().min(3, "Nome do responsável é obrigatório."),
 	contactPhone: z
 		.string()
