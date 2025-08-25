@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, ArrowRight, UserPlus } from "lucide-react"
+import { ArrowLeft, ArrowRight, Loader2, UserPlus } from "lucide-react"
 import { motion } from "motion/react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -22,6 +22,7 @@ import { type RegisterPartnerData, registerPartnerSchema } from "@/lib/validatio
 const RegisterPartnerForm = ({ className }: { className?: string }) => {
 	const [step, setStep] = useState(1)
 	const [isFetchingCep, setIsFetchingCep] = useState(false)
+	const [isFetchingCnpj, setIsFetchingCnpj] = useState(false)
 	const queryClient = useQueryClient()
 
 	const registerPartnerForm = useForm<RegisterPartnerData>({
@@ -46,6 +47,35 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 	})
 
 	const { control, handleSubmit, formState, setValue, setFocus, trigger, reset, resetField } = registerPartnerForm
+
+	async function handleCnpjBlur(e: React.FocusEvent<HTMLInputElement>) {
+		const cnpj = e.target.value.replace(/\D/g, "")
+		if (cnpj.length !== 14) {
+			return
+		}
+
+		setIsFetchingCnpj(true)
+		try {
+			const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`)
+			const data = await response.json()
+
+			if (!response.ok) {
+				throw new Error(data.message || "CNPJ não encontrado ou inválido.")
+			}
+
+			setValue("legalBusinessName", data.razao_social || "", { shouldValidate: true })
+			setFocus("contactName")
+		} catch (error) {
+			console.error("Falha ao buscar CNPJ:", error)
+			const errorMessage = error instanceof Error ? error.message : "Não foi possível buscar os dados do CNPJ."
+			toast.error("Erro ao buscar CNPJ", {
+				description: errorMessage
+			})
+			setValue("legalBusinessName", "")
+		} finally {
+			setIsFetchingCnpj(false)
+		}
+	}
 
 	async function handleCepBlur(e: React.FocusEvent<HTMLInputElement>) {
 		const cep = e.target.value.replace(/\D/g, "")
@@ -105,18 +135,13 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 					queryClient.invalidateQueries({ queryKey: ["partners"] })
 					reset()
 					setStep(1)
-					return {
-						message: "Cadastro realizado com sucesso!",
-						description: "Seu cadastro foi enviado para análise."
-					}
-				} else {
-					throw new Error(result.message)
+					return "Cadastro realizado com sucesso! Seu cadastro foi enviado para análise."
 				}
+				throw new Error(result.message)
 			},
-			error: (err: Error) => ({
-				message: "Erro no cadastro",
-				description: err.message
-			})
+			error: (err: Error) => {
+				return err.message
+			}
 		})
 	}
 
@@ -130,10 +155,10 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 		<Card className={cn("w-full border-0 shadow-none", className)}>
 			<CardHeader>
 				<div className="flex w-full items-start pt-6">
-					<div className="flex flex-col items-center flex-1">
+					<div className="flex flex-1 flex-col items-center">
 						<div
 							className={cn(
-								"w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg transition-all",
+								"flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold transition-all",
 								step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
 							)}
 						>
@@ -141,11 +166,11 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 						</div>
 						<p className={cn("mt-2 text-sm font-medium", step >= 1 ? "text-primary" : "text-muted-foreground")}>Empresa</p>
 					</div>
-					<div className={cn("flex-1 h-1 bg-border mt-4 transition-colors", step > 1 && "bg-primary")} />
-					<div className="flex flex-col items-center flex-1">
+					<div className={cn("mt-4 h-1 flex-1 bg-border transition-colors", step > 1 && "bg-primary")} />
+					<div className="flex flex-1 flex-col items-center">
 						<div
 							className={cn(
-								"w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg transition-all",
+								"flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold transition-all",
 								step >= 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
 							)}
 						>
@@ -153,11 +178,11 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 						</div>
 						<p className={cn("mt-2 text-sm font-medium", step >= 2 ? "text-primary" : "text-muted-foreground")}>Endereço</p>
 					</div>
-					<div className={cn("flex-1 h-1 bg-border mt-4 transition-colors", step > 2 && "bg-primary")} />
-					<div className="flex flex-col items-center flex-1">
+					<div className={cn("mt-4 h-1 flex-1 bg-border transition-colors", step > 2 && "bg-primary")} />
+					<div className="flex flex-1 flex-col items-center">
 						<div
 							className={cn(
-								"w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg transition-all",
+								"flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold transition-all",
 								step >= 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
 							)}
 						>
@@ -189,7 +214,15 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 												<FormItem>
 													<FormLabel>CNPJ</FormLabel>
 													<FormControl>
-														<Input placeholder="00.000.000/0000-00" {...field} onChange={(e) => field.onChange(maskCnpj(e.target.value))} />
+														<div className="relative">
+															<Input
+																placeholder="00.000.000/0000-00"
+																{...field}
+																onChange={(e) => field.onChange(maskCnpj(e.target.value))}
+																onBlur={handleCnpjBlur}
+															/>
+															{isFetchingCnpj && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin" />}
+														</div>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -202,7 +235,7 @@ const RegisterPartnerForm = ({ className }: { className?: string }) => {
 												<FormItem>
 													<FormLabel>Razão Social</FormLabel>
 													<FormControl>
-														<Input placeholder="Nome da sua empresa" {...field} />
+														<Input placeholder="Preenchido automaticamente" {...field} disabled />
 													</FormControl>
 													<FormMessage />
 												</FormItem>
