@@ -22,7 +22,7 @@ export const simulationStep1Schema = z.object({
 	connectionVoltage: z.enum(connectionVoltageTypes as [string, ...string[]], "Selecione um tipo de conexão válido."),
 	kit_module: z.string().min(1, "Selecione um módulo."),
 	kit_inverter: z.string().min(1, "Selecione um inversor."),
-	kit_others: z.string().min(1, "Selecione um item de 'Outros'.")
+	kit_others: z.string().min(1, "Selecione um item de 'Outros'.").optional().or(z.literal(""))
 })
 
 export const simulationStep2Schema = z.object({
