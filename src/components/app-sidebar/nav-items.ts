@@ -1,4 +1,4 @@
-import { Activity, Briefcase, Handshake, Home, Package, Settings, Users } from "lucide-react"
+import { Activity, Briefcase, Handshake, Home, Package, Settings, Users, Building, FileText } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 interface SubNavItem {
@@ -76,6 +76,12 @@ const navItems: NavSection[] = [
 				]
 			},
 			{
+				title: "Clientes",
+				url: "/dashboard/customers",
+				icon: Building,
+				permission: "simulations:view" // Reutilizando uma permissão por enquanto
+			},
+			{
 				title: "Simulações",
 				url: "/dashboard/simulations",
 				icon: Activity,
@@ -92,6 +98,12 @@ const navItems: NavSection[] = [
 						permission: "simulations:create"
 					}
 				]
+			},
+			{
+				title: "Pedidos",
+				url: "/dashboard/orders",
+				icon: FileText,
+				permission: "orders:view"
 			}
 		]
 	}

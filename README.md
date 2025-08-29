@@ -4,6 +4,8 @@
 - [X] Sidebar Logout
 - [X] Configurar o admin para setar as permissões users
 - [ ] Configurar o admin para setar as permissões para roles
+- [ ] Deixar Kits no form de simulations searchable
+- [ ] Erro personalizado em simulations form para avisar o erro, ex: cnpj já existente
 
 ## APONTAMENTOS:
 

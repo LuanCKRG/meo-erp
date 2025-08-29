@@ -35,9 +35,9 @@ async function registerPartner(data: RegisterPartnerData): Promise<ActionRespons
 			name: data.contactName
 		})
 
-		if (!userResponse.success) {
-			// Propaga a mensagem de erro específica da action createUser (ex: email já existe, senha fraca)
-			return { success: false, message: userResponse.message }
+		if (!userResponse.success || !userResponse.data?.id) {
+			// Propaga a mensagem de erro específica da action createUser (ex: email já existe)
+			return { success: false, message: userResponse.message || "Erro ao criar usuário" }
 		}
 
 		newAuthUserId = userResponse.data.id

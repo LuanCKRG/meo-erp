@@ -1,29 +1,42 @@
+// new-simulation-form.tsx
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
 import * as React from "react"
+import { useForm, FormProvider } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 
 import { createSimulation } from "@/actions/simulations"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { SimulationProvider, useSimulation } from "@/contexts/simulation-context"
 import { cn } from "@/lib/utils"
 import { SimulationStep1 } from "./step-1-project-data"
 import { SimulationStep2 } from "./step-2-client-data"
 import { SimulationStep3 } from "./step-3-installation"
 import { SimulationStep4 } from "./step-4-values"
-import { newSimulationSchema } from "./validation/new-simulation"
+import {
+	newSimulationSchema,
+	simulationStep1Schema,
+	simulationStep2Schema,
+	simulationStep3Schema,
+	simulationStep4Schema,
+	type SimulationData
+} from "./validation/new-simulation"
 
 const STEPS_CONFIG = [
-	{ id: 1, name: "Dados do Projeto" },
-	{ id: 2, name: "Dados do Cliente" },
-	{ id: 3, name: "Instalação" },
-	{ id: 4, name: "Valores" }
+	{ id: 1, name: "Dados do Projeto", schema: simulationStep1Schema },
+	{ id: 2, name: "Dados do Cliente", schema: simulationStep2Schema },
+	{ id: 3, name: "Instalação", schema: simulationStep3Schema },
+	{ id: 4, name: "Valores", schema: simulationStep4Schema }
 ]
 
-function SimulationStepper() {
-	const { currentStep } = useSimulation()
+type ExtendedSimulationData = SimulationData & {
+	kit_module_brand_id?: string
+	kit_inverter_brand_id?: string
+	kit_others_brand_id?: string
+}
 
+function SimulationStepper({ currentStep }: { currentStep: number }) {
 	return (
 		<div className="flex w-full items-start pt-6">
 			{STEPS_CONFIG.map((stepConfig, index) => (
@@ -56,23 +69,98 @@ function SimulationStepper() {
 	)
 }
 
-function SimulationContent() {
-	const { currentStep, simulationData } = useSimulation()
+export function NewSimulationForm({ className, initialData }: { className?: string; initialData?: Partial<ExtendedSimulationData> }) {
+	const [currentStep, setCurrentStep] = React.useState(1)
 
-	const motionVariants = {
-		initial: { opacity: 0, x: -20 },
-		animate: { opacity: 1, x: 0 },
-		exit: { opacity: 0, x: 20 }
+	const form = useForm<ExtendedSimulationData>({
+		resolver: zodResolver(newSimulationSchema),
+		defaultValues: {
+			systemPower: "",
+			currentConsumption: "",
+			energyProvider: "",
+			structureType: "",
+			connectionVoltage: "",
+			kit_module: "",
+			kit_inverter: "",
+			kit_others: "",
+			kit_module_brand_id: "",
+			kit_inverter_brand_id: "",
+			kit_others_brand_id: "",
+			cnpj: "",
+			legalName: "",
+			incorporationDate: "",
+			annualRevenue: "",
+			contactName: "",
+			contactPhone: "",
+			contactEmail: "",
+			cep: "",
+			street: "",
+			number: "",
+			complement: "",
+			neighborhood: "",
+			city: "",
+			state: "",
+			equipmentValue: "",
+			laborValue: "",
+			otherCosts: "",
+			...initialData
+		},
+		mode: "onChange"
+	})
+
+	const validateCurrentStep = async (step: number): Promise<boolean> => {
+		const stepSchema = STEPS_CONFIG[step - 1]?.schema
+		if (!stepSchema) return true
+
+		const currentData = form.getValues()
+		const result = stepSchema.safeParse(currentData)
+
+		if (!result.success) {
+			// Marcar campos com erro para mostrar as mensagens
+			const errors = result.error.issues
+			errors.forEach((error) => {
+				if (error.path.length > 0) {
+					const fieldName = error.path[0] as keyof ExtendedSimulationData
+					form.setError(fieldName, {
+						type: "manual",
+						message: error.message
+					})
+				}
+			})
+
+			toast.error("Preencha todos os campos obrigatórios", {
+				description: `Encontrados ${errors.length} erro${errors.length > 1 ? "s" : ""} no formulário`
+			})
+
+			return false
+		}
+
+		return true
 	}
 
-	const handleSubmitEntireForm = () => {
-		const result = newSimulationSchema.safeParse(simulationData)
+	const nextStep = async () => {
+		const isValid = await validateCurrentStep(currentStep)
+		if (isValid) {
+			setCurrentStep((prev) => Math.min(prev + 1, 4))
+		}
+	}
+
+	const backStep = () => {
+		setCurrentStep((prev) => Math.max(prev - 1, 1))
+	}
+
+	const handleSubmitEntireForm = async () => {
+		const isValid = await validateCurrentStep(4)
+		if (!isValid) return
+
+		const formData = form.getValues()
+		const result = newSimulationSchema.safeParse(formData)
 
 		if (!result.success) {
 			toast.error("Erro de validação final", {
 				description: "Alguns dados parecem estar inconsistentes. Por favor, revise os passos."
 			})
-			console.error("Final Validation Error:", result.error.flatten())
+			console.error("Final Validation Error:", result.error)
 			return
 		}
 
@@ -80,10 +168,10 @@ function SimulationContent() {
 			loading: "Salvando simulação...",
 			success: (res) => {
 				if (res.success) {
-					// Aqui você pode resetar o formulário ou redirecionar o usuário
+					form.reset() // Reset form after successful submission
+					setCurrentStep(1) // Reset to first step
 					return `Simulação #${res.data.kdi} salva com sucesso!`
 				}
-				// Se success for false, o toast.promise trata como erro
 				throw new Error(res.message)
 			},
 			error: (err: Error) => {
@@ -92,29 +180,37 @@ function SimulationContent() {
 		})
 	}
 
-	return (
-		<AnimatePresence mode="wait">
-			<motion.div key={currentStep} variants={motionVariants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.3 }} className="mt-8">
-				{currentStep === 1 && <SimulationStep1 />}
-				{currentStep === 2 && <SimulationStep2 />}
-				{currentStep === 3 && <SimulationStep3 />}
-				{currentStep === 4 && <SimulationStep4 onSubmitFinal={handleSubmitEntireForm} />}
-			</motion.div>
-		</AnimatePresence>
-	)
-}
+	const motionVariants = {
+		initial: { opacity: 0, x: -20 },
+		animate: { opacity: 1, x: 0 },
+		exit: { opacity: 0, x: 20 }
+	}
 
-export function NewSimulationForm({ className }: { className?: string }) {
 	return (
-		<SimulationProvider>
+		<FormProvider {...form}>
 			<Card className={cn("w-full border-0 shadow-none", className)}>
 				<CardHeader>
-					<SimulationStepper />
+					<SimulationStepper currentStep={currentStep} />
 				</CardHeader>
 				<CardContent>
-					<SimulationContent />
+					<AnimatePresence mode="wait">
+						<motion.div
+							key={currentStep}
+							variants={motionVariants}
+							initial="initial"
+							animate="animate"
+							exit="exit"
+							transition={{ duration: 0.3 }}
+							className="mt-8"
+						>
+							{currentStep === 1 && <SimulationStep1 onNext={nextStep} />}
+							{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
+							{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
+							{currentStep === 4 && <SimulationStep4 onSubmit={handleSubmitEntireForm} onBack={backStep} />}
+						</motion.div>
+					</AnimatePresence>
 				</CardContent>
 			</Card>
-		</SimulationProvider>
+		</FormProvider>
 	)
 }

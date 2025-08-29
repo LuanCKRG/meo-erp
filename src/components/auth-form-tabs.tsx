@@ -1,7 +1,7 @@
 "use client"
 
+import { RegisterPartnerForm } from "@/components/forms/register-partner-form"
 import { SignInForm } from "@/components/forms/sign-in-form"
-import { RegisterCustomerForm } from "@/components/forms/register-customer-form"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -10,7 +10,7 @@ const AuthFormTabs = () => {
 		<Tabs defaultValue="signin" className="w-full">
 			<TabsList className="grid w-full grid-cols-2">
 				<TabsTrigger value="signin">Entrar</TabsTrigger>
-				<TabsTrigger value="signup">Criar Conta</TabsTrigger>
+				<TabsTrigger value="register">Cadastre-se</TabsTrigger>
 			</TabsList>
 
 			<TabsContent value="signin">
@@ -21,10 +21,10 @@ const AuthFormTabs = () => {
 				</Card>
 			</TabsContent>
 
-			<TabsContent value="signup">
+			<TabsContent value="register">
 				<Card>
 					<CardContent className="p-0">
-						<RegisterCustomerForm />
+						<RegisterPartnerForm />
 					</CardContent>
 				</Card>
 			</TabsContent>

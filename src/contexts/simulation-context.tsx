@@ -4,21 +4,27 @@ import * as React from "react"
 
 import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 
+type FullSimulationData = Partial<SimulationData> & {
+	kit_module_brand_id?: string | null
+	kit_inverter_brand_id?: string | null
+	kit_others_brand_id?: string | null
+}
+
 type SimulationContextType = {
 	currentStep: number
-	simulationData: Partial<SimulationData>
-	setSimulationData: (data: Partial<SimulationData>) => void
+	simulationData: FullSimulationData
+	setSimulationData: (data: FullSimulationData) => void
 	nextStep: () => void
 	backStep: () => void
 }
 
 const SimulationContext = React.createContext<SimulationContextType | undefined>(undefined)
 
-export function SimulationProvider({ children }: { children: React.ReactNode }) {
+export function SimulationProvider({ children, initialData }: { children: React.ReactNode; initialData?: FullSimulationData }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
-	const [simulationData, setSimulationDataState] = React.useState<Partial<SimulationData>>({})
+	const [simulationData, setSimulationDataState] = React.useState<FullSimulationData>(initialData || {})
 
-	const setSimulationData = React.useCallback((newData: Partial<SimulationData>) => {
+	const setSimulationData = React.useCallback((newData: FullSimulationData) => {
 		setSimulationDataState((prev) => ({ ...prev, ...newData }))
 	}, [])
 

@@ -3,13 +3,46 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 
-import { SimulationsTableActions } from "@/components/data-tables/simulations/simulations-table-actions"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import type { Simulation } from "@/lib/definitions/simulations"
+import type { SimulationStatus, SimulationWithRelations } from "@/lib/definitions/simulations"
 import { formatCnpj } from "@/lib/formatters"
-import { formatDate } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
+import { SimulationsTableActions } from "./simulations-table-actions"
 
-export const columns: ColumnDef<Simulation>[] = [
+const formatCurrency = (value: number | null | undefined): string => {
+	if (value === null || value === undefined) return "N/A"
+	return new Intl.NumberFormat("pt-BR", {
+		style: "currency",
+		currency: "BRL"
+	}).format(value)
+}
+
+const statusTranslations: Record<SimulationStatus, string> = {
+	initial_contact: "Contato Inicial",
+	under_review: "Em análise Cliente",
+	in_negotiation: "Em Negociação",
+	won: "Ganho",
+	lost: "Perdido"
+}
+
+const statusVariant: Record<SimulationStatus, "default" | "secondary" | "destructive" | "outline"> = {
+	initial_contact: "secondary",
+	under_review: "outline",
+	in_negotiation: "default",
+	won: "default", // Should be a success variant, using default for now
+	lost: "destructive"
+}
+
+const statusColor: Record<SimulationStatus, string> = {
+	initial_contact: "",
+	under_review: "",
+	in_negotiation: "",
+	won: "bg-green-500 hover:bg-green-600 border-green-600 text-white",
+	lost: ""
+}
+
+export const columns: ColumnDef<SimulationWithRelations>[] = [
 	{
 		accessorKey: "kdi",
 		header: ({ column }) => (
@@ -20,13 +53,42 @@ export const columns: ColumnDef<Simulation>[] = [
 		)
 	},
 	{
-		accessorKey: "legal_name",
-		header: "Cliente"
-	},
-	{
 		accessorKey: "cnpj",
 		header: "CNPJ",
 		cell: ({ row }) => formatCnpj(row.getValue("cnpj"))
+	},
+	{
+		accessorKey: "company_name",
+		header: "Razão Social"
+	},
+	{
+		accessorKey: "city",
+		header: "Cidade",
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
+	},
+	{
+		accessorKey: "state",
+		header: "Estado",
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
+	},
+	{
+		accessorKey: "partner_name",
+		header: "Parceiro",
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
+	},
+	{
+		accessorKey: "internal_manager",
+		header: "Gestor Interno",
+		cell: ({ row }) => row.original.internal_manager || "-",
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
 	},
 	{
 		accessorKey: "system_power",
@@ -34,8 +96,21 @@ export const columns: ColumnDef<Simulation>[] = [
 		cell: ({ row }) => `${row.original.system_power} kWp`
 	},
 	{
-		accessorKey: "created_by_name",
-		header: "Responsável"
+		accessorKey: "total_value",
+		header: "Valor",
+		cell: ({ row }) => formatCurrency(row.original.total_value)
+	},
+	{
+		accessorKey: "status",
+		header: "Status",
+		cell: ({ row }) => {
+			const status = row.getValue("status") as SimulationStatus
+			return (
+				<Badge variant={statusVariant[status]} className={cn(statusColor[status])}>
+					{statusTranslations[status]}
+				</Badge>
+			)
+		}
 	},
 	{
 		accessorKey: "created_at",

@@ -7,7 +7,7 @@ async function getAllEquipments(): Promise<EquipmentWithRelations[]> {
 	try {
 		const supabase = await createClient()
 		const { data, error } = await supabase
-			.from("equipment")
+			.from("equipments")
 			.select(
 				`
         *,

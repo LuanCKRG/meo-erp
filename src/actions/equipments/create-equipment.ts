@@ -12,7 +12,7 @@ async function createEquipment(data: AddEquipmentData): Promise<ActionResponse<E
 		const supabase = await createClient()
 
 		const { data: newEquipment, error } = await supabase
-			.from("equipment")
+			.from("equipments")
 			.insert({
 				name: data.name,
 				type_id: data.type_id,

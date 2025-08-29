@@ -21,12 +21,6 @@ const HomePage = () => {
 						</Link>
 						.
 					</p>
-					<p className="mt-2">
-						É um parceiro?{" "}
-						<Link href="/register-partner" className="font-semibold text-primary underline underline-offset-4">
-							Cadastre sua empresa aqui.
-						</Link>
-					</p>
 				</div>
 			</div>
 		</div>

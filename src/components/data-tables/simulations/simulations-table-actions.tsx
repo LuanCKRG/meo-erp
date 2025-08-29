@@ -1,8 +1,13 @@
 "use client"
 
-import { Expand, MoreHorizontal } from "lucide-react"
-import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { Edit, Loader2, MoreHorizontal, Send, Trash2 } from "lucide-react"
+import { useState, useTransition } from "react"
+import { toast } from "sonner"
 
+import { createOrderFromSimulation } from "@/actions/orders"
+import { deleteSimulation } from "@/actions/simulations"
+import { EditSimulationDialog } from "@/components/dialogs/edit-simulation-dialog"
 import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
@@ -12,135 +17,84 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import type { Simulation } from "@/lib/definitions/simulations"
-import { formatCnpj, formatPhone } from "@/lib/formatters"
-import { formatDate } from "@/lib/utils"
+import type { SimulationWithRelations } from "@/lib/definitions/simulations"
 
-const formatCurrency = (value: number | null | undefined): string => {
-	if (value === null || value === undefined) return "N/A"
-	return new Intl.NumberFormat("pt-BR", {
-		style: "currency",
-		currency: "BRL"
-	}).format(value)
-}
+export const SimulationsTableActions = ({ simulation }: { simulation: SimulationWithRelations }) => {
+	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+	const [isDeletePending, startDeleteTransition] = useTransition()
+	const [isCreateOrderPending, startCreateOrderTransition] = useTransition()
+	const queryClient = useQueryClient()
 
-const DetailItem = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
-	<div className="grid grid-cols-[150px_1fr] items-center">
-		<span className="font-medium text-muted-foreground">{label}</span>
-		<span className="break-words">{value || "-"}</span>
-	</div>
-)
+	const handleDelete = () => {
+		startDeleteTransition(() => {
+			toast.promise(
+				deleteSimulation({
+					simulationId: simulation.id,
+					customerId: simulation.customerId
+				}),
+				{
+					loading: "Deletando simulação...",
+					success: (res) => {
+						queryClient.invalidateQueries({ queryKey: ["simulations"] })
+						return res.message
+					},
+					error: (err) => {
+						return err.message
+					}
+				}
+			)
+		})
+	}
 
-const FullDetailsSheetContent = ({ simulation }: { simulation: Simulation }) => (
-	<div className="space-y-6">
-		<fieldset className="rounded-lg border p-4">
-			<legend className="-ml-1 px-1 text-lg font-medium text-primary">Dados do Projeto</legend>
-			<div className="space-y-2 pt-2">
-				<DetailItem label="Potência (kWp)" value={simulation.system_power} />
-				<DetailItem label="Consumo (kWh)" value={simulation.current_consumption} />
-				<DetailItem label="Concessionária" value={simulation.energy_provider} />
-				<DetailItem label="Tipo de Estrutura" value={simulation.structure_type} />
-				<DetailItem label="Conexão e Tensão" value={simulation.connection_voltage} />
-			</div>
-		</fieldset>
-
-		<fieldset className="rounded-lg border p-4">
-			<legend className="-ml-1 px-1 text-lg font-medium text-primary">Kit de Equipamentos</legend>
-			<div className="space-y-2 pt-2">
-				<DetailItem label="Módulo" value={`${simulation.kit_module_name}(${simulation.kit_module_brand_name})`} />
-				<DetailItem label="Inversor" value={`${simulation.kit_inverter_name}(${simulation.kit_module_brand_name})`} />
-				<DetailItem label="Outros" value={simulation.kit_others} />
-			</div>
-		</fieldset>
-
-		<fieldset className="rounded-lg border p-4">
-			<legend className="-ml-1 px-1 text-lg font-medium text-primary">Dados do Cliente</legend>
-			<div className="space-y-2 pt-2">
-				<DetailItem label="CNPJ" value={formatCnpj(simulation.cnpj)} />
-				<DetailItem label="Razão Social" value={simulation.legal_name} />
-				<DetailItem label="Data de Fundação" value={formatDate(simulation.incorporation_date)} />
-				<DetailItem label="Faturamento Anual" value={formatCurrency(simulation.annual_revenue)} />
-			</div>
-		</fieldset>
-
-		<fieldset className="rounded-lg border p-4">
-			<legend className="-ml-1 px-1 text-lg font-medium text-primary">Contato</legend>
-			<div className="space-y-2 pt-2">
-				<DetailItem label="Nome" value={simulation.contact_name} />
-				<DetailItem label="Celular" value={formatPhone(simulation.contact_phone)} />
-				<DetailItem label="Email" value={simulation.contact_email} />
-			</div>
-		</fieldset>
-
-		<fieldset className="rounded-lg border p-4">
-			<legend className="-ml-1 px-1 text-lg font-medium text-primary">Local de Instalação</legend>
-			<div className="space-y-2 pt-2">
-				<DetailItem label="CEP" value={simulation.cep} />
-				<DetailItem label="Endereço" value={`${simulation.street}, ${simulation.number}${simulation.complement ? `, ${simulation.complement}` : ""}`} />
-				<DetailItem label="Bairro" value={simulation.neighborhood} />
-				<DetailItem label="Cidade/UF" value={`${simulation.city}/${simulation.state}`} />
-			</div>
-		</fieldset>
-
-		<fieldset className="rounded-lg border p-4">
-			<legend className="-ml-1 px-1 text-lg font-medium text-primary">Valores</legend>
-			<div className="space-y-2 pt-2">
-				<DetailItem label="Equipamentos" value={formatCurrency(simulation.equipment_value)} />
-				<DetailItem label="Mão de Obra" value={formatCurrency(simulation.labor_value)} />
-				<DetailItem label="Outros Custos" value={formatCurrency(simulation.other_costs)} />
-				<DetailItem label="Total" value={formatCurrency(simulation.equipment_value + simulation.labor_value + (simulation.other_costs || 0))} />
-			</div>
-		</fieldset>
-
-		<fieldset className="rounded-lg border p-4">
-			<legend className="-ml-1 px-1 text-lg font-medium text-primary">Criação</legend>
-			<div className="space-y-2 pt-2">
-				<DetailItem label="Responsável" value={simulation.created_by_name} />
-				<DetailItem label="Email do Responsável" value={simulation.created_by_email} />
-				<DetailItem label="Data" value={formatDate(simulation.created_at)} />
-			</div>
-		</fieldset>
-	</div>
-)
-
-export const SimulationsTableActions = ({ simulation }: { simulation: Simulation }) => {
-	const [isSheetOpen, setIsSheetOpen] = useState(false)
+	const handleCreateOrder = () => {
+		startCreateOrderTransition(() => {
+			toast.promise(createOrderFromSimulation(simulation.id), {
+				loading: "Criando pedido...",
+				success: (res) => {
+					if (res.success) {
+						// Você pode querer invalidar uma query de 'pedidos' aqui no futuro
+						// queryClient.invalidateQueries({ queryKey: ["orders"] })
+						return res.message
+					}
+					// Lança um erro para ser pego pelo `error` do toast.promise
+					throw new Error(res.message)
+				},
+				error: (err: Error) => {
+					return err.message || "Ocorreu um erro inesperado."
+				}
+			})
+		})
+	}
 
 	return (
-		<div className="flex items-center justify-center space-x-2">
-			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-				<SheetTrigger asChild>
-					<Button aria-haspopup="true" size="icon" variant="ghost">
-						<Expand className="size-4" />
-						<span className="sr-only">Expandir detalhes</span>
-					</Button>
-				</SheetTrigger>
-				<SheetContent className="max-w-full sm:max-w-xl overflow-y-auto">
-					<SheetHeader>
-						<SheetTitle>Detalhes da Simulação #{simulation.kdi}</SheetTitle>
-						<SheetDescription>Visão completa de todos os dados da simulação para o cliente {simulation.legal_name}.</SheetDescription>
-					</SheetHeader>
-					<div className="py-4">
-						<FullDetailsSheetContent simulation={simulation} />
-					</div>
-				</SheetContent>
-			</Sheet>
-
-			{/* <DropdownMenu>
+		<>
+			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button aria-haspopup="true" size="icon" variant="ghost">
-						<MoreHorizontal className="size-4" />
-						<span className="sr-only">Abrir/Fechar menu</span>
+					<Button variant="ghost" className="h-8 w-8 p-0">
+						<span className="sr-only">Abrir menu</span>
+						<MoreHorizontal className="h-4 w-4" />
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuLabel>Ações</DropdownMenuLabel>
+					<DropdownMenuItem onSelect={handleCreateOrder} disabled={isCreateOrderPending}>
+						{isCreateOrderPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+						Criar Pedido
+					</DropdownMenuItem>
 					<DropdownMenuSeparator />
-					<DropdownMenuItem>Exportar PDF</DropdownMenuItem>
-					<DropdownMenuItem className="text-destructive focus:text-destructive">Excluir</DropdownMenuItem>
+					<DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
+						<Edit className="mr-2 h-4 w-4" />
+						Editar
+					</DropdownMenuItem>
+					<DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={handleDelete} disabled={isDeletePending}>
+						{isDeletePending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+						Deletar
+					</DropdownMenuItem>
 				</DropdownMenuContent>
-			</DropdownMenu> */}
-		</div>
+			</DropdownMenu>
+
+			{/* Renderiza o dialog de edição */}
+			<EditSimulationDialog simulationId={simulation.id} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
+		</>
 	)
 }

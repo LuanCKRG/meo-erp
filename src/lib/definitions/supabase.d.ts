@@ -16,71 +16,87 @@ export type Database = {
     Tables: {
       customers: {
         Row: {
+          annual_revenue: number | null
+          city: string
+          cnpj: string
+          company_name: string
+          complement: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string
           created_at: string
-          email: string
+          created_by_user_id: string
           id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "customers_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      equipment: {
-        Row: {
-          brand_id: string | null
-          cod: number
-          created_at: string
-          name: string
-          type_id: string
+          incorporation_date: string | null
+          internal_manager: string | null
+          kdi: number
+          neighborhood: string
+          number: string
+          partner_id: string | null
+          postal_code: string
+          state: string
+          street: string
           updated_at: string
         }
         Insert: {
-          brand_id?: string | null
-          cod?: number
+          annual_revenue?: number | null
+          city: string
+          cnpj: string
+          company_name: string
+          complement?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string
           created_at?: string
-          name: string
-          type_id: string
+          created_by_user_id?: string
+          id?: string
+          incorporation_date?: string | null
+          internal_manager?: string | null
+          kdi?: number
+          neighborhood: string
+          number: string
+          partner_id?: string | null
+          postal_code: string
+          state: string
+          street: string
           updated_at?: string
         }
         Update: {
-          brand_id?: string | null
-          cod?: number
+          annual_revenue?: number | null
+          city?: string
+          cnpj?: string
+          company_name?: string
+          complement?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string
           created_at?: string
-          name?: string
-          type_id?: string
+          created_by_user_id?: string
+          id?: string
+          incorporation_date?: string | null
+          internal_manager?: string | null
+          kdi?: number
+          neighborhood?: string
+          number?: string
+          partner_id?: string | null
+          postal_code?: string
+          state?: string
+          street?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "equipment_brand_id_fkey"
-            columns: ["brand_id"]
+            foreignKeyName: "customers_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
             isOneToOne: false
-            referencedRelation: "equipment_brands"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "equipment_type_id_fkey"
-            columns: ["type_id"]
+            foreignKeyName: "customers_partner_id_fkey"
+            columns: ["partner_id"]
             isOneToOne: false
-            referencedRelation: "equipment_types"
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]
@@ -126,6 +142,157 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      equipments: {
+        Row: {
+          brand_id: string | null
+          created_at: string
+          id: number
+          name: string
+          type_id: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id?: string | null
+          created_at?: string
+          id?: number
+          name: string
+          type_id: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string | null
+          created_at?: string
+          id?: number
+          name?: string
+          type_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          connection_voltage: string
+          created_at: string
+          created_by_user_id: string
+          current_consumption: number
+          customer_id: string
+          energy_provider: string
+          equipment_value: number
+          id: string
+          kdi: number
+          kit_inverter_id: number
+          kit_module_id: number
+          kit_others: number | null
+          labor_value: number
+          other_costs: number | null
+          seller_id: string | null
+          status: Database["public"]["Enums"]["enum_simulation_status"]
+          structure_type: string
+          system_power: number
+          updated_at: string
+        }
+        Insert: {
+          connection_voltage: string
+          created_at?: string
+          created_by_user_id?: string
+          current_consumption: number
+          customer_id: string
+          energy_provider: string
+          equipment_value: number
+          id?: string
+          kdi?: number
+          kit_inverter_id: number
+          kit_module_id: number
+          kit_others?: number | null
+          labor_value: number
+          other_costs?: number | null
+          seller_id?: string | null
+          status?: Database["public"]["Enums"]["enum_simulation_status"]
+          structure_type: string
+          system_power: number
+          updated_at?: string
+        }
+        Update: {
+          connection_voltage?: string
+          created_at?: string
+          created_by_user_id?: string
+          current_consumption?: number
+          customer_id?: string
+          energy_provider?: string
+          equipment_value?: number
+          id?: string
+          kdi?: number
+          kit_inverter_id?: number
+          kit_module_id?: number
+          kit_others?: number | null
+          labor_value?: number
+          other_costs?: number | null
+          seller_id?: string | null
+          status?: Database["public"]["Enums"]["enum_simulation_status"]
+          structure_type?: string
+          system_power?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_kit_inverter_fkey"
+            columns: ["kit_inverter_id"]
+            isOneToOne: false
+            referencedRelation: "equipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_kit_module_fkey"
+            columns: ["kit_module_id"]
+            isOneToOne: false
+            referencedRelation: "equipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_kit_others_fkey"
+            columns: ["kit_others"]
+            isOneToOne: false
+            referencedRelation: "equipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partners: {
         Row: {
@@ -319,112 +486,64 @@ export type Database = {
       }
       simulations: {
         Row: {
-          annual_revenue: number | null
-          cep: string
-          city: string
-          cnpj: string
-          complement: string | null
           connection_voltage: string
-          contact_email: string
-          contact_name: string
-          contact_phone: string
           created_at: string
-          created_by_email: string
-          created_by_name: string
           created_by_user_id: string
           current_consumption: number
+          customer_id: string
           energy_provider: string
           equipment_value: number
-          incorporation_date: string
+          id: string
           kdi: number
-          kit_inverter_brand_name: string | null
-          kit_inverter_id: string
-          kit_inverter_name: string | null
-          kit_module_brand_name: string | null
-          kit_module_id: string
-          kit_module_name: string | null
-          kit_others: string | null
+          kit_inverter_id: number
+          kit_module_id: number
+          kit_others: number | null
           labor_value: number
-          legal_name: string
-          neighborhood: string
-          number: string
           other_costs: number | null
-          state: string
-          street: string
+          seller_id: string | null
+          status: Database["public"]["Enums"]["enum_simulation_status"]
           structure_type: string
           system_power: number
           updated_at: string
         }
         Insert: {
-          annual_revenue?: number | null
-          cep: string
-          city: string
-          cnpj: string
-          complement?: string | null
           connection_voltage: string
-          contact_email: string
-          contact_name: string
-          contact_phone: string
           created_at?: string
-          created_by_email: string
-          created_by_name: string
           created_by_user_id?: string
           current_consumption: number
+          customer_id: string
           energy_provider: string
           equipment_value: number
-          incorporation_date: string
+          id?: string
           kdi?: number
-          kit_inverter_brand_name?: string | null
-          kit_inverter_id: string
-          kit_inverter_name?: string | null
-          kit_module_brand_name?: string | null
-          kit_module_id: string
-          kit_module_name?: string | null
-          kit_others?: string | null
+          kit_inverter_id: number
+          kit_module_id: number
+          kit_others?: number | null
           labor_value: number
-          legal_name: string
-          neighborhood: string
-          number: string
           other_costs?: number | null
-          state: string
-          street: string
+          seller_id?: string | null
+          status?: Database["public"]["Enums"]["enum_simulation_status"]
           structure_type: string
           system_power: number
           updated_at?: string
         }
         Update: {
-          annual_revenue?: number | null
-          cep?: string
-          city?: string
-          cnpj?: string
-          complement?: string | null
           connection_voltage?: string
-          contact_email?: string
-          contact_name?: string
-          contact_phone?: string
           created_at?: string
-          created_by_email?: string
-          created_by_name?: string
           created_by_user_id?: string
           current_consumption?: number
+          customer_id?: string
           energy_provider?: string
           equipment_value?: number
-          incorporation_date?: string
+          id?: string
           kdi?: number
-          kit_inverter_brand_name?: string | null
-          kit_inverter_id?: string
-          kit_inverter_name?: string | null
-          kit_module_brand_name?: string | null
-          kit_module_id?: string
-          kit_module_name?: string | null
-          kit_others?: string | null
+          kit_inverter_id?: number
+          kit_module_id?: number
+          kit_others?: number | null
           labor_value?: number
-          legal_name?: string
-          neighborhood?: string
-          number?: string
           other_costs?: number | null
-          state?: string
-          street?: string
+          seller_id?: string | null
+          status?: Database["public"]["Enums"]["enum_simulation_status"]
           structure_type?: string
           system_power?: number
           updated_at?: string
@@ -435,6 +554,41 @@ export type Database = {
             columns: ["created_by_user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_kit_inverter_fkey"
+            columns: ["kit_inverter_id"]
+            isOneToOne: false
+            referencedRelation: "equipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_kit_module_fkey"
+            columns: ["kit_module_id"]
+            isOneToOne: false
+            referencedRelation: "equipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_kit_others_fkey"
+            columns: ["kit_others"]
+            isOneToOne: false
+            referencedRelation: "equipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
         ]
@@ -536,7 +690,13 @@ export type Database = {
     }
     Enums: {
       enum_partners_status: "pending" | "approved" | "rejected"
-      user_role: "partner" | "seller" | "client" | "admin"
+      enum_simulation_status:
+        | "initial_contact"
+        | "under_review"
+        | "in_negotiation"
+        | "won"
+        | "lost"
+      user_role: "partner" | "seller" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -665,7 +825,14 @@ export const Constants = {
   public: {
     Enums: {
       enum_partners_status: ["pending", "approved", "rejected"],
-      user_role: ["partner", "seller", "client", "admin"],
+      enum_simulation_status: [
+        "initial_contact",
+        "under_review",
+        "in_negotiation",
+        "won",
+        "lost",
+      ],
+      user_role: ["partner", "seller", "admin"],
     },
   },
 } as const

@@ -22,7 +22,7 @@ export const simulationStep1Schema = z.object({
 	connectionVoltage: z.enum(connectionVoltageTypes as [string, ...string[]], "Selecione um tipo de conexão válido."),
 	kit_module: z.string().min(1, "Selecione um módulo."),
 	kit_inverter: z.string().min(1, "Selecione um inversor."),
-	kit_others: z.string().min(1, "Selecione um item de 'Outros'.").optional().or(z.literal(""))
+	kit_others: z.string().optional().or(z.literal(""))
 })
 
 export const simulationStep2Schema = z.object({
@@ -35,13 +35,13 @@ export const simulationStep2Schema = z.object({
 		.string()
 		.min(1, "Data de fundação é obrigatória.")
 		.refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), "Formato de data inválido. Use DD/MM/AAAA."),
-	annualRevenue: numericString(15, "").optional().or(z.literal("")),
+	annualRevenue: numericString(15).optional().or(z.literal("")),
 	contactName: z.string().min(3, "Nome do responsável é obrigatório."),
 	contactPhone: z
 		.string()
 		.min(1, "Celular do responsável é obrigatório.")
 		.refine((val) => val.length === 14 || val.length === 15, "Número de celular inválido. Use (00) 00000-0000."),
-	contactEmail: z.string().email("Email de contato inválido.")
+	contactEmail: z.email("Email de contato inválido.")
 })
 
 export const simulationStep3Schema = z.object({
@@ -57,7 +57,7 @@ export const simulationStep3Schema = z.object({
 export const simulationStep4Schema = z.object({
 	equipmentValue: numericString(14, "Valor dos equipamentos é obrigatório."),
 	laborValue: numericString(14, "Valor da mão de obra é obrigatório."),
-	otherCosts: numericString(14, "Outros custos são obrigatórios.").optional().or(z.literal(""))
+	otherCosts: numericString(14).optional().or(z.literal(""))
 })
 
 // Tipos de dados para cada passo

@@ -1,7 +1,7 @@
+// dynamic-equipment-selector.tsx
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import * as React from "react"
 import { useFormContext } from "react-hook-form"
 
 import { getBrandsByEquipmentType, getEquipmentsByBrandAndType } from "@/actions/equipments"
@@ -13,39 +13,42 @@ import { Skeleton } from "@/components/ui/skeleton"
 interface DynamicEquipmentSelectProps {
 	equipmentTypeId: string
 	formFieldName: string
+	brandIdFieldName: string
 	formLabel: string
 }
 
-export function DynamicEquipmentSelect({ equipmentTypeId, formFieldName, formLabel }: DynamicEquipmentSelectProps) {
-	const { control, setValue } = useFormContext()
-	const [selectedBrand, setSelectedBrand] = React.useState<string | null>(null)
+export function DynamicEquipmentSelect({ equipmentTypeId, formFieldName, brandIdFieldName, formLabel }: DynamicEquipmentSelectProps) {
+	const { control, setValue, watch } = useFormContext()
+
+	// Watch the brand field to trigger equipment loading
+	const selectedBrandId = watch(brandIdFieldName)
 
 	const { data: brands = [], isLoading: brandsLoading } = useQuery({
 		queryKey: ["brands", equipmentTypeId],
 		queryFn: () => getBrandsByEquipmentType(equipmentTypeId),
-		staleTime: 5 * 60 * 1000 // 5 minutos
+		staleTime: 5 * 60 * 1000
 	})
 
 	const hasNoBrands = !brandsLoading && brands.length === 0
 
 	const { data: equipments = [], isLoading: equipmentsLoading } = useQuery({
-		queryKey: ["equipments", equipmentTypeId, selectedBrand],
+		queryKey: ["equipments", equipmentTypeId, selectedBrandId],
 		queryFn: () => {
 			if (hasNoBrands) {
 				return getEquipmentsByBrandAndType(equipmentTypeId, null)
 			}
-			if (selectedBrand === null) {
+			if (!selectedBrandId) {
 				return Promise.resolve([])
 			}
-			return getEquipmentsByBrandAndType(equipmentTypeId, selectedBrand)
+			return getEquipmentsByBrandAndType(equipmentTypeId, selectedBrandId)
 		},
-		enabled: !!equipmentTypeId && (hasNoBrands || selectedBrand !== null),
+		enabled: !!equipmentTypeId && (hasNoBrands || !!selectedBrandId),
 		staleTime: 5 * 60 * 1000
 	})
 
-	const handleBrandChange = (brandId: string | null) => {
-		setSelectedBrand(brandId)
-		setValue(formFieldName, "") // Reseta o equipamento ao mudar a marca
+	const handleBrandChange = (brandId: string) => {
+		setValue(brandIdFieldName, brandId)
+		setValue(formFieldName, "") // Reset equipment when brand changes
 	}
 
 	if (brandsLoading) {
@@ -60,23 +63,36 @@ export function DynamicEquipmentSelect({ equipmentTypeId, formFieldName, formLab
 	return (
 		<CardContent className="space-y-4">
 			{!hasNoBrands && (
-				<FormItem>
-					<FormLabel>Marca</FormLabel>
-					<Select value={selectedBrand || ""} onValueChange={handleBrandChange} disabled={brandsLoading}>
-						<FormControl>
-							<SelectTrigger>
-								<SelectValue placeholder="Selecione uma marca" />
-							</SelectTrigger>
-						</FormControl>
-						<SelectContent>
-							{brands.map((brand) => (
-								<SelectItem key={brand.id} value={brand.id}>
-									{brand.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</FormItem>
+				<FormField
+					control={control}
+					name={brandIdFieldName}
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Marca</FormLabel>
+							<Select
+								value={field.value || ""}
+								onValueChange={(value) => {
+									field.onChange(value)
+									handleBrandChange(value)
+								}}
+							>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Selecione uma marca" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{brands?.map((brand) => (
+										<SelectItem key={brand.id} value={brand.id}>
+											{brand.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 			)}
 
 			<FormField
@@ -89,22 +105,26 @@ export function DynamicEquipmentSelect({ equipmentTypeId, formFieldName, formLab
 							<Skeleton className="h-10 w-full" />
 						) : (
 							<Select
-								onValueChange={field.onChange}
 								value={field.value || ""}
-								disabled={equipmentsLoading || (!hasNoBrands && !selectedBrand) || equipments.length === 0}
+								onValueChange={field.onChange}
+								disabled={equipmentsLoading || (!hasNoBrands && !selectedBrandId) || equipments.length === 0}
 							>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue
 											placeholder={
-												!hasNoBrands && !selectedBrand ? "Selecione uma marca" : equipments.length === 0 ? "Nenhum disponível" : "Selecione um equipamento"
+												!hasNoBrands && !selectedBrandId
+													? "Selecione uma marca primeiro"
+													: equipments.length === 0
+														? "Nenhum disponível"
+														: "Selecione um equipamento"
 											}
 										/>
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									{equipments.map((equipment) => (
-										<SelectItem key={equipment.cod} value={String(equipment.cod)}>
+									{equipments?.map((equipment) => (
+										<SelectItem key={equipment.id} value={String(equipment.id)}>
 											{equipment.name}
 										</SelectItem>
 									))}

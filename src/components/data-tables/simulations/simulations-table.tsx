@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query"
 import {
 	type ColumnFiltersState,
 	getCoreRowModel,
+	getFacetedRowModel,
+	getFacetedUniqueValues,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
@@ -44,15 +46,22 @@ export const SimulationsTable = () => {
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel()
+		getSortedRowModel: getSortedRowModel(),
+		getFacetedRowModel: getFacetedRowModel(),
+		getFacetedUniqueValues: getFacetedUniqueValues()
 	})
 
 	const columnNameMap: { [key: string]: string } = {
 		kdi: "KDI",
-		legal_name: "Cliente",
 		cnpj: "CNPJ",
-		system_power: "Potência",
-		created_by_name: "Responsável",
+		company_name: "Razão Social",
+		city: "Cidade",
+		state: "Estado",
+		partner_name: "Parceiro",
+		internal_manager: "Gestor Interno",
+		system_power: "Potência (kWp)",
+		total_value: "Valor",
+		status: "Status",
 		created_at: "Data",
 		actions: "Ações"
 	}

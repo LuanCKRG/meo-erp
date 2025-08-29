@@ -8,10 +8,11 @@ import { toast } from "sonner"
 import { getUserPermissionsDetailed, updateUserPermissions } from "@/actions/users"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PERMISSIONS, type PermissionId } from "@/lib/constants"
 import type { User } from "@/lib/definitions/users"
+import { useForm } from "react-hook-form"
 
 interface EditUserPermissionsFormProps {
 	user: User
@@ -71,13 +72,16 @@ const getInitialPermissionsState = () => {
 
 export function EditUserPermissionsForm({ user, onSuccess }: EditUserPermissionsFormProps) {
 	const [isPending, startTransition] = useTransition()
-	const [permissions, setPermissions] = useState<Record<PermissionId, boolean>>(getInitialPermissionsState())
 	const queryClient = useQueryClient()
+
+	const form = useForm({
+		defaultValues: getInitialPermissionsState()
+	})
 
 	const { data: userPermissions, isLoading } = useQuery({
 		queryKey: ["user-permissions", user.id],
 		queryFn: () => getUserPermissionsDetailed(user.id),
-		enabled: !!user.id // só executa se o user.id existir
+		enabled: !!user.id
 	})
 
 	useEffect(() => {
@@ -88,34 +92,23 @@ export function EditUserPermissionsForm({ user, onSuccess }: EditUserPermissions
 					initialState[p.permission_id as PermissionId] = p.effective
 				}
 			})
-			setPermissions(initialState)
+			form.reset(initialState)
 		}
-	}, [userPermissions])
+	}, [userPermissions, form])
 
 	const groupedPermissions = useMemo(() => groupPermissions(PERMISSIONS), [])
 
-	const handlePermissionChange = (permissionId: PermissionId, checked: boolean) => {
-		setPermissions((prev) => ({
-			...prev,
-			[permissionId]: checked
-		}))
-	}
-
 	const handleSelectAll = (permissionIds: PermissionId[]) => {
-		setPermissions((prev) => {
-			const newPermissions = { ...prev }
-			permissionIds.forEach((id) => {
-				newPermissions[id] = true
-			})
-			return newPermissions
+		permissionIds.forEach((id) => {
+			form.setValue(id, true)
 		})
 	}
 
-	function handleSubmit() {
+	function onSubmit(data: Record<PermissionId, boolean>) {
 		startTransition(async () => {
 			const result = await updateUserPermissions({
 				userId: user.id,
-				permissions: permissions
+				permissions: data
 			})
 
 			if (result.success) {
@@ -161,40 +154,47 @@ export function EditUserPermissionsForm({ user, onSuccess }: EditUserPermissions
 	}
 
 	return (
-		<div className="space-y-6">
-			<div className="max-h-[60vh] space-y-8 overflow-y-auto pr-4">
-				{groupedPermissions.map(([resource, permissionIds]) => (
-					<fieldset key={resource} className="rounded-lg border bg-primary-foreground p-4">
-						<legend className="-ml-1 px-1 text-lg font-medium text-primary">{resourceTitleTranslations[resource] || resource}</legend>
-						<div className="flex justify-end">
-							<Button type="button" variant="link" size="sm" onClick={() => handleSelectAll(permissionIds)}>
-								Marcar Todos
-							</Button>
-						</div>
-						<div className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2">
-							{permissionIds.map((permissionId) => (
-								<div key={permissionId} className="flex flex-row items-start space-x-3 space-y-0 rounded-md border bg-background p-4 shadow-sm">
-									<Checkbox
-										id={permissionId}
-										checked={permissions[permissionId]}
-										onCheckedChange={(checked) => handlePermissionChange(permissionId, !!checked)}
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+				<div className="max-h-[60vh] space-y-8 overflow-y-auto pr-4">
+					{groupedPermissions.map(([resource, permissionIds]) => (
+						<fieldset key={resource} className="rounded-lg border bg-primary-foreground p-4">
+							<legend className="-ml-1 px-1 text-lg font-medium text-primary">{resourceTitleTranslations[resource] || resource}</legend>
+							<div className="flex justify-end">
+								<Button type="button" variant="link" size="sm" onClick={() => handleSelectAll(permissionIds)}>
+									Marcar Todos
+								</Button>
+							</div>
+							<div className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2">
+								{permissionIds.map((permissionId) => (
+									<FormField
+										key={permissionId}
+										control={form.control}
+										name={permissionId}
+										render={({ field }) => (
+											<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border bg-background p-4 shadow-sm">
+												<FormControl>
+													<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+												</FormControl>
+												<div className="space-y-1 leading-none">
+													<FormLabel>{permissionTranslations[permissionId] || permissionId}</FormLabel>
+												</div>
+											</FormItem>
+										)}
 									/>
-									<div className="space-y-1 leading-none">
-										<Label htmlFor={permissionId}>{permissionTranslations[permissionId] || permissionId}</Label>
-									</div>
-								</div>
-							))}
-						</div>
-					</fieldset>
-				))}
-			</div>
+								))}
+							</div>
+						</fieldset>
+					))}
+				</div>
 
-			<div className="flex justify-end pt-4">
-				<Button onClick={handleSubmit} disabled={isPending}>
-					{isPending ? <Loader2 className="animate-spin" /> : <Save />}
-					Salvar Permissões
-				</Button>
-			</div>
-		</div>
+				<div className="flex justify-end pt-4">
+					<Button type="submit" disabled={isPending}>
+						{isPending ? <Loader2 className="animate-spin" /> : <Save />}
+						Salvar Permissões
+					</Button>
+				</div>
+			</form>
+		</Form>
 	)
 }
