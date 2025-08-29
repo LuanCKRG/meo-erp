@@ -34,7 +34,8 @@ const permissionTranslations: Record<PermissionId, string> = {
 	"sellers:manage": "Gerenciar Vendedores",
 	"sellers:view": "Visualizar Lista de Vendedores",
 	"simulations:create": "Criar Novas Simulações",
-	"simulations:view": "Ver Simulações Criadas"
+	"simulations:view": "Ver Simulações Criadas",
+	"orders:view": "Ver Pedidos"
 }
 
 const resourceTitleTranslations: Record<string, string> = {
@@ -42,7 +43,8 @@ const resourceTitleTranslations: Record<string, string> = {
 	partners: "Parceiros",
 	sellers: "Vendedores",
 	reports: "Relatórios",
-	simulations: "Simulações"
+	simulations: "Simulações",
+	orders: "Pedidos"
 }
 
 const groupPermissions = (permissions: readonly PermissionId[]) => {
