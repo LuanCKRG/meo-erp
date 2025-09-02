@@ -1,68 +1,103 @@
-import { AlertTriangle, List } from "lucide-react"
-import Link from "next/link"
-import { redirect } from "next/navigation"
+"use client"
 
-import { hasPermission } from "@/actions/auth"
+import { useQuery } from "@tanstack/react-query"
+import { Loader2 } from "lucide-react"
+import { useEffect } from "react"
+
+import { getCurrentUser } from "@/actions/auth"
 import { getCurrentPartnerDetails } from "@/actions/partners"
 import { NewSimulationForm } from "@/components/forms/new-simulation/new-simulation-form"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/server"
+import { SimulationSelector } from "@/components/forms/new-simulation/simulation-selector"
+import { SimulationProvider, useSimulation } from "@/contexts/simulation-context"
 
-const AddSimulationPage = async () => {
-	const canCreateSimulation = await hasPermission("simulations:create")
-	if (!canCreateSimulation) {
-		redirect("/dashboard/home")
-	}
-
-	const supabase = await createClient()
+function SimulationPageContent() {
 	const {
-		data: { user }
-	} = await supabase.auth.getUser()
+		data: user,
+		isLoading: isLoadingUser,
+		error: userError
+	} = useQuery({
+		queryKey: ["currentUser"],
+		queryFn: getCurrentUser,
+		staleTime: Infinity,
+		refetchOnWindowFocus: false
+	})
 
-	if (!user) {
-		redirect("/")
+	const isPartner = user?.role === "partner"
+
+	const {
+		data: partnerDetails,
+		isLoading: isLoadingPartner,
+		error: partnerError
+	} = useQuery({
+		queryKey: ["currentPartnerDetails"],
+		queryFn: getCurrentPartnerDetails,
+		enabled: isPartner // Apenas busca se o usuário for um parceiro
+	})
+
+	const { setPartnerId, setSellerId, partnerId, partnerName, sellerName, setPartnerName, setSellerName } = useSimulation()
+
+	// Preenche o contexto automaticamente APENAS se o usuário for um parceiro
+	useEffect(() => {
+		if (isPartner && user?.id && partnerDetails?.sellerId && user.name) {
+			setPartnerId(user.id)
+			setSellerId(partnerDetails.sellerId)
+			setPartnerName(user.name) // Parceiro logado é o parceiro da simulação
+			// O nome do seller associado precisaria de outra busca, mas o ID é o suficiente para a action.
+			// Podemos adicionar a busca do nome do seller se for necessário exibir.
+		}
+	}, [isPartner, user, partnerDetails, setPartnerId, setSellerId, setPartnerName])
+
+	const isLoading = isLoadingUser || (isPartner && isLoadingPartner)
+	const error = userError || (isPartner && partnerError)
+
+	if (isLoading) {
+		return (
+			<div className="flex flex-col items-center justify-center gap-4 py-16">
+				<Loader2 className="h-8 w-8 animate-spin" />
+				<p>Carregando dados do usuário...</p>
+			</div>
+		)
 	}
 
-	const { data: userRoleData } = await supabase.from("users").select("role").eq("id", user.id).single()
-	const isPartnerRole = userRoleData?.role === "partner"
+	if (error || !user?.role) {
+		return <p className="text-destructive text-center">Não foi possível carregar os dados do usuário. Tente recarregar a página.</p>
+	}
 
-	const partnerDetails = await getCurrentPartnerDetails()
-	const canViewSimulations = await hasPermission("simulations:view")
+	const showSelector = user.role === "admin" || user.role === "seller"
+	const isFormDisabled = showSelector && !partnerId
 
-	// Lógica positiva e explícita: O usuário pode simular SE E SOMENTE SE
-	// ele for um parceiro E estiver aprovado E ativo E tiver um gestor.
-	const isUserAllowedToSimulate = isPartnerRole && partnerDetails?.status === "approved" && partnerDetails?.isActive && !!partnerDetails.sellerId
+	const getContextText = () => {
+		if (!showSelector || !partnerId) return null
+		if (user.role === "admin" && sellerName && partnerName) {
+			return `para ${sellerName} / ${partnerName}`
+		}
+		if (user.role === "seller" && partnerName) {
+			return `para ${partnerName}`
+		}
+		return null
+	}
 
 	return (
 		<div className="flex flex-col gap-8">
-			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+			<div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Nova Simulação</h1>
 					<p className="text-muted-foreground">Preencha os dados abaixo para criar uma nova simulação.</p>
 				</div>
-				{canViewSimulations && (
-					<Button variant="outline" asChild>
-						<Link href="/dashboard/simulations">
-							<List />
-							Ver Simulações
-						</Link>
-					</Button>
-				)}
+				{getContextText() && <p className="font-medium text-muted-foreground text-sm text-right">Criando simulação {getContextText()}</p>}
 			</div>
-
-			{isUserAllowedToSimulate ? (
-				<NewSimulationForm />
-			) : (
-				<Alert variant="destructive" className="max-w-lg mx-auto">
-					<AlertTriangle className="h-4 w-4" />
-					<AlertTitle>Acesso Restrito</AlertTitle>
-					<AlertDescription>
-						Mesmo tendo permissão para acessar a página, apenas Parceiros aprovados, ativos e com um gestor associado conseguem adicionar uma nova simulação.
-					</AlertDescription>
-				</Alert>
-			)}
+			{showSelector && <SimulationSelector role={user.role} />}
+			<NewSimulationForm isDisabled={isFormDisabled} />
 		</div>
+	)
+}
+
+const AddSimulationPage = () => {
+	// O Provedor de Contexto agora envolve todo o conteúdo da página.
+	return (
+		<SimulationProvider>
+			<SimulationPageContent />
+		</SimulationProvider>
 	)
 }
 
