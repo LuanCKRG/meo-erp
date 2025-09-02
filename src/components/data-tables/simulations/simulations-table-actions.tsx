@@ -1,12 +1,12 @@
 "use client"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { Edit, Loader2, MoreHorizontal, Send, Trash2 } from "lucide-react"
+import { Edit, FileDown, Loader2, MoreHorizontal, Send, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { createOrderFromSimulation } from "@/actions/orders"
-import { deleteSimulation } from "@/actions/simulations"
+import { deleteSimulation, generateSimulationPdf } from "@/actions/simulations"
 import { EditSimulationDialog } from "@/components/dialogs/edit-simulation-dialog"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,11 +18,13 @@ import {
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import type { SimulationWithRelations } from "@/lib/definitions/simulations"
+import { formatCnpj } from "@/lib/formatters"
 
 export const SimulationsTableActions = ({ simulation }: { simulation: SimulationWithRelations }) => {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 	const [isDeletePending, startDeleteTransition] = useTransition()
 	const [isCreateOrderPending, startCreateOrderTransition] = useTransition()
+	const [isPdfPending, startPdfTransition] = useTransition()
 	const queryClient = useQueryClient()
 
 	const handleDelete = () => {
@@ -66,6 +68,29 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 		})
 	}
 
+	const handleDownloadPdf = () => {
+		startPdfTransition(() => {
+			toast.promise(generateSimulationPdf(simulation.id), {
+				loading: "Gerando PDF da proposta...",
+				success: (result) => {
+					if (!result.success) {
+						throw new Error(result.message)
+					}
+					// Cria um link temporário para o download
+					const link = document.createElement("a")
+					link.href = `data:application/pdf;base64,${result.data.pdfBase64}`
+					link.download = `proposta-simulacao-${simulation.kdi}.pdf`
+					document.body.appendChild(link)
+					link.click()
+					document.body.removeChild(link)
+
+					return "PDF gerado com sucesso! O download deve começar em breve."
+				},
+				error: (err: Error) => err.message
+			})
+		})
+	}
+
 	return (
 		<>
 			<DropdownMenu>
@@ -80,6 +105,10 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 					<DropdownMenuItem onSelect={handleCreateOrder} disabled={isCreateOrderPending}>
 						{isCreateOrderPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
 						Criar Pedido
+					</DropdownMenuItem>
+					<DropdownMenuItem onSelect={handleDownloadPdf} disabled={isPdfPending}>
+						{isPdfPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+						Baixar Proposta
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
