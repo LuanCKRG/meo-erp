@@ -1,54 +1,55 @@
 "use client"
 
-import * as React from "react"
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
-import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
-
-type FullSimulationData = Partial<SimulationData> & {
-	kit_module_brand_id?: string | null
-	kit_inverter_brand_id?: string | null
-	kit_others_brand_id?: string | null
+interface SimulationContextType {
+	partnerId: string | null
+	setPartnerId: (id: string | null) => void
+	sellerId: string | null
+	setSellerId: (id: string | null) => void
+	partnerName: string | null
+	setPartnerName: (name: string | null) => void
+	sellerName: string | null
+	setSellerName: (name: string | null) => void
+	clearContext: () => void
 }
 
-type SimulationContextType = {
-	currentStep: number
-	simulationData: FullSimulationData
-	setSimulationData: (data: FullSimulationData) => void
-	nextStep: () => void
-	backStep: () => void
-}
+const SimulationContext = createContext<SimulationContextType | undefined>(undefined)
 
-const SimulationContext = React.createContext<SimulationContextType | undefined>(undefined)
+export function SimulationProvider({ children }: { children: ReactNode }) {
+	const [partnerId, setPartnerId] = useState<string | null>(null)
+	const [sellerId, setSellerId] = useState<string | null>(null)
+	const [partnerName, setPartnerName] = useState<string | null>(null)
+	const [sellerName, setSellerName] = useState<string | null>(null)
 
-export function SimulationProvider({ children, initialData }: { children: React.ReactNode; initialData?: FullSimulationData }) {
-	const [currentStep, setCurrentStep] = React.useState(1)
-	const [simulationData, setSimulationDataState] = React.useState<FullSimulationData>(initialData || {})
+	useEffect(() => {
+		console.log(sellerId)
+	}, [sellerId])
 
-	const setSimulationData = React.useCallback((newData: FullSimulationData) => {
-		setSimulationDataState((prev) => ({ ...prev, ...newData }))
-	}, [])
-
-	const nextStep = () => {
-		setCurrentStep((prev) => Math.min(prev + 1, 4))
-	}
-
-	const backStep = () => {
-		setCurrentStep((prev) => Math.max(prev - 1, 1))
+	const clearContext = () => {
+		setPartnerId(null)
+		setSellerId(null)
+		setPartnerName(null)
+		setSellerName(null)
 	}
 
 	const value = {
-		currentStep,
-		simulationData,
-		setSimulationData,
-		nextStep,
-		backStep
+		partnerId,
+		setPartnerId,
+		sellerId,
+		setSellerId,
+		partnerName,
+		setPartnerName,
+		sellerName,
+		setSellerName,
+		clearContext
 	}
 
 	return <SimulationContext.Provider value={value}>{children}</SimulationContext.Provider>
 }
 
 export function useSimulation() {
-	const context = React.useContext(SimulationContext)
+	const context = useContext(SimulationContext)
 	if (context === undefined) {
 		throw new Error("useSimulation must be used within a SimulationProvider")
 	}
