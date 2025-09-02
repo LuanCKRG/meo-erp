@@ -1,26 +1,27 @@
 // new-simulation-form.tsx
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import { AnimatePresence, motion } from "framer-motion"
 import * as React from "react"
-import { useForm, FormProvider } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { FormProvider, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { createSimulation } from "@/actions/simulations"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { useSimulation } from "@/contexts/simulation-context"
 import { cn } from "@/lib/utils"
 import { SimulationStep1 } from "./step-1-project-data"
 import { SimulationStep2 } from "./step-2-client-data"
 import { SimulationStep3 } from "./step-3-installation"
 import { SimulationStep4 } from "./step-4-values"
 import {
+	type SimulationData,
 	newSimulationSchema,
 	simulationStep1Schema,
 	simulationStep2Schema,
 	simulationStep3Schema,
-	simulationStep4Schema,
-	type SimulationData
+	simulationStep4Schema
 } from "./validation/new-simulation"
 
 const STEPS_CONFIG = [
@@ -69,8 +70,17 @@ function SimulationStepper({ currentStep }: { currentStep: number }) {
 	)
 }
 
-export function NewSimulationForm({ className, initialData }: { className?: string; initialData?: Partial<ExtendedSimulationData> }) {
+export function NewSimulationForm({
+	className,
+	initialData,
+	isDisabled = false
+}: {
+	className?: string
+	initialData?: Partial<ExtendedSimulationData>
+	isDisabled?: boolean
+}) {
 	const [currentStep, setCurrentStep] = React.useState(1)
+	const { partnerId, sellerId, clearContext } = useSimulation()
 
 	const form = useForm<ExtendedSimulationData>({
 		resolver: zodResolver(newSimulationSchema),
@@ -164,12 +174,26 @@ export function NewSimulationForm({ className, initialData }: { className?: stri
 			return
 		}
 
-		toast.promise(createSimulation(result.data), {
+		// Garante que o partnerId do contexto (ou da sessão do parceiro) exista.
+		if (!partnerId) {
+			toast.error("Contexto inválido", {
+				description: "O ID do parceiro não foi definido. Por favor, reinicie o processo de simulação."
+			})
+			return
+		}
+
+		const simulationContext = {
+			partnerId,
+			sellerId // pode ser null, e isso é esperado.
+		}
+
+		toast.promise(createSimulation(result.data, simulationContext), {
 			loading: "Salvando simulação...",
 			success: (res) => {
 				if (res.success) {
-					form.reset() // Reset form after successful submission
-					setCurrentStep(1) // Reset to first step
+					form.reset()
+					setCurrentStep(1)
+					clearContext()
 					return `Simulação #${res.data.kdi} salva com sucesso!`
 				}
 				throw new Error(res.message)
@@ -187,30 +211,32 @@ export function NewSimulationForm({ className, initialData }: { className?: stri
 	}
 
 	return (
-		<FormProvider {...form}>
-			<Card className={cn("w-full border-0 shadow-none", className)}>
-				<CardHeader>
-					<SimulationStepper currentStep={currentStep} />
-				</CardHeader>
-				<CardContent>
-					<AnimatePresence mode="wait">
-						<motion.div
-							key={currentStep}
-							variants={motionVariants}
-							initial="initial"
-							animate="animate"
-							exit="exit"
-							transition={{ duration: 0.3 }}
-							className="mt-8"
-						>
-							{currentStep === 1 && <SimulationStep1 onNext={nextStep} />}
-							{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
-							{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
-							{currentStep === 4 && <SimulationStep4 onSubmit={handleSubmitEntireForm} onBack={backStep} />}
-						</motion.div>
-					</AnimatePresence>
-				</CardContent>
-			</Card>
-		</FormProvider>
+		<fieldset disabled={isDisabled} className="group">
+			<FormProvider {...form}>
+				<Card className={cn("w-full border-0 shadow-none group-disabled:opacity-50 group-disabled:pointer-events-none", className)}>
+					<CardHeader>
+						<SimulationStepper currentStep={currentStep} />
+					</CardHeader>
+					<CardContent>
+						<AnimatePresence mode="wait">
+							<motion.div
+								key={currentStep}
+								variants={motionVariants}
+								initial="initial"
+								animate="animate"
+								exit="exit"
+								transition={{ duration: 0.3 }}
+								className="mt-8"
+							>
+								{currentStep === 1 && <SimulationStep1 onNext={nextStep} />}
+								{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
+								{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
+								{currentStep === 4 && <SimulationStep4 onSubmit={handleSubmitEntireForm} onBack={backStep} />}
+							</motion.div>
+						</AnimatePresence>
+					</CardContent>
+				</Card>
+			</FormProvider>
+		</fieldset>
 	)
 }
