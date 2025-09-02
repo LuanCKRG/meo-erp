@@ -6,5 +6,16 @@ import rejectPartner from "@/actions/partners/reject-partner"
 import setPartnerActiveStatus from "@/actions/partners/set-partner-active-status"
 import updatePartner from "@/actions/partners/update-partner"
 import getCurrentPartnerDetails from "@/actions/partners/get-current-partner-details"
+import getPartnersBySellerId from "@/actions/partners/get-partner-by-seller-id"
 
-export { getAllPartners, getPartnerByCNPJ, registerPartner, approvePartner, rejectPartner, updatePartner, setPartnerActiveStatus, getCurrentPartnerDetails }
+export {
+	getAllPartners,
+	getPartnerByCNPJ,
+	registerPartner,
+	approvePartner,
+	rejectPartner,
+	updatePartner,
+	setPartnerActiveStatus,
+	getCurrentPartnerDetails,
+	getPartnersBySellerId
+}
