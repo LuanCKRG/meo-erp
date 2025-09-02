@@ -3,7 +3,6 @@
 import { PostgrestError } from "@supabase/supabase-js"
 
 import { createCustomer, deleteCustomer } from "@/actions/customers"
-import { getCurrentPartnerDetails } from "@/actions/partners"
 import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { CustomerInsert } from "@/lib/definitions/customers"
 import type { SimulationInsert } from "@/lib/definitions/simulations"
@@ -17,7 +16,12 @@ const parseCurrencyStringToNumber = (value: string | undefined | null): number =
 	return Number.isNaN(numberValue) ? 0 : numberValue
 }
 
-async function createSimulation(data: SimulationData): Promise<ActionResponse<{ kdi: number }>> {
+interface SimulationContext {
+	partnerId: string
+	sellerId: string | null
+}
+
+async function createSimulation(data: SimulationData, context: SimulationContext): Promise<ActionResponse<{ kdi: number }>> {
 	const supabase = await createClient()
 
 	const {
@@ -28,31 +32,13 @@ async function createSimulation(data: SimulationData): Promise<ActionResponse<{ 
 		return { success: false, message: "Usuário não autenticado. Acesso negado." }
 	}
 
-	const { data: userRoleData } = await supabase.from("users").select("role").eq("id", user.id).single()
-	const isPartnerRole = userRoleData?.role === "partner"
-
-	// Busca o seller_id do parceiro logado, se for um.
-	const partnerDetails = await getCurrentPartnerDetails()
-	// Admins/sellers podem não ser parceiros, então sellerId pode ser null para eles.
-	// A lógica de negócio decide se isso é permitido.
-	// Para este caso, a verificação na página já garante que parceiros sem seller_id não cheguem aqui.
-	const sellerIdForSimulation = partnerDetails?.sellerId || null
+	if (!context.partnerId) {
+		return { success: false, message: "ID do Parceiro não fornecido. A simulação não pode ser criada." }
+	}
 
 	let newlyCreatedCustomerId: string | null = null
 
 	try {
-		// Se o usuário for um parceiro, precisamos encontrar o ID do parceiro a partir do user.id
-		let partnerId: string | null = null
-		if (isPartnerRole) {
-			const { data: partnerData } = await supabase.from("partners").select("id").eq("user_id", user.id).single()
-			if (partnerData) {
-				partnerId = partnerData.id
-			} else {
-				// Isso não deveria acontecer se o usuário tem a role 'partner'
-				console.warn("Usuário com role 'partner' não encontrado na tabela 'partners'. User ID:", user.id)
-			}
-		}
-
 		const customerData: CustomerInsert = {
 			cnpj: data.cnpj.replace(/\D/g, ""),
 			company_name: data.legalName,
@@ -69,8 +55,7 @@ async function createSimulation(data: SimulationData): Promise<ActionResponse<{ 
 			city: data.city,
 			state: data.state,
 			created_by_user_id: user.id,
-			// Se o usuário for um parceiro, salvamos o ID DO PARCEIRO (não do usuário)
-			partner_id: partnerId
+			partner_id: context.partnerId
 		}
 
 		const customerResponse = await createCustomer(customerData)
@@ -95,7 +80,7 @@ async function createSimulation(data: SimulationData): Promise<ActionResponse<{ 
 			labor_value: parseCurrencyStringToNumber(data.laborValue),
 			other_costs: parseCurrencyStringToNumber(data.otherCosts),
 			created_by_user_id: user.id,
-			seller_id: sellerIdForSimulation // Adiciona o seller_id
+			seller_id: context.sellerId
 		}
 
 		const { data: simulationResult, error: simulationError } = await supabase.from("simulations").insert(simulationData).select("kdi").single()
