@@ -6,6 +6,7 @@ import { PDFDocument, rgb } from "pdf-lib"
 
 import { getSimulationById } from "@/actions/simulations"
 import { formatCnpj } from "@/lib/formatters"
+import { formatDate } from "@/lib/utils"
 import type { ActionResponse } from "@/types/action-response"
 
 async function generateSimulationPdf(simulationId: string): Promise<ActionResponse<{ pdfBase64: string }>> {
@@ -20,7 +21,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			return { success: false, message: simulationDetails.message || "Não foi possível encontrar a simulação." }
 		}
 
-		const { customer } = simulationDetails.data
+		const { customer, created_at } = simulationDetails.data
 
 		// 2. Carregar o template PDF
 		const templatePath = path.join(process.cwd(), "public", "template-simulation.pdf")
@@ -30,13 +31,48 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		// 3. Adicionar dados ao PDF
 		const firstPage = pdfDoc.getPages()[0]
 		const { width, height } = firstPage.getSize()
+		const textColor = rgb(0.2, 0.2, 0.2) // Cor cinza escuro
 
-		// Adiciona o CNPJ (Exemplo: no topo da página)
+		// Adiciona o CNPJ
 		firstPage.drawText(formatCnpj(customer.cnpj), {
 			x: 100,
-			y: height - 150, // 50 pixels do topo
+			y: height - 150,
 			size: 12,
-			color: rgb(0.2, 0.2, 0.2) // Cor cinza escuro
+			color: textColor
+		})
+
+		// Adiciona a Razão Social
+		firstPage.drawText(customer.company_name, {
+			x: 100,
+			y: height - 168,
+			size: 12,
+			color: textColor
+		})
+
+		// Adiciona Cidade/Estado
+		firstPage.drawText(`${customer.city}/${customer.state}`, {
+			x: 100,
+			y: height - 185,
+			size: 12,
+			color: textColor
+		})
+
+		// Adiciona a Data de Criação da Simulação
+		const creationDate = formatDate(created_at)
+		firstPage.drawText(creationDate, {
+			x: 115,
+			y: height - 201,
+			size: 12,
+			color: textColor
+		})
+
+		// Adiciona a Data Atual
+		const currentDate = formatDate(new Date().toISOString())
+		firstPage.drawText(currentDate, {
+			x: width - 72,
+			y: height - 85,
+			size: 12,
+			color: textColor
 		})
 
 		// 4. Salvar o PDF em memória e converter para Base64
