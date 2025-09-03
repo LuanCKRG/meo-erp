@@ -1,13 +1,14 @@
 "use client"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { Edit, FileDown, Loader2, MoreHorizontal, Send, Trash2 } from "lucide-react"
+import { Edit, Eye, FileDown, Loader2, MoreHorizontal, Send, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { createOrderFromSimulation } from "@/actions/orders"
 import { deleteSimulation, generateSimulationPdf } from "@/actions/simulations"
 import { EditSimulationDialog } from "@/components/dialogs/edit-simulation-dialog"
+import { ViewSimulationSheet } from "@/components/dialogs/view-simulation-sheet"
 import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
@@ -18,10 +19,10 @@ import {
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import type { SimulationWithRelations } from "@/lib/definitions/simulations"
-import { formatCnpj } from "@/lib/formatters"
 
 export const SimulationsTableActions = ({ simulation }: { simulation: SimulationWithRelations }) => {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+	const [isViewSheetOpen, setIsViewSheetOpen] = useState(false)
 	const [isDeletePending, startDeleteTransition] = useTransition()
 	const [isCreateOrderPending, startCreateOrderTransition] = useTransition()
 	const [isPdfPending, startPdfTransition] = useTransition()
@@ -102,6 +103,10 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuLabel>Ações</DropdownMenuLabel>
+					<DropdownMenuItem onSelect={() => setIsViewSheetOpen(true)}>
+						<Eye className="mr-2 h-4 w-4" />
+						Visualizar
+					</DropdownMenuItem>
 					<DropdownMenuItem onSelect={handleCreateOrder} disabled={isCreateOrderPending}>
 						{isCreateOrderPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
 						Criar Pedido
@@ -124,6 +129,9 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 
 			{/* Renderiza o dialog de edição */}
 			<EditSimulationDialog simulationId={simulation.id} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
+
+			{/* Renderiza o sheet de visualização */}
+			<ViewSimulationSheet simulationId={simulation.id} open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen} />
 		</>
 	)
 }
