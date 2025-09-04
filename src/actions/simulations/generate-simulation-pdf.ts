@@ -1,13 +1,12 @@
 "use server"
 
-import fs from "node:fs/promises"
-import path from "node:path"
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib"
 
 import { getSimulationById } from "@/actions/simulations"
 import { formatCnpj } from "@/lib/formatters"
 import { formatDate } from "@/lib/utils"
 import type { ActionResponse } from "@/types/action-response"
+import { PDF_TEMPLATE_SIMULATION_BASE64 } from "@/lib/constants"
 
 const formatCurrency = (value: number | null | undefined): string => {
 	if (value === null || value === undefined) return "R$ 0,00"
@@ -49,9 +48,8 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 
 		const { customer, created_at, equipment_value, labor_value, other_costs, system_power } = simulationDetails.data
 
-		// 2. Carregar o template PDF e a fonte
-		const templatePath = path.resolve("src/assets", "template-simulation.pdf")
-		const templateBytes = await fs.readFile(templatePath)
+		// 2. Carregar o template PDF do Base64
+		const templateBytes = Buffer.from(PDF_TEMPLATE_SIMULATION_BASE64, "base64")
 		const pdfDoc = await PDFDocument.load(templateBytes)
 		const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
 
@@ -192,7 +190,6 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			color: textColor,
 			font
 		})
-
 		// 4. Salvar o PDF em memória e converter para Base64
 		const pdfBytes = await pdfDoc.save()
 		const pdfBase64 = Buffer.from(pdfBytes).toString("base64")
@@ -211,5 +208,4 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		}
 	}
 }
-
 export default generateSimulationPdf
