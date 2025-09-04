@@ -1,12 +1,13 @@
 "use server"
 
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib"
+import fontkit from "@pdf-lib/fontkit"
+import { PDFDocument, rgb } from "pdf-lib"
 
 import { getSimulationById } from "@/actions/simulations"
 import { formatCnpj } from "@/lib/formatters"
 import { formatDate } from "@/lib/utils"
 import type { ActionResponse } from "@/types/action-response"
-import { PDF_TEMPLATE_SIMULATION_BASE64 } from "@/lib/constants"
+import { PDF_TEMPLATE_SIMULATION_BASE64, MONTSERRAT_BASE64 } from "@/lib/constants"
 
 const formatCurrency = (value: number | null | undefined): string => {
 	if (value === null || value === undefined) return "R$ 0,00"
@@ -48,15 +49,21 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 
 		const { customer, created_at, equipment_value, labor_value, other_costs, system_power } = simulationDetails.data
 
-		// 2. Carregar o template PDF do Base64
+		// 2. Carregar o template PDF e a fonte do Base64
 		const templateBytes = Buffer.from(PDF_TEMPLATE_SIMULATION_BASE64, "base64")
+		const montserratFontBytes = Buffer.from(MONTSERRAT_BASE64, "base64")
+
 		const pdfDoc = await PDFDocument.load(templateBytes)
-		const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+
+		// Registrar o fontkit
+		pdfDoc.registerFontkit(fontkit)
+
+		const montserratFont = await pdfDoc.embedFont(montserratFontBytes)
+		const textColor = rgb(0, 0, 0) // Cor preta
 
 		// 3. Adicionar dados ao PDF
 		const firstPage = pdfDoc.getPages()[0]
 		const { width, height } = firstPage.getSize()
-		const textColor = rgb(0.2, 0.2, 0.2) // Cor cinza escuro
 
 		// Adiciona o CNPJ
 		firstPage.drawText(formatCnpj(customer.cnpj), {
@@ -64,17 +71,17 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			y: height - 150,
 			size: 12,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Lógica para ajustar dinamicamente o tamanho da fonte da Razão Social
 		let companyNameFontSize = 12
 		const maxCompanyNameWidth = 168 // Largura máxima permitida para a razão social
-		let companyNameWidth = font.widthOfTextAtSize(customer.company_name, companyNameFontSize)
+		let companyNameWidth = montserratFont.widthOfTextAtSize(customer.company_name, companyNameFontSize)
 
 		while (companyNameWidth > maxCompanyNameWidth && companyNameFontSize > 8) {
 			companyNameFontSize -= 0.5
-			companyNameWidth = font.widthOfTextAtSize(customer.company_name, companyNameFontSize)
+			companyNameWidth = montserratFont.widthOfTextAtSize(customer.company_name, companyNameFontSize)
 		}
 
 		// Adiciona a Razão Social com o tamanho da fonte ajustado
@@ -83,18 +90,18 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			y: height - 168,
 			size: companyNameFontSize,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Lógica para ajustar dinamicamente o tamanho da fonte de Cidade/UF
 		const cidadeUf = `${customer.city}/${customer.state}`
 		let cidadeUfFontSize = 12
 		const maxCidadeUfWidth = 168
-		let cidadeUfWidth = font.widthOfTextAtSize(cidadeUf, cidadeUfFontSize)
+		let cidadeUfWidth = montserratFont.widthOfTextAtSize(cidadeUf, cidadeUfFontSize)
 
 		while (cidadeUfWidth > maxCidadeUfWidth && cidadeUfFontSize > 8) {
 			cidadeUfFontSize -= 0.5
-			cidadeUfWidth = font.widthOfTextAtSize(cidadeUf, cidadeUfFontSize)
+			cidadeUfWidth = montserratFont.widthOfTextAtSize(cidadeUf, cidadeUfFontSize)
 		}
 
 		// Adiciona Cidade/Estado com fonte ajustada
@@ -103,7 +110,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			y: height - 185,
 			size: cidadeUfFontSize,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Adiciona a Data de Criação da Simulação
@@ -113,7 +120,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			y: height - 201,
 			size: 12,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Adiciona a Data Atual
@@ -123,7 +130,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			y: height - 85,
 			size: 12,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Adiciona a Potência do Sistema
@@ -133,7 +140,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			y: height - 152,
 			size: 12,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Calcula e adiciona o Valor Residual
@@ -143,11 +150,11 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 
 		let residualValueFontSize = 12
 		const maxResidualValueWidth = 53
-		let residualValueWidth = font.widthOfTextAtSize(formattedResidualValue, residualValueFontSize)
+		let residualValueWidth = montserratFont.widthOfTextAtSize(formattedResidualValue, residualValueFontSize)
 
 		while (residualValueWidth > maxResidualValueWidth && residualValueFontSize > 8) {
 			residualValueFontSize -= 0.5
-			residualValueWidth = font.widthOfTextAtSize(formattedResidualValue, residualValueFontSize)
+			residualValueWidth = montserratFont.widthOfTextAtSize(formattedResidualValue, residualValueFontSize)
 		}
 
 		const residualValueY = height - 360
@@ -159,7 +166,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			y: residualValueY,
 			size: residualValueFontSize,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Calcular e adicionar valores das parcelas
@@ -170,47 +177,47 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 
 		// Parcela 36x
 		let installment36FontSize = 12
-		let installment36Width = font.widthOfTextAtSize(installment36, installment36FontSize)
+		let installment36Width = montserratFont.widthOfTextAtSize(installment36, installment36FontSize)
 		while (installment36Width > maxInstallmentWidth && installment36FontSize > 8) {
 			installment36FontSize -= 0.5
-			installment36Width = font.widthOfTextAtSize(installment36, installment36FontSize)
+			installment36Width = montserratFont.widthOfTextAtSize(installment36, installment36FontSize)
 		}
 		firstPage.drawText(installment36, {
 			x: 82,
 			y: height - 330,
 			size: installment36FontSize,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Parcela 48x
 		let installment48FontSize = 12
-		let installment48Width = font.widthOfTextAtSize(installment48, installment48FontSize)
+		let installment48Width = montserratFont.widthOfTextAtSize(installment48, installment48FontSize)
 		while (installment48Width > maxInstallmentWidth && installment48FontSize > 8) {
 			installment48FontSize -= 0.5
-			installment48Width = font.widthOfTextAtSize(installment48, installment48FontSize)
+			installment48Width = montserratFont.widthOfTextAtSize(installment48, installment48FontSize)
 		}
 		firstPage.drawText(installment48, {
 			x: 82,
-			y: height - 360,
+			y: height - 362,
 			size: installment48FontSize,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// Parcela 60x
 		let installment60FontSize = 12
-		let installment60Width = font.widthOfTextAtSize(installment60, installment60FontSize)
+		let installment60Width = montserratFont.widthOfTextAtSize(installment60, installment60FontSize)
 		while (installment60Width > maxInstallmentWidth && installment60FontSize > 8) {
 			installment60FontSize -= 0.5
-			installment60Width = font.widthOfTextAtSize(installment60, installment60FontSize)
+			installment60Width = montserratFont.widthOfTextAtSize(installment60, installment60FontSize)
 		}
 		firstPage.drawText(installment60, {
 			x: 82,
 			y: height - 390,
 			size: installment60FontSize,
 			color: textColor,
-			font
+			font: montserratFont
 		})
 
 		// 4. Salvar o PDF em memória e converter para Base64
@@ -231,4 +238,5 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		}
 	}
 }
+
 export default generateSimulationPdf
