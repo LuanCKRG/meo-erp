@@ -1,8 +1,8 @@
 import type { Database } from "@/lib/definitions/supabase"
-import type { SimulationStatus } from "./simulations"
 
 export type Order = Database["public"]["Tables"]["orders"]["Row"]
 export type OrderInsert = Database["public"]["Tables"]["orders"]["Insert"]
+export type OrderStatus = Database["public"]["Enums"]["application_status"]
 
 export type OrderWithRelations = {
 	id: string
@@ -16,6 +16,6 @@ export type OrderWithRelations = {
 	internal_manager: string | null
 	system_power: number
 	total_value: number
-	status: SimulationStatus
+	status: OrderStatus
 	created_at: string
 }
