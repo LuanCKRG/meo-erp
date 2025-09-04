@@ -4,6 +4,6 @@ import deleteSimulation from "@/actions/simulations/delete-simulation"
 import updateSimulation from "@/actions/simulations/update-simulation"
 import getSimulationById from "@/actions/simulations/get-simulation-by-id"
 import generateSimulationPdf from "@/actions/simulations/generate-simulation-pdf"
+import updateSimulationStatus from "@/actions/simulations/update-simulation-status"
 
-export { createSimulation, getAllSimulations, deleteSimulation, updateSimulation, getSimulationById, generateSimulationPdf }
-
+export { createSimulation, getAllSimulations, deleteSimulation, updateSimulation, getSimulationById, generateSimulationPdf, updateSimulationStatus }
