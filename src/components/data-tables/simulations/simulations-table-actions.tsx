@@ -1,13 +1,15 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Edit, Eye, FileDown, Loader2, MoreHorizontal, Send, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
+import { hasPermission } from "@/actions/auth"
 import { createOrderFromSimulation } from "@/actions/orders"
 import { deleteSimulation, generateSimulationPdf } from "@/actions/simulations"
 import { EditSimulationDialog } from "@/components/dialogs/edit-simulation-dialog"
+import { UpdateStatusDialog } from "@/components/dialogs/update-status-dialog"
 import { ViewSimulationSheet } from "@/components/dialogs/view-simulation-sheet"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,6 +29,11 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 	const [isCreateOrderPending, startCreateOrderTransition] = useTransition()
 	const [isPdfPending, startPdfTransition] = useTransition()
 	const queryClient = useQueryClient()
+
+	const { data: canCreateSimulations } = useQuery({
+		queryKey: ["permission", "simulations:create"],
+		queryFn: () => hasPermission("simulations:create")
+	})
 
 	const handleDelete = () => {
 		startDeleteTransition(() => {
@@ -107,23 +114,28 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 						<Eye className="mr-2 h-4 w-4" />
 						Visualizar
 					</DropdownMenuItem>
-					<DropdownMenuItem onSelect={handleCreateOrder} disabled={isCreateOrderPending}>
-						{isCreateOrderPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-						Criar Pedido
-					</DropdownMenuItem>
-					<DropdownMenuItem onSelect={handleDownloadPdf} disabled={isPdfPending}>
-						{isPdfPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
-						Baixar Proposta
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
-						<Edit className="mr-2 h-4 w-4" />
-						Editar
-					</DropdownMenuItem>
-					<DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={handleDelete} disabled={isDeletePending}>
-						{isDeletePending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-						Deletar
-					</DropdownMenuItem>
+					{canCreateSimulations && (
+						<>
+							<DropdownMenuItem onSelect={handleCreateOrder} disabled={isCreateOrderPending}>
+								{isCreateOrderPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+								Criar Pedido
+							</DropdownMenuItem>
+							<DropdownMenuItem onSelect={handleDownloadPdf} disabled={isPdfPending}>
+								{isPdfPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+								Baixar Proposta
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<UpdateStatusDialog simulation={simulation} />
+							<DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
+								<Edit className="mr-2 h-4 w-4" />
+								Editar
+							</DropdownMenuItem>
+							<DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={handleDelete} disabled={isDeletePending}>
+								{isDeletePending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+								Deletar
+							</DropdownMenuItem>
+						</>
+					)}
 				</DropdownMenuContent>
 			</DropdownMenu>
 
