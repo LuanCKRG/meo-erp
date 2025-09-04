@@ -50,7 +50,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		const { customer, created_at, equipment_value, labor_value, other_costs, system_power } = simulationDetails.data
 
 		// 2. Carregar o template PDF e a fonte
-		const templatePath = path.join(process.cwd(), "public", "template-simulation.pdf")
+		const templatePath = path.resolve("src/assets", "template-simulation.pdf")
 		const templateBytes = await fs.readFile(templatePath)
 		const pdfDoc = await PDFDocument.load(templateBytes)
 		const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
