@@ -5,8 +5,7 @@ import { ArrowUpDown } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import type { SimulationStatus } from "@/lib/definitions/simulations"
-import type { OrderWithRelations } from "@/lib/definitions/orders"
+import type { OrderStatus, OrderWithRelations } from "@/lib/definitions/orders"
 import { formatCnpj } from "@/lib/formatters"
 import { cn, formatDate } from "@/lib/utils"
 import { OrdersTableActions } from "./orders-table-actions"
@@ -19,28 +18,46 @@ const formatCurrency = (value: number | null | undefined): string => {
 	}).format(value)
 }
 
-const statusTranslations: Record<SimulationStatus, string> = {
-	initial_contact: "Contato Inicial",
-	under_review: "Em análise Cliente",
-	in_negotiation: "Em Negociação",
-	won: "Ganho",
-	lost: "Perdido"
+const statusTranslations: Record<OrderStatus, string> = {
+	analysis_pending: "Ag. Análise",
+	pre_analysis: "Análise Prévia",
+	confirmation_pending: "Em Confirmação",
+	credit_analysis: "Análise de Crédito",
+	documents_pending: "Ag. Documentos",
+	final_analysis: "Análise Final",
+	approved: "Aprovado",
+	rejected: "Reprovado",
+	contract_signing: "Assinatura Contrato",
+	completed: "Finalizado",
+	canceled: "Cancelado"
 }
 
-const statusVariant: Record<SimulationStatus, "default" | "secondary" | "destructive" | "outline"> = {
-	initial_contact: "secondary",
-	under_review: "outline",
-	in_negotiation: "default",
-	won: "default", // Should be a success variant, using default for now
-	lost: "destructive"
+const statusVariant: Record<OrderStatus, "default" | "secondary" | "destructive" | "outline"> = {
+	analysis_pending: "secondary",
+	pre_analysis: "outline",
+	confirmation_pending: "outline",
+	credit_analysis: "default",
+	documents_pending: "secondary",
+	final_analysis: "default",
+	approved: "default",
+	rejected: "destructive",
+	contract_signing: "default",
+	completed: "default",
+	canceled: "destructive"
 }
 
-const statusColor: Record<SimulationStatus, string> = {
-	initial_contact: "",
-	under_review: "",
-	in_negotiation: "",
-	won: "bg-green-500 hover:bg-green-600 border-green-600 text-white",
-	lost: ""
+const statusColor: Record<OrderStatus, string> = {
+	analysis_pending: "bg-yellow-500/20 text-yellow-700 border-yellow-500/30",
+	pre_analysis: "bg-blue-500/20 text-blue-700 border-blue-500/30",
+	confirmation_pending: "bg-purple-500/20 text-purple-700 border-purple-500/30",
+	credit_analysis: "bg-blue-600/80 text-white",
+	documents_pending: "bg-yellow-600/80 text-white",
+	final_analysis: "bg-blue-700/80 text-white",
+	approved: "bg-green-500 hover:bg-green-600 border-green-600 text-white",
+	rejected: "bg-red-500 hover:bg-red-600",
+	contract_signing: "bg-teal-500 text-white",
+	completed: "bg-green-700 hover:bg-green-800 text-white",
+	canceled: "bg-gray-500 hover:bg-gray-600"
 }
 
 export const columns: ColumnDef<OrderWithRelations>[] = [
@@ -105,7 +122,7 @@ export const columns: ColumnDef<OrderWithRelations>[] = [
 		accessorKey: "status",
 		header: "Status",
 		cell: ({ row }) => {
-			const status = row.getValue("status") as SimulationStatus
+			const status = row.getValue("status") as OrderStatus
 			return (
 				<Badge variant={statusVariant[status]} className={cn(statusColor[status])}>
 					{statusTranslations[status]}

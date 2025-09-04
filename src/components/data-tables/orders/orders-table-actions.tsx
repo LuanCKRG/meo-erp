@@ -4,8 +4,16 @@ import { Edit, MoreHorizontal } from "lucide-react"
 import { useState } from "react"
 
 import { EditOrderDialog } from "@/components/dialogs/edit-order-dialog"
+import { UpdateOrderStatusDialog } from "@/components/dialogs/update-order-status-dialog"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 import type { OrderWithRelations } from "@/lib/definitions/orders"
 
 export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => {
@@ -26,6 +34,8 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 						<Edit className="mr-2 h-4 w-4" />
 						Editar Pedido
 					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<UpdateOrderStatusDialog order={order} />
 				</DropdownMenuContent>
 			</DropdownMenu>
 
