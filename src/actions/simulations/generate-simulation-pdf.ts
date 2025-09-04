@@ -163,33 +163,56 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		})
 
 		// Calcular e adicionar valores das parcelas
-		const installment36 = totalValue / 36
-		const installment48 = totalValue / 48
-		const installment60 = totalValue / 60
+		const maxInstallmentWidth = 59
+		const installment36 = formatCurrency(totalValue / 36)
+		const installment48 = formatCurrency(totalValue / 48)
+		const installment60 = formatCurrency(totalValue / 60)
 
-		firstPage.drawText(formatCurrency(installment36), {
+		// Parcela 36x
+		let installment36FontSize = 12
+		let installment36Width = font.widthOfTextAtSize(installment36, installment36FontSize)
+		while (installment36Width > maxInstallmentWidth && installment36FontSize > 8) {
+			installment36FontSize -= 0.5
+			installment36Width = font.widthOfTextAtSize(installment36, installment36FontSize)
+		}
+		firstPage.drawText(installment36, {
 			x: 82,
 			y: height - 330,
-			size: 12,
+			size: installment36FontSize,
 			color: textColor,
 			font
 		})
 
-		firstPage.drawText(formatCurrency(installment48), {
+		// Parcela 48x
+		let installment48FontSize = 12
+		let installment48Width = font.widthOfTextAtSize(installment48, installment48FontSize)
+		while (installment48Width > maxInstallmentWidth && installment48FontSize > 8) {
+			installment48FontSize -= 0.5
+			installment48Width = font.widthOfTextAtSize(installment48, installment48FontSize)
+		}
+		firstPage.drawText(installment48, {
 			x: 82,
-			y: height - 362,
-			size: 12,
+			y: height - 360,
+			size: installment48FontSize,
 			color: textColor,
 			font
 		})
 
-		firstPage.drawText(formatCurrency(installment60), {
+		// Parcela 60x
+		let installment60FontSize = 12
+		let installment60Width = font.widthOfTextAtSize(installment60, installment60FontSize)
+		while (installment60Width > maxInstallmentWidth && installment60FontSize > 8) {
+			installment60FontSize -= 0.5
+			installment60Width = font.widthOfTextAtSize(installment60, installment60FontSize)
+		}
+		firstPage.drawText(installment60, {
 			x: 82,
 			y: height - 390,
-			size: 12,
+			size: installment60FontSize,
 			color: textColor,
 			font
 		})
+
 		// 4. Salvar o PDF em memória e converter para Base64
 		const pdfBytes = await pdfDoc.save()
 		const pdfBase64 = Buffer.from(pdfBytes).toString("base64")
