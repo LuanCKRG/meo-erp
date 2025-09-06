@@ -2,16 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query"
 import {
-	type ColumnFiltersState,
 	getCoreRowModel,
 	getFacetedRowModel,
 	getFacetedUniqueValues,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-	type VisibilityState
+	useReactTable
 } from "@tanstack/react-table"
 import { useState } from "react"
 
@@ -21,23 +18,31 @@ import { PartnerTableToolbar } from "@/components/data-tables/partners/partner-t
 import { DataTable } from "@/components/ui/data-table"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options"
+import { usePersistedTableState } from "@/hooks/use-persisted-table-state"
+
+const PARTNER_TABLE_STORAGE_KEY = "partner-table-state"
 
 const PartnerTable = () => {
 	const [rowSelection, setRowSelection] = useState({})
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-		id: false,
-		user_id: false,
-		seller_id: false,
-		contact_email: false,
-		cep: false,
-		street: false,
-		number: false,
-		complement: false,
-		neighborhood: false,
-		updated_at: false
+
+	const { sorting, setSorting, columnFilters, setColumnFilters, columnVisibility, setColumnVisibility } = usePersistedTableState({
+		storageKey: PARTNER_TABLE_STORAGE_KEY,
+		initialState: {
+			columnVisibility: {
+				id: false,
+				user_id: false,
+				seller_id: false,
+				contact_email: false,
+				cep: false,
+				street: false,
+				number: false,
+				complement: false,
+				neighborhood: false,
+				updated_at: false
+			},
+			sorting: [{ id: "created_at", desc: true }]
+		}
 	})
-	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-	const [sorting, setSorting] = useState<SortingState>([])
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["partners"],

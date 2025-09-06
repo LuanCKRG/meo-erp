@@ -2,18 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query"
 import {
-	type ColumnFiltersState,
 	getCoreRowModel,
 	getFacetedRowModel,
 	getFacetedUniqueValues,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-	type VisibilityState
+	useReactTable
 } from "@tanstack/react-table"
-import { useState } from "react"
 
 import { getAllOrders } from "@/actions/orders"
 import { columns } from "@/components/data-tables/orders/orders-columns"
@@ -21,12 +17,19 @@ import { OrdersTableToolbar } from "@/components/data-tables/orders/orders-table
 import { DataTable } from "@/components/ui/data-table"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options"
+import { usePersistedTableState } from "@/hooks/use-persisted-table-state"
+
+const ORDERS_TABLE_STORAGE_KEY = "orders-table-state"
 
 export const OrdersTable = () => {
-	const [sorting, setSorting] = useState<SortingState>([{ id: "created_at", desc: true }])
-	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-		status: false
+	const { sorting, setSorting, columnFilters, setColumnFilters, columnVisibility, setColumnVisibility } = usePersistedTableState({
+		storageKey: ORDERS_TABLE_STORAGE_KEY,
+		initialState: {
+			sorting: [{ id: "created_at", desc: true }],
+			columnVisibility: {
+				status: false
+			}
+		}
 	})
 
 	const { data, isLoading } = useQuery({

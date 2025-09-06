@@ -19,21 +19,29 @@ import { columns } from "@/components/data-tables/sellers/columns"
 import { SellerTableToolbar } from "@/components/data-tables/sellers/seller-table-toolbar"
 import { DataTable } from "@/components/ui/data-table"
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options"
+import { usePersistedTableState } from "@/hooks/use-persisted-table-state"
+
+const SELLER_TABLE_STORAGE_KEY = "seller-table-state"
 
 const SellerTable = () => {
 	const [rowSelection, setRowSelection] = useState({})
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-		id: false,
-		user_id: false,
-		cep: false,
-		street: false,
-		number: false,
-		complement: false,
-		neighborhood: false,
-		updated_at: false
+
+	const { sorting, setSorting, columnFilters, setColumnFilters, columnVisibility, setColumnVisibility } = usePersistedTableState({
+		storageKey: SELLER_TABLE_STORAGE_KEY,
+		initialState: {
+			columnVisibility: {
+				id: false,
+				user_id: false,
+				cep: false,
+				street: false,
+				number: false,
+				complement: false,
+				neighborhood: false,
+				updated_at: false
+			},
+			sorting: [{ id: "created_at", desc: true }]
+		}
 	})
-	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-	const [sorting, setSorting] = useState<SortingState>([])
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["sellers"],

@@ -2,18 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query"
 import {
-	type ColumnFiltersState,
 	getCoreRowModel,
 	getFacetedRowModel,
 	getFacetedUniqueValues,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-	type VisibilityState
+	useReactTable
 } from "@tanstack/react-table"
-import { useState } from "react"
 
 import { getAllCustomers } from "@/actions/customers"
 import { columns } from "@/components/data-tables/customers/columns"
@@ -21,11 +17,17 @@ import { CustomerTableToolbar } from "@/components/data-tables/customers/custome
 import { DataTable } from "@/components/ui/data-table"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options"
+import { usePersistedTableState } from "@/hooks/use-persisted-table-state"
+
+const CUSTOMER_TABLE_STORAGE_KEY = "customer-table-state"
 
 export const CustomerTable = () => {
-	const [sorting, setSorting] = useState<SortingState>([{ id: "kdi", desc: true }])
-	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+	const { sorting, setSorting, columnFilters, setColumnFilters, columnVisibility, setColumnVisibility } = usePersistedTableState({
+		storageKey: CUSTOMER_TABLE_STORAGE_KEY,
+		initialState: {
+			sorting: [{ id: "kdi", desc: true }]
+		}
+	})
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["customers"],
