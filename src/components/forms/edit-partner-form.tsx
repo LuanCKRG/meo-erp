@@ -97,7 +97,12 @@ const EditPartnerForm = ({ partner, className }: { partner: Partner; className?:
 
 		if (result.success) {
 			toast.success("Dados atualizados com sucesso!")
-			queryClient.invalidateQueries({ queryKey: ["partners"] })
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["partners"] }),
+				queryClient.invalidateQueries({ queryKey: ["simulations"] }),
+				queryClient.invalidateQueries({ queryKey: ["orders"] }),
+				queryClient.invalidateQueries({ queryKey: ["customers"] })
+			])
 		} else {
 			toast.error("Erro na atualização", {
 				description: result.message
