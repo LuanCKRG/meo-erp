@@ -3,7 +3,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { Building, Factory, FileText, Landmark, Mail, MapPin, Package, Phone, TrendingUp, User, Wallet } from "lucide-react"
+import { Building, Factory, FileText, Landmark, Mail, MapPin, Package, Phone, TrendingUp, User, Wallet, NotebookText } from "lucide-react"
 
 import { getSimulationById } from "@/actions/simulations"
 import { Separator } from "@/components/ui/separator"
@@ -152,8 +152,13 @@ export function ViewSimulationSheet({ simulationId, open, onOpenChange }: ViewSi
 									<DetailItem icon={TrendingUp} label="Potência do Sistema" value={`${simulation.system_power} kWp`} />
 									<DetailItem icon={TrendingUp} label="Consumo Atual" value={`${simulation.current_consumption} kWh`} />
 									<DetailItem icon={FileText} label="Concessionária" value={simulation.energy_provider} />
-									<DetailItem icon={FileText} label="Tipo de Estrutura" value={simulation.structure_type} />
+									<DetailItem icon={FileText} label="Tipo de Estrutura" value={simulation.structure_type_name} />
 									<DetailItem icon={FileText} label="Tensão da Conexão" value={simulation.connection_voltage} />
+									{simulation.notes && (
+										<div className="pt-2 col-span-1 sm:col-span-2">
+											<DetailItem icon={NotebookText} label="Observações" value={simulation.notes} />
+										</div>
+									)}
 								</div>
 							</div>
 
