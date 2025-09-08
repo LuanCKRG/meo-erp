@@ -24,10 +24,8 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
           cnpj,
           company_name,
           city,
-          state
-        ),
-        users (
-          name
+          state,
+          partners ( contact_name )
         ),
         sellers (
           name
@@ -47,6 +45,7 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
 				return null
 			}
 			const total_value = (order.equipment_value || 0) + (order.labor_value || 0) + (order.other_costs || 0)
+			const partner = Array.isArray(order.customers.partners) ? order.customers.partners[0] : order.customers.partners
 
 			return {
 				id: order.id,
@@ -56,7 +55,7 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
 				company_name: order.customers.company_name || "N/A",
 				city: order.customers.city || "N/A",
 				state: order.customers.state || "N/A",
-				partner_name: order.users?.name || "N/A",
+				partner_name: partner?.contact_name || "N/A",
 				internal_manager: order.sellers?.name || null,
 				system_power: order.system_power,
 				total_value,

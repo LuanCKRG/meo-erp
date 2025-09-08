@@ -24,10 +24,8 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
           cnpj,
           company_name,
           city,
-          state
-        ),
-        users (
-          name
+          state,
+          partners ( contact_name )
         ),
         sellers (
           name
@@ -47,6 +45,7 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
 				return null // Se não houver cliente, não podemos processar esta simulação
 			}
 			const total_value = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
+			const partner = Array.isArray(sim.customers.partners) ? sim.customers.partners[0] : sim.customers.partners
 
 			return {
 				id: sim.id,
@@ -56,7 +55,7 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
 				company_name: sim.customers.company_name || "N/A",
 				city: sim.customers.city || "N/A",
 				state: sim.customers.state || "N/A",
-				partner_name: sim.users?.name || "N/A",
+				partner_name: partner?.contact_name || "N/A",
 				internal_manager: sim.sellers?.name || null, // Adiciona o nome do gestor interno
 				system_power: sim.system_power,
 				total_value,

@@ -16,8 +16,10 @@ async function getAllCustomers(): Promise<CustomerWithRelations[]> {
         company_name,
         cnpj,
         partners (
-          contact_name,
-          sellers ( name )
+          contact_name
+        ),
+        sellers (
+            name
         )
       `
 			)
@@ -30,6 +32,7 @@ async function getAllCustomers(): Promise<CustomerWithRelations[]> {
 
 		const mappedData = data.map((customer) => {
 			const partner = Array.isArray(customer.partners) ? customer.partners[0] : customer.partners
+			const seller = Array.isArray(customer.sellers) ? customer.sellers[0] : customer.sellers
 
 			return {
 				id: customer.id,
@@ -37,7 +40,7 @@ async function getAllCustomers(): Promise<CustomerWithRelations[]> {
 				company_name: customer.company_name,
 				cnpj: customer.cnpj,
 				partner_name: partner?.contact_name || "N/A",
-				internal_manager_name: partner?.sellers?.name || "N/A"
+				internal_manager_name: seller?.name || "N/A"
 			}
 		})
 
