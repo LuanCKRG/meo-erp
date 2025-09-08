@@ -20,7 +20,6 @@ export const simulationStep1Schema = z.object({
 	energyProvider: z.enum(energyProviders as [string, ...string[]], "Selecione uma concessionária válida."),
 	structureType: z.string().min(1, "Selecione um tipo de estrutura."),
 	connectionVoltage: z.enum(connectionVoltageTypes as [string, ...string[]], "Selecione um tipo de conexão válido."),
-	notes: z.string().optional(),
 	kit_module: z.string().min(1, "Selecione um módulo."),
 	kit_inverter: z.string().min(1, "Selecione um inversor."),
 	kit_others: z.string().optional().or(z.literal(""))
@@ -34,7 +33,7 @@ export const simulationStep2Schema = z.object({
 	legalName: z.string().min(2, "Razão social é obrigatória."),
 	incorporationDate: z
 		.string()
-		.min(10, "Data de fundação é obrigatória.")
+		.min(1, "Data de fundação é obrigatória.")
 		.refine((val) => /^\d{2}\/\d{2}\/\d{4}$/.test(val), "Formato de data inválido. Use DD/MM/AAAA."),
 	annualRevenue: numericString(15).optional().or(z.literal("")),
 	contactName: z.string().min(3, "Nome do responsável é obrigatório."),
@@ -58,7 +57,8 @@ export const simulationStep3Schema = z.object({
 export const simulationStep4Schema = z.object({
 	equipmentValue: numericString(14, "Valor dos equipamentos é obrigatório."),
 	laborValue: numericString(14, "Valor da mão de obra é obrigatório."),
-	otherCosts: numericString(14).optional().or(z.literal(""))
+	otherCosts: numericString(14).optional().or(z.literal("")),
+	notes: z.string().optional()
 })
 
 // Tipos de dados para cada passo

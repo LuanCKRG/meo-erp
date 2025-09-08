@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { Textarea } from "@/components/ui/textarea"
 import { useSidebar } from "@/components/ui/sidebar"
 import { maskNumber } from "@/lib/masks"
 import { cn } from "@/lib/utils"
@@ -112,6 +113,23 @@ const SimulationStep4 = ({ onSubmit, onBack }: Step4Props) => {
 										<DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
 										<Input type="text" placeholder="0,00" className="pl-9" {...field} onChange={(e) => field.onChange(maskNumber(e.target.value, 14))} />
 									</div>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="notes"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Observações</FormLabel>
+								<FormControl>
+									<Textarea
+										placeholder="Adicione observações importantes sobre a simulação, como detalhes da instalação, condições especiais, etc."
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
