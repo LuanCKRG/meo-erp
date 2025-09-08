@@ -15,32 +15,68 @@ async function updateSeller(sellerId: string, data: EditSellerData): Promise<Act
 		}
 	}
 
+	const supabase = await createClient()
+	let originalSellerData: EditSellerData | null = null
+	let userIdToUpdate: string | null = null
+
 	try {
-		const supabase = await createClient()
+		// 1. Obter os dados originais e o user_id para poder reverter em caso de falha
+		const { data: currentSeller, error: fetchError } = await supabase
+			.from("sellers")
+			.select("name, cpf, phone, cep, street, number, complement, neighborhood, city, state, user_id")
+			.eq("id", sellerId)
+			.single()
 
-		// O user_id é o ID real na tabela de sellers
-		const { error, count } = await supabase.from("sellers").update(data, { count: "exact" }).eq("id", sellerId)
+		if (fetchError || !currentSeller) {
+			console.error("Erro ao buscar vendedor original:", fetchError)
+			return { success: false, message: "Não foi possível encontrar o vendedor para atualização." }
+		}
 
-		if (error) {
-			console.error("Erro ao atualizar vendedor (Supabase):", error)
+		// Armazena os dados para reversão e o user_id para a segunda atualização
+		originalSellerData = {
+			...currentSeller,
+			complement: currentSeller.complement ?? undefined
+		}
+		userIdToUpdate = currentSeller.user_id
 
-			if (error.code === "23505" && error.message.includes("sellers_cpf_key")) {
+		// 2. Tentar atualizar a tabela de vendedores
+		const { error: sellerError } = await supabase.from("sellers").update(data).eq("id", sellerId)
+
+		if (sellerError) {
+			console.error("Erro ao atualizar vendedor (Supabase):", sellerError)
+			if (sellerError.code === "23505" && sellerError.message.includes("sellers_cpf_key")) {
 				return {
 					success: false,
 					message: "O CPF fornecido já está em uso por outro vendedor."
 				}
 			}
-
-			return {
-				success: false,
-				message: `Erro ao atualizar os dados do vendedor. Por favor, tente novamente.`
-			}
+			throw sellerError
 		}
 
-		if (count === 0 || count === null) {
+		// 3. Tentar atualizar o nome na tabela de usuários usando o user_id
+		if (!userIdToUpdate) {
+			// Se por algum motivo o user_id não foi encontrado, lançamos um erro para reverter.
+			throw new Error("ID do usuário associado não encontrado. A atualização foi cancelada.")
+		}
+
+		const { error: userError } = await supabase.from("users").update({ name: data.name }).eq("id", userIdToUpdate)
+
+		if (userError) {
+			console.error("Erro ao atualizar nome na tabela de usuários (Supabase):", userError)
+			// Se a atualização do usuário falhar, reverta a atualização do vendedor
+			const { error: revertError } = await supabase.from("sellers").update(originalSellerData).eq("id", sellerId)
+
+			if (revertError) {
+				console.error("FALHA CRÍTICA: Erro ao reverter atualização do vendedor:", revertError)
+				return {
+					success: false,
+					message: "Ocorreu um erro crítico ao atualizar os dados e a reversão automática falhou. Por favor, contate o suporte imediatamente."
+				}
+			}
+
 			return {
 				success: false,
-				message: "Nenhum vendedor encontrado com o ID fornecido. A atualização falhou."
+				message: "A atualização do vendedor falhou porque não foi possível sincronizar o nome de usuário. Nenhuma alteração foi salva."
 			}
 		}
 
