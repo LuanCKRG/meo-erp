@@ -5,9 +5,10 @@ import { ArrowUpDown } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { OrderStatus, OrderWithRelations } from "@/lib/definitions/orders"
 import { formatCnpj } from "@/lib/formatters"
-import { cn, formatDate } from "@/lib/utils"
+import { cn, formatDate, getFirstAndLastName } from "@/lib/utils"
 import { OrdersTableActions } from "./orders-table-actions"
 
 const formatCurrency = (value: number | null | undefined): string => {
@@ -96,6 +97,19 @@ export const columns: ColumnDef<OrderWithRelations>[] = [
 	{
 		accessorKey: "partner_name",
 		header: "Parceiro",
+		cell: ({ row }) => {
+			const fullName = row.getValue("partner_name") as string
+			return (
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<div className="cursor-pointer">{getFirstAndLastName(fullName)}</div>
+					</TooltipTrigger>
+					<TooltipContent>
+						<p>{fullName}</p>
+					</TooltipContent>
+				</Tooltip>
+			)
+		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id))
 		}

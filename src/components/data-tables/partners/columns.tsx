@@ -7,9 +7,10 @@ import { PartnerActions } from "@/components/data-tables/partners/partner-table-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { PartnerStatus, PartnerWithSellerName } from "@/lib/definitions/partners"
 import { formatCnpj, formatPhone } from "@/lib/formatters"
-import { cn, formatDate } from "@/lib/utils"
+import { cn, formatDate, getFirstAndLastName } from "@/lib/utils"
 
 const statusVariant: { [key in PartnerStatus]: "default" | "secondary" | "destructive" } = {
 	approved: "default",
@@ -51,7 +52,19 @@ export const columns: ColumnDef<PartnerWithSellerName>[] = [
 				</Button>
 			)
 		},
-		cell: ({ row }) => <div className="font-medium text-left">{row.getValue("legal_business_name")}</div>
+		cell: ({ row }) => {
+			const fullName = row.getValue("legal_business_name") as string
+			return (
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<div className="font-medium text-left cursor-pointer">{getFirstAndLastName(fullName)}</div>
+					</TooltipTrigger>
+					<TooltipContent>
+						<p>{fullName}</p>
+					</TooltipContent>
+				</Tooltip>
+			)
+		}
 	},
 	{
 		accessorKey: "cnpj",
@@ -61,7 +74,19 @@ export const columns: ColumnDef<PartnerWithSellerName>[] = [
 	{
 		accessorKey: "contact_name",
 		header: "Responsável",
-		cell: ({ row }) => <div className="text-left">{row.getValue("contact_name")}</div>
+		cell: ({ row }) => {
+			const fullName = row.getValue("contact_name") as string
+			return (
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<div className="text-left cursor-pointer">{getFirstAndLastName(fullName)}</div>
+					</TooltipTrigger>
+					<TooltipContent>
+						<p>{fullName}</p>
+					</TooltipContent>
+				</Tooltip>
+			)
+		}
 	},
 	{
 		accessorKey: "contact_mobile",

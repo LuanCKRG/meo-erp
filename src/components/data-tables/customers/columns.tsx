@@ -4,8 +4,10 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { CustomerWithRelations } from "@/lib/definitions/customers"
 import { formatCnpj } from "@/lib/formatters"
+import { getFirstAndLastName } from "@/lib/utils"
 import { CustomerTableActions } from "./customer-table-actions"
 
 export const columns: ColumnDef<CustomerWithRelations>[] = [
@@ -41,7 +43,19 @@ export const columns: ColumnDef<CustomerWithRelations>[] = [
 				<ArrowUpDown className="ml-2 h-4 w-4" />
 			</Button>
 		),
-		cell: ({ row }) => <div className="text-left">{row.getValue("partner_name")}</div>
+		cell: ({ row }) => {
+			const fullName = row.getValue("partner_name") as string
+			return (
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<div className="text-left cursor-pointer">{getFirstAndLastName(fullName)}</div>
+					</TooltipTrigger>
+					<TooltipContent>
+						<p>{fullName}</p>
+					</TooltipContent>
+				</Tooltip>
+			)
+		}
 	},
 	{
 		accessorKey: "internal_manager_name",
