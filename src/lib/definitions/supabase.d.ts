@@ -93,6 +93,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "customers_internal_manager_fkey"
+            columns: ["internal_manager"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "customers_partner_id_fkey"
             columns: ["partner_id"]
             isOneToOne: false
@@ -200,9 +207,10 @@ export type Database = {
           kit_module_id: number
           kit_others: number | null
           labor_value: number
+          notes: string | null
           other_costs: number | null
           seller_id: string | null
-          status: Database["public"]["Enums"]["enum_simulation_status"]
+          status: Database["public"]["Enums"]["enum_order_status"]
           structure_type: string
           system_power: number
           updated_at: string
@@ -221,9 +229,10 @@ export type Database = {
           kit_module_id: number
           kit_others?: number | null
           labor_value: number
+          notes?: string | null
           other_costs?: number | null
           seller_id?: string | null
-          status?: Database["public"]["Enums"]["enum_simulation_status"]
+          status?: Database["public"]["Enums"]["enum_order_status"]
           structure_type: string
           system_power: number
           updated_at?: string
@@ -242,9 +251,10 @@ export type Database = {
           kit_module_id?: number
           kit_others?: number | null
           labor_value?: number
+          notes?: string | null
           other_costs?: number | null
           seller_id?: string | null
-          status?: Database["public"]["Enums"]["enum_simulation_status"]
+          status?: Database["public"]["Enums"]["enum_order_status"]
           structure_type?: string
           system_power?: number
           updated_at?: string
@@ -499,6 +509,7 @@ export type Database = {
           kit_module_id: number
           kit_others: number | null
           labor_value: number
+          notes: string | null
           other_costs: number | null
           seller_id: string | null
           status: Database["public"]["Enums"]["enum_simulation_status"]
@@ -520,6 +531,7 @@ export type Database = {
           kit_module_id: number
           kit_others?: number | null
           labor_value: number
+          notes?: string | null
           other_costs?: number | null
           seller_id?: string | null
           status?: Database["public"]["Enums"]["enum_simulation_status"]
@@ -541,6 +553,7 @@ export type Database = {
           kit_module_id?: number
           kit_others?: number | null
           labor_value?: number
+          notes?: string | null
           other_costs?: number | null
           seller_id?: string | null
           status?: Database["public"]["Enums"]["enum_simulation_status"]
@@ -589,6 +602,13 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_structure_type_fkey"
+            columns: ["structure_type"]
+            isOneToOne: false
+            referencedRelation: "structure_types"
             referencedColumns: ["id"]
           },
         ]
@@ -689,6 +709,18 @@ export type Database = {
       }
     }
     Enums: {
+      enum_order_status:
+        | "analysis_pending"
+        | "pre_analysis"
+        | "confirmation_pending"
+        | "credit_analysis"
+        | "documents_pending"
+        | "final_analysis"
+        | "approved"
+        | "rejected"
+        | "contract_signing"
+        | "completed"
+        | "canceled"
       enum_partners_status: "pending" | "approved" | "rejected"
       enum_simulation_status:
         | "initial_contact"
@@ -824,6 +856,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      enum_order_status: [
+        "analysis_pending",
+        "pre_analysis",
+        "confirmation_pending",
+        "credit_analysis",
+        "documents_pending",
+        "final_analysis",
+        "approved",
+        "rejected",
+        "contract_signing",
+        "completed",
+        "canceled",
+      ],
       enum_partners_status: ["pending", "approved", "rejected"],
       enum_simulation_status: [
         "initial_contact",
