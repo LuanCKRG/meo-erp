@@ -8,6 +8,7 @@ import type { ActionResponse } from "@/types/action-response"
 // Este tipo combina os dados da simulação, do cliente e dos equipamentos do kit.
 export type FullSimulationDetails = Simulation & {
 	customer: Customer
+	structure_type_name: string
 	kit_module_brand_id: string | null
 	kit_inverter_brand_id: string | null
 	kit_others_brand_id: string | null
@@ -21,13 +22,14 @@ async function getSimulationById(simulationId: string): Promise<ActionResponse<F
 	try {
 		const supabase = await createClient()
 
-		// 1. Busca a simulação e o cliente
+		// 1. Busca a simulação, o cliente e o nome do tipo de estrutura
 		const { data: simulation, error } = await supabase
 			.from("simulations")
 			.select(
 				`
         *,
-        customers(*)
+        customers(*),
+        structure_types ( name )
       `
 			)
 			.eq("id", simulationId)
@@ -40,6 +42,9 @@ async function getSimulationById(simulationId: string): Promise<ActionResponse<F
 
 		if (!simulation.customers) {
 			return { success: false, message: "Dados do cliente associado não encontrados." }
+		}
+		if (!simulation.structure_types) {
+			return { success: false, message: "Dados do tipo de estrutura associado não encontrados. Inconsistência de dados." }
 		}
 
 		// 2. Busca os brand_ids dos equipamentos do kit em paralelo
@@ -55,6 +60,7 @@ async function getSimulationById(simulationId: string): Promise<ActionResponse<F
 		const result: FullSimulationDetails = {
 			...simulation,
 			customer: simulation.customers,
+			structure_type_name: simulation.structure_types.name,
 			kit_module_brand_id: moduleRes.data?.brand_id || null,
 			kit_inverter_brand_id: inverterRes.data?.brand_id || null,
 			kit_others_brand_id: othersRes.data?.brand_id || null
