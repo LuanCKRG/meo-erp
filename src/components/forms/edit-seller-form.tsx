@@ -163,7 +163,7 @@ const EditSellerForm = ({ seller, onFinished, className }: EditSellerFormProps) 
 											<FormItem>
 												<FormLabel>Nome Completo</FormLabel>
 												<FormControl>
-													<Input placeholder="João da Silva" {...field} disabled />
+													<Input placeholder="João da Silva" {...field} />
 												</FormControl>
 												<FormMessage />
 											</FormItem>

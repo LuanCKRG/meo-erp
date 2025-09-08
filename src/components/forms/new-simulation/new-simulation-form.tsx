@@ -90,6 +90,7 @@ export function NewSimulationForm({
 			energyProvider: "",
 			structureType: "",
 			connectionVoltage: "",
+			notes: "",
 			kit_module: "",
 			kit_inverter: "",
 			kit_others: "",

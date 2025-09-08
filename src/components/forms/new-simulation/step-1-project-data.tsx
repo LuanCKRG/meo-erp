@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
 import { connectionVoltageTypes, energyProviders, INVERTER_TYPE_ID, MODULE_TYPE_ID, OTHERS_TYPE_ID } from "@/lib/constants"
 import { maskNumber } from "@/lib/masks"
 import { DynamicEquipmentSelect } from "./dynamic-equipment-selector"
@@ -144,11 +145,28 @@ const SimulationStep1 = ({ onNext }: Step1Props) => {
 					)}
 				/>
 			</div>
+
+			<FormField
+				control={form.control}
+				name="notes"
+				render={({ field }) => (
+					<FormItem>
+						<FormLabel>Observações</FormLabel>
+						<FormControl>
+							<Textarea placeholder="Adicione observações importantes sobre a simulação." {...field} />
+						</FormControl>
+						<FormMessage />
+					</FormItem>
+				)}
+			/>
+
 			<Separator className="my-8" />
+
 			<div className="space-y-2">
 				<h3 className="text-lg font-medium">Kit de Equipamentos</h3>
 				<p className="text-sm text-muted-foreground">Selecione os equipamentos para a simulação.</p>
 			</div>
+
 			<div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
 				<Card>
 					<CardHeader>

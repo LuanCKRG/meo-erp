@@ -1,7 +1,8 @@
+// edit-simulation-form.tsx
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
 import * as React from "react"
@@ -83,6 +84,7 @@ function EditSimulationContent({
 	initialData: ExtendedSimulationData
 }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
+	const queryClient = useQueryClient()
 
 	const form = useForm<ExtendedSimulationData>({
 		resolver: zodResolver(newSimulationSchema),
@@ -153,6 +155,7 @@ function EditSimulationContent({
 			loading: "Atualizando simulação...",
 			success: (res) => {
 				if (res.success) {
+					queryClient.invalidateQueries({ queryKey: ["simulation-details", simulationId] })
 					onFinished()
 					return "Simulação atualizada com sucesso!"
 				}
@@ -221,12 +224,13 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 
 	const { customer, ...simulation } = queryData.data
 
-	const initialData = {
+	const initialData: ExtendedSimulationData = {
 		systemPower: maskNumber(simulation.system_power?.toString() || "0", 9),
 		currentConsumption: maskNumber(simulation.current_consumption?.toString() || "0", 9),
 		energyProvider: simulation.energy_provider,
 		structureType: simulation.structure_type,
 		connectionVoltage: simulation.connection_voltage,
+		notes: simulation.notes || "",
 		kit_module: simulation.kit_module_id?.toString() || "",
 		kit_inverter: simulation.kit_inverter_id?.toString() || "",
 		kit_others: simulation.kit_others?.toString() || "",
