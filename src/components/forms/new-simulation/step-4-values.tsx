@@ -2,7 +2,6 @@
 "use client"
 
 import { ArrowLeft, DollarSign, Send } from "lucide-react"
-import { useEffect, useState } from "react"
 import { useFormContext } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -48,14 +47,12 @@ const SimulationStep4 = ({ onSubmit, onBack }: Step4Props) => {
 	const form = useFormContext()
 	const { state } = useSidebar()
 
+	// Observe os valores
 	const watchedStringValues = form.watch(["equipmentValue", "laborValue", "otherCosts"])
-	const [totalInvestment, setTotalInvestment] = useState(0)
 
-	useEffect(() => {
-		const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
-		const total = equipment + labor + others
-		setTotalInvestment(Number.isNaN(total) ? 0 : total)
-	}, [watchedStringValues])
+	// Calcule o valor total diretamente na renderização, em vez de usar useEffect/useState
+	const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
+	const totalInvestment = (equipment || 0) + (labor || 0) + (others || 0)
 
 	const calculateInstallment = (term: number) => {
 		if (totalInvestment === 0) return 0
