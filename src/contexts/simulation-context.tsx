@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, type ReactNode } from "react"
 
 interface SimulationContextType {
 	partnerId: string | null
@@ -11,6 +11,8 @@ interface SimulationContextType {
 	setPartnerName: (name: string | null) => void
 	sellerName: string | null
 	setSellerName: (name: string | null) => void
+	isCustomerDataLocked: boolean
+	setIsCustomerDataLocked: (locked: boolean) => void
 	clearContext: () => void
 }
 
@@ -21,16 +23,14 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 	const [sellerId, setSellerId] = useState<string | null>(null)
 	const [partnerName, setPartnerName] = useState<string | null>(null)
 	const [sellerName, setSellerName] = useState<string | null>(null)
-
-	useEffect(() => {
-		console.log(sellerId)
-	}, [sellerId])
+	const [isCustomerDataLocked, setIsCustomerDataLocked] = useState<boolean>(false)
 
 	const clearContext = () => {
 		setPartnerId(null)
 		setSellerId(null)
 		setPartnerName(null)
 		setSellerName(null)
+		setIsCustomerDataLocked(false)
 	}
 
 	const value = {
@@ -42,6 +42,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
 		setPartnerName,
 		sellerName,
 		setSellerName,
+		isCustomerDataLocked,
+		setIsCustomerDataLocked,
 		clearContext
 	}
 
