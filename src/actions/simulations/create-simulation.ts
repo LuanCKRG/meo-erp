@@ -2,7 +2,7 @@
 
 import { PostgrestError } from "@supabase/supabase-js"
 
-import { createCustomer, deleteCustomer } from "@/actions/customers"
+import { createCustomer, deleteCustomer, getCustomerByCnpj } from "@/actions/customers"
 import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { CustomerInsert } from "@/lib/definitions/customers"
 import type { SimulationInsert } from "@/lib/definitions/simulations"
@@ -36,39 +36,62 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 		return { success: false, message: "ID do Parceiro não fornecido. A simulação não pode ser criada." }
 	}
 
-	let newlyCreatedCustomerId: string | null = null
+	let customerId: string | null = null
+	let wasCustomerNewlyCreated = false
 
 	try {
-		const customerData: CustomerInsert = {
-			cnpj: data.cnpj.replace(/\D/g, ""),
-			company_name: data.legalName,
-			incorporation_date: data.incorporationDate.split("/").reverse().join("-"),
-			annual_revenue: parseCurrencyStringToNumber(data.annualRevenue),
-			contact_name: data.contactName,
-			contact_phone: data.contactPhone.replace(/\D/g, ""),
-			contact_email: data.contactEmail,
-			postal_code: data.cep.replace(/\D/g, ""),
-			street: data.street,
-			number: data.number,
-			complement: data.complement,
-			neighborhood: data.neighborhood,
-			city: data.city,
-			state: data.state,
-			created_by_user_id: user.id,
-			partner_id: context.partnerId,
-			internal_manager: context.sellerId
+		// Passo 1: Verificar se o cliente já existe
+		const cleanedCnpj = data.cnpj.replace(/\D/g, "")
+		const existingCustomerResponse = await getCustomerByCnpj(cleanedCnpj)
+
+		if (!existingCustomerResponse.success) {
+			// Se a própria busca falhou, retorna o erro.
+			return { success: false, message: existingCustomerResponse.message }
 		}
 
-		const customerResponse = await createCustomer(customerData)
+		if (existingCustomerResponse.data) {
+			// Cliente já existe, usamos o ID dele.
+			customerId = existingCustomerResponse.data.id
+		} else {
+			// Cliente não existe, criamos um novo.
+			const customerData: CustomerInsert = {
+				cnpj: cleanedCnpj,
+				company_name: data.legalName,
+				incorporation_date: data.incorporationDate.split("/").reverse().join("-"),
+				annual_revenue: parseCurrencyStringToNumber(data.annualRevenue),
+				contact_name: data.contactName,
+				contact_phone: data.contactPhone.replace(/\D/g, ""),
+				contact_email: data.contactEmail,
+				postal_code: data.cep.replace(/\D/g, ""),
+				street: data.street,
+				number: data.number,
+				complement: data.complement,
+				neighborhood: data.neighborhood,
+				city: data.city,
+				state: data.state,
+				created_by_user_id: user.id,
+				partner_id: context.partnerId,
+				internal_manager: context.sellerId
+			}
 
-		if (!customerResponse.success || !customerResponse.data) {
-			return { success: false, message: `Erro ao criar cliente: ${customerResponse.message}` }
+			const customerResponse = await createCustomer(customerData)
+
+			if (!customerResponse.success || !customerResponse.data) {
+				return { success: false, message: `Erro ao criar cliente: ${customerResponse.message}` }
+			}
+
+			customerId = customerResponse.data.id
+			wasCustomerNewlyCreated = true
 		}
 
-		newlyCreatedCustomerId = customerResponse.data.id
+		if (!customerId) {
+			// Verificação de segurança, embora improvável de acontecer.
+			throw new Error("Não foi possível obter um ID de cliente para a simulação.")
+		}
 
+		// Passo 2: Criar a simulação
 		const simulationData: SimulationInsert = {
-			customer_id: newlyCreatedCustomerId,
+			customer_id: customerId,
 			system_power: parseCurrencyStringToNumber(data.systemPower),
 			current_consumption: parseCurrencyStringToNumber(data.currentConsumption),
 			energy_provider: data.energyProvider,
@@ -101,8 +124,9 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 	} catch (error) {
 		console.error("Erro inesperado na action 'createSimulation':", error)
 
-		if (newlyCreatedCustomerId) {
-			await deleteCustomer(newlyCreatedCustomerId)
+		// Ação de compensação: deleta o cliente apenas se ele foi criado nesta transação.
+		if (wasCustomerNewlyCreated && customerId) {
+			await deleteCustomer(customerId)
 		}
 
 		if (error instanceof PostgrestError) {
