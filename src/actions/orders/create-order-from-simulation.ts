@@ -38,9 +38,9 @@ async function createOrderFromSimulation(simulationId: string): Promise<ActionRe
 			labor_value: simulation.labor_value,
 			other_costs: simulation.other_costs,
 			seller_id: simulation.seller_id,
-			status: simulation.status,
 			structure_type: simulation.structure_type,
-			system_power: simulation.system_power
+			system_power: simulation.system_power,
+			notes: simulation.notes // Copiando as notas da simulação para o pedido
 		}
 
 		// 3. Inserir na tabela 'orders'

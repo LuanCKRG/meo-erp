@@ -55,7 +55,8 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 			city: data.city,
 			state: data.state,
 			created_by_user_id: user.id,
-			partner_id: context.partnerId
+			partner_id: context.partnerId,
+			internal_manager: context.sellerId
 		}
 
 		const customerResponse = await createCustomer(customerData)
@@ -80,7 +81,8 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 			labor_value: parseCurrencyStringToNumber(data.laborValue),
 			other_costs: parseCurrencyStringToNumber(data.otherCosts),
 			created_by_user_id: user.id,
-			seller_id: context.sellerId
+			seller_id: context.sellerId,
+			notes: data.notes
 		}
 
 		const { data: simulationResult, error: simulationError } = await supabase.from("simulations").insert(simulationData).select("kdi").single()

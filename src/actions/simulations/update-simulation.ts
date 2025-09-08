@@ -63,7 +63,8 @@ async function updateSimulation({ simulationId, customerId, data }: UpdateSimula
 			kit_others: data.kit_others ? Number(data.kit_others) : null,
 			equipment_value: parseCurrencyStringToNumber(data.equipmentValue),
 			labor_value: parseCurrencyStringToNumber(data.laborValue),
-			other_costs: parseCurrencyStringToNumber(data.otherCosts)
+			other_costs: parseCurrencyStringToNumber(data.otherCosts),
+			notes: data.notes
 		}
 
 		const { error: simulationError } = await supabase.from("simulations").update(simulationData).eq("id", simulationId)
