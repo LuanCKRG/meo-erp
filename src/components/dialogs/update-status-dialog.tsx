@@ -1,12 +1,13 @@
 "use client"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { Check, ChevronsUpDown, Loader2, RefreshCw } from "lucide-react"
+import { Check, Loader2 } from "lucide-react"
 import { useTransition } from "react"
 import { toast } from "sonner"
 
 import { updateSimulationStatus } from "@/actions/simulations"
-import { DropdownMenuItem, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import type { SimulationStatus, SimulationWithRelations } from "@/lib/definitions/simulations"
 import { cn } from "@/lib/utils"
 
@@ -18,12 +19,19 @@ const availableStatuses: { value: SimulationStatus; label: string }[] = [
 	{ value: "lost", label: "Perdido" }
 ]
 
-export const UpdateStatusDialog = ({ simulation }: { simulation: SimulationWithRelations }) => {
+interface UpdateStatusDialogProps {
+	simulation: SimulationWithRelations
+	open: boolean
+	onOpenChange: (open: boolean) => void
+}
+
+export const UpdateStatusDialog = ({ simulation, open, onOpenChange }: UpdateStatusDialogProps) => {
 	const [isPending, startTransition] = useTransition()
 	const queryClient = useQueryClient()
 
 	const handleStatusChange = (newStatus: SimulationStatus) => {
 		if (newStatus === simulation.status) {
+			onOpenChange(false)
 			return
 		}
 
@@ -33,6 +41,7 @@ export const UpdateStatusDialog = ({ simulation }: { simulation: SimulationWithR
 				success: (res) => {
 					if (res.success) {
 						queryClient.invalidateQueries({ queryKey: ["simulations"] })
+						onOpenChange(false)
 						return res.message
 					}
 					throw new Error(res.message)
@@ -45,21 +54,31 @@ export const UpdateStatusDialog = ({ simulation }: { simulation: SimulationWithR
 	}
 
 	return (
-		<DropdownMenuSub>
-			<DropdownMenuSubTrigger disabled={isPending}>
-				{isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-				Alterar Status
-			</DropdownMenuSubTrigger>
-			<DropdownMenuPortal>
-				<DropdownMenuSubContent>
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Alterar Status da Simulação</DialogTitle>
+					<DialogDescription>Selecione o novo status para a simulação #{simulation.kdi}.</DialogDescription>
+				</DialogHeader>
+				<div className="grid grid-cols-1 gap-2 py-4 sm:grid-cols-2">
 					{availableStatuses.map((status) => (
-						<DropdownMenuItem key={status.value} onClick={() => handleStatusChange(status.value)}>
-							<Check className={cn("mr-2 h-4 w-4", simulation.status === status.value ? "opacity-100" : "opacity-0")} />
+						<Button
+							key={status.value}
+							variant="outline"
+							className={cn("justify-start", simulation.status === status.value && "ring-2 ring-primary")}
+							onClick={() => handleStatusChange(status.value)}
+							disabled={isPending}
+						>
+							{isPending ? (
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							) : (
+								<Check className={cn("mr-2 h-4 w-4", simulation.status === status.value ? "opacity-100" : "opacity-0")} />
+							)}
 							{status.label}
-						</DropdownMenuItem>
+						</Button>
 					))}
-				</DropdownMenuSubContent>
-			</DropdownMenuPortal>
-		</DropdownMenuSub>
+				</div>
+			</DialogContent>
+		</Dialog>
 	)
 }
