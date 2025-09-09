@@ -20,13 +20,13 @@ import { SimulationStep3 } from "./new-simulation/step-3-installation"
 import { SimulationStep4 } from "./new-simulation/step-4-values"
 import { SimulationStep5 } from "./new-simulation/step-5-documents"
 import {
-	type SimulationData,
-	newSimulationSchema,
+	type EditSimulationData,
+	editSimulationSchema,
+	editSimulationStep5Schema,
 	simulationStep1Schema,
 	simulationStep2Schema,
 	simulationStep3Schema,
-	simulationStep4Schema,
-	simulationStep5Schema
+	simulationStep4Schema
 } from "./new-simulation/validation/new-simulation"
 
 const STEPS_CONFIG = [
@@ -34,10 +34,10 @@ const STEPS_CONFIG = [
 	{ id: 2, name: "Dados do Cliente", schema: simulationStep2Schema },
 	{ id: 3, name: "Instalação", schema: simulationStep3Schema },
 	{ id: 4, name: "Valores", schema: simulationStep4Schema },
-	{ id: 5, name: "Documentos", schema: simulationStep5Schema }
+	{ id: 5, name: "Documentos", schema: editSimulationStep5Schema }
 ]
 
-type ExtendedSimulationData = SimulationData & {
+type ExtendedSimulationData = EditSimulationData & {
 	kit_module_brand_id?: string | null
 	kit_inverter_brand_id?: string | null
 	kit_others_brand_id?: string | null
@@ -91,7 +91,7 @@ function EditSimulationContent({
 	const queryClient = useQueryClient()
 
 	const form = useForm<ExtendedSimulationData>({
-		resolver: zodResolver(newSimulationSchema),
+		resolver: zodResolver(editSimulationSchema),
 		defaultValues: initialData,
 		mode: "onChange"
 	})
@@ -142,10 +142,10 @@ function EditSimulationContent({
 		exit: { opacity: 0, x: 20 }
 	}
 
-	const handleSubmitEntireForm = (data: ExtendedSimulationData) => {
+	const handleSubmitEntireForm = (data: EditSimulationData) => {
 		const finalData = { ...initialData, ...data }
 
-		const result = newSimulationSchema.safeParse(finalData)
+		const result = editSimulationSchema.safeParse(finalData)
 
 		if (!result.success) {
 			toast.error("Erro de validação final", {
@@ -259,14 +259,14 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 		equipmentValue: maskNumber(simulation.equipment_value?.toString() || "0", 14),
 		laborValue: maskNumber(simulation.labor_value?.toString() || "0", 14),
 		otherCosts: maskNumber(simulation.other_costs?.toString() || "0", 14),
-		rgCnhSocios: new FileList(),
-		balancoDRE2022: new FileList(),
-		balancoDRE2023: new FileList(),
-		balancoDRE2024: new FileList(),
-		relacaoFaturamento: new FileList(),
-		comprovanteEndereco: new FileList(),
-		irpfSocios: new FileList(),
-		fotosOperacao: new FileList()
+		rgCnhSocios: undefined,
+		balancoDRE2022: undefined,
+		balancoDRE2023: undefined,
+		balancoDRE2024: undefined,
+		relacaoFaturamento: undefined,
+		comprovanteEndereco: undefined,
+		irpfSocios: undefined,
+		fotosOperacao: undefined
 	}
 
 	return (
