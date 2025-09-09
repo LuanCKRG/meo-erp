@@ -1,4 +1,3 @@
-// src/components/ui/file-input.tsx
 "use client"
 
 import { Upload, X, File as FileIcon } from "lucide-react"
