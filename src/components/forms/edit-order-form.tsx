@@ -1,3 +1,4 @@
+// src/components/forms/edit-order-form.tsx
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -16,20 +17,23 @@ import { SimulationStep1 } from "./new-simulation/step-1-project-data"
 import { SimulationStep2 } from "./new-simulation/step-2-client-data"
 import { SimulationStep3 } from "./new-simulation/step-3-installation"
 import { SimulationStep4 } from "./new-simulation/step-4-values"
+import { SimulationStep5 } from "./new-simulation/step-5-documents"
 import {
 	type SimulationData,
 	newSimulationSchema,
 	simulationStep1Schema,
 	simulationStep2Schema,
 	simulationStep3Schema,
-	simulationStep4Schema
+	simulationStep4Schema,
+	simulationStep5Schema
 } from "./new-simulation/validation/new-simulation"
 
 const STEPS_CONFIG = [
 	{ id: 1, name: "Dados do Projeto", schema: simulationStep1Schema },
 	{ id: 2, name: "Dados do Cliente", schema: simulationStep2Schema },
 	{ id: 3, name: "Instalação", schema: simulationStep3Schema },
-	{ id: 4, name: "Valores", schema: simulationStep4Schema }
+	{ id: 4, name: "Valores", schema: simulationStep4Schema },
+	{ id: 5, name: "Documentos", schema: simulationStep5Schema }
 ]
 
 type ExtendedOrderData = SimulationData & {
@@ -122,7 +126,7 @@ function EditOrderContent({
 	const nextStep = async () => {
 		const isValid = await validateCurrentStep(currentStep)
 		if (isValid) {
-			setCurrentStep((prev) => Math.min(prev + 1, 4))
+			setCurrentStep((prev) => Math.min(prev + 1, STEPS_CONFIG.length))
 		}
 	}
 
@@ -184,7 +188,8 @@ function EditOrderContent({
 							{currentStep === 1 && <SimulationStep1 onNext={nextStep} />}
 							{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
 							{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
-							{currentStep === 4 && <SimulationStep4 onSubmit={form.handleSubmit(handleSubmitEntireForm)} onBack={backStep} />}
+							{currentStep === 4 && <SimulationStep4 onNext={nextStep} onBack={backStep} />}
+							{currentStep === 5 && <SimulationStep5 onSubmit={form.handleSubmit(handleSubmitEntireForm)} onBack={backStep} />}
 						</motion.div>
 					</AnimatePresence>
 				</CardContent>
@@ -221,12 +226,13 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 
 	const { customer, ...order } = queryData.data
 
-	const initialData = {
+	const initialData: ExtendedOrderData = {
 		systemPower: maskNumber(order.system_power?.toString() || "0", 9),
 		currentConsumption: maskNumber(order.current_consumption?.toString() || "0", 9),
 		energyProvider: order.energy_provider,
 		structureType: order.structure_type,
 		connectionVoltage: order.connection_voltage,
+		notes: order.notes || "",
 		kit_module: order.kit_module_id?.toString() || "",
 		kit_inverter: order.kit_inverter_id?.toString() || "",
 		kit_others: order.kit_others?.toString() || "",
@@ -249,7 +255,15 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		state: customer.state,
 		equipmentValue: maskNumber(order.equipment_value?.toString() || "0", 14),
 		laborValue: maskNumber(order.labor_value?.toString() || "0", 14),
-		otherCosts: maskNumber(order.other_costs?.toString() || "0", 14)
+		otherCosts: maskNumber(order.other_costs?.toString() || "0", 14),
+		rgCnhSocios: new FileList(),
+		balancoDRE2022: new FileList(),
+		balancoDRE2023: new FileList(),
+		balancoDRE2024: new FileList(),
+		relacaoFaturamento: new FileList(),
+		comprovanteEndereco: new FileList(),
+		irpfSocios: new FileList(),
+		fotosOperacao: new FileList()
 	}
 
 	return <EditOrderContent orderId={orderId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
