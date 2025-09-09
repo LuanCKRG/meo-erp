@@ -3,12 +3,12 @@
 import { PostgrestError } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
 
-import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { Customer } from "@/lib/definitions/customers"
 import type { Simulation } from "@/lib/definitions/simulations"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
 import { uploadSimulationFiles } from "."
+import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 
 const parseCurrencyStringToNumber = (value: string | undefined | null): number => {
 	if (!value) return 0
@@ -20,7 +20,7 @@ const parseCurrencyStringToNumber = (value: string | undefined | null): number =
 interface UpdateSimulationParams {
 	simulationId: string
 	customerId: string
-	data: SimulationData
+	data: EditSimulationData
 }
 
 async function updateSimulation({ simulationId, customerId, data }: UpdateSimulationParams): Promise<ActionResponse<null>> {

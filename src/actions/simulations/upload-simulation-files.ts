@@ -1,14 +1,14 @@
 // src/actions/simulations/upload-simulation-files.ts
 "use server"
 
-import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
+import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
 
 const BUCKET_NAME = "docs_simulation"
 
 type DocumentField = keyof Pick<
-	SimulationData,
+	EditSimulationData,
 	"rgCnhSocios" | "balancoDRE2022" | "balancoDRE2023" | "balancoDRE2024" | "relacaoFaturamento" | "comprovanteEndereco" | "irpfSocios" | "fotosOperacao"
 >
 
@@ -23,7 +23,7 @@ const documentFields: DocumentField[] = [
 	"fotosOperacao"
 ]
 
-async function uploadSimulationFiles(simulationId: string, data: SimulationData): Promise<ActionResponse<{ paths: string[] }>> {
+async function uploadSimulationFiles(simulationId: string, data: EditSimulationData): Promise<ActionResponse<{ paths: string[] }>> {
 	const supabase = createAdminClient()
 	const uploadedPaths: string[] = []
 

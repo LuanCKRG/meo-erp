@@ -6,8 +6,10 @@ import { revalidatePath } from "next/cache"
 import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { Customer } from "@/lib/definitions/customers"
 import type { Order } from "@/lib/definitions/orders"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
+import { uploadOrderFiles } from "."
+import type { EditSimulationData } from "@/lib/validations/new-simulation/new-simulation"
 
 const parseCurrencyStringToNumber = (value: string | undefined | null): number => {
 	if (!value) return 0
@@ -19,11 +21,11 @@ const parseCurrencyStringToNumber = (value: string | undefined | null): number =
 interface UpdateOrderParams {
 	orderId: string
 	customerId: string
-	data: SimulationData // Reutilizando a validação da simulação
+	data: EditSimulationData // Reutilizando a validação da simulação
 }
 
 async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Promise<ActionResponse<null>> {
-	const supabase = await createClient()
+	const supabase = createAdminClient()
 
 	try {
 		// 1. Atualizar os dados do cliente
@@ -70,6 +72,12 @@ async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Pr
 		if (orderError) {
 			console.error("Erro ao atualizar pedido:", orderError)
 			throw orderError
+		}
+
+		// 3. Fazer upload de novos arquivos, se houver
+		const uploadResponse = await uploadOrderFiles(orderId, data)
+		if (!uploadResponse.success) {
+			console.warn("O pedido foi atualizado, mas houve um erro no upload de novos arquivos:", uploadResponse.message)
 		}
 
 		revalidatePath("/dashboard/orders")
