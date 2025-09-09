@@ -6,8 +6,9 @@ import { revalidatePath } from "next/cache"
 import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { Customer } from "@/lib/definitions/customers"
 import type { Simulation } from "@/lib/definitions/simulations"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
+import { uploadSimulationFiles } from "."
 
 const parseCurrencyStringToNumber = (value: string | undefined | null): number => {
 	if (!value) return 0
@@ -23,7 +24,7 @@ interface UpdateSimulationParams {
 }
 
 async function updateSimulation({ simulationId, customerId, data }: UpdateSimulationParams): Promise<ActionResponse<null>> {
-	const supabase = await createClient()
+	const supabaseAdmin = createAdminClient()
 
 	try {
 		// 1. Atualizar os dados do cliente
@@ -44,7 +45,7 @@ async function updateSimulation({ simulationId, customerId, data }: UpdateSimula
 			// Não atualizamos o CNPJ, pois é um identificador.
 		}
 
-		const { error: customerError } = await supabase.from("customers").update(customerData).eq("id", customerId)
+		const { error: customerError } = await supabaseAdmin.from("customers").update(customerData).eq("id", customerId)
 
 		if (customerError) {
 			console.error("Erro ao atualizar cliente:", customerError)
@@ -67,11 +68,18 @@ async function updateSimulation({ simulationId, customerId, data }: UpdateSimula
 			notes: data.notes
 		}
 
-		const { error: simulationError } = await supabase.from("simulations").update(simulationData).eq("id", simulationId)
+		const { error: simulationError } = await supabaseAdmin.from("simulations").update(simulationData).eq("id", simulationId)
 
 		if (simulationError) {
 			console.error("Erro ao atualizar simulação:", simulationError)
 			throw simulationError
+		}
+
+		// 3. Fazer upload de novos arquivos, se houver
+		const uploadResponse = await uploadSimulationFiles(simulationId, data)
+		if (!uploadResponse.success) {
+			// Não consideramos um erro crítico, mas registramos
+			console.warn("A simulação foi atualizada, mas houve um erro no upload de novos arquivos:", uploadResponse.message)
 		}
 
 		revalidatePath("/dashboard/simulations")
