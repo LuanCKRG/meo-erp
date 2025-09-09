@@ -1,19 +1,32 @@
+// src/components/data-tables/simulations/simulations-table-actions.tsx
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Edit, Eye, FileDown, Loader2, Send, Trash2, RefreshCw } from "lucide-react"
+import { Check, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Send, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { hasPermission } from "@/actions/auth"
 import { createOrderFromSimulation } from "@/actions/orders"
-import { deleteSimulation, generateSimulationPdf } from "@/actions/simulations"
+import { deleteSimulation, downloadSimulationFiles, generateSimulationPdf, listSimulationFiles } from "@/actions/simulations"
+import { documentFields } from "@/components/forms/new-simulation/step-5-documents"
 import { EditSimulationDialog } from "@/components/dialogs/edit-simulation-dialog"
 import { UpdateStatusDialog } from "@/components/dialogs/update-status-dialog"
 import { ViewSimulationSheet } from "@/components/dialogs/view-simulation-sheet"
 import { Button } from "@/components/ui/button"
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { SimulationWithRelations } from "@/lib/definitions/simulations"
+
+type DocumentFieldName = (typeof documentFields)[number]["name"]
 
 export const SimulationsTableActions = ({ simulation }: { simulation: SimulationWithRelations }) => {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -22,11 +35,22 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 	const [isDeletePending, startDeleteTransition] = useTransition()
 	const [isCreateOrderPending, startCreateOrderTransition] = useTransition()
 	const [isPdfPending, startPdfTransition] = useTransition()
+	const [isDownloadPending, startDownloadTransition] = useTransition()
+	const [isDownloadDropdownOpen, setIsDownloadDropdownOpen] = useState(false)
+	const [selectedDocs, setSelectedDocs] = useState<Set<DocumentFieldName>>(new Set())
+
 	const queryClient = useQueryClient()
 
 	const { data: canCreateSimulations } = useQuery({
 		queryKey: ["permission", "simulations:create"],
 		queryFn: () => hasPermission("simulations:create")
+	})
+
+	const { data: availableFiles, isLoading: isLoadingFiles } = useQuery({
+		queryKey: ["simulation-files", simulation.id],
+		queryFn: () => listSimulationFiles(simulation.id),
+		enabled: isDownloadDropdownOpen, // Apenas busca quando o dropdown é aberto
+		staleTime: 5 * 60 * 1000 // Cache por 5 minutos
 	})
 
 	const handleDelete = () => {
@@ -56,11 +80,9 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 				loading: "Criando pedido...",
 				success: (res) => {
 					if (res.success) {
-						// Você pode querer invalidar uma query de 'pedidos' aqui no futuro
-						// queryClient.invalidateQueries({ queryKey: ["orders"] })
+						queryClient.invalidateQueries({ queryKey: ["orders"] })
 						return res.message
 					}
-					// Lança um erro para ser pego pelo `error` do toast.promise
 					throw new Error(res.message)
 				},
 				error: (err: Error) => {
@@ -78,14 +100,12 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 					if (!result.success) {
 						throw new Error(result.message)
 					}
-					// Cria um link temporário para o download
 					const link = document.createElement("a")
 					link.href = `data:application/pdf;base64,${result.data.pdfBase64}`
 					link.download = `proposta-simulacao-${simulation.kdi}.pdf`
 					document.body.appendChild(link)
 					link.click()
 					document.body.removeChild(link)
-
 					return "PDF gerado com sucesso! O download deve começar em breve."
 				},
 				error: (err: Error) => err.message
@@ -93,14 +113,52 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 		})
 	}
 
+	const handleFileDownload = () => {
+		if (selectedDocs.size === 0) {
+			toast.info("Nenhum documento selecionado", {
+				description: "Por favor, selecione pelo menos um documento para baixar."
+			})
+			return
+		}
+
+		startDownloadTransition(() => {
+			toast.promise(
+				downloadSimulationFiles({
+					simulationId: simulation.id,
+					documentNames: Array.from(selectedDocs)
+				}),
+				{
+					loading: "Preparando arquivos para download...",
+					success: (result) => {
+						if (!result.success) {
+							throw new Error(result.message)
+						}
+
+						const link = document.createElement("a")
+						link.href = `data:${result.data.contentType};base64,${result.data.fileBase64}`
+						link.download = result.data.fileName
+						document.body.appendChild(link)
+						link.click()
+						document.body.removeChild(link)
+
+						return "Download iniciado!"
+					},
+					error: (err: Error) => err.message
+				}
+			)
+		})
+	}
+
+	const existingDocumentFields = documentFields.filter((docField) => availableFiles?.success && availableFiles.data.some((file) => file.name === docField.name))
+
 	return (
 		<>
-			<div className="flex items-center justify-center gap-2">
+			<div className="flex items-center justify-center space-x-1">
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsViewSheetOpen(true)}>
+						<Button variant="ghost" size="icon" onClick={() => setIsViewSheetOpen(true)}>
 							<Eye className="h-4 w-4" />
-							<span className="sr-only">Visualizar</span>
+							<span className="sr-only">Visualizar Detalhes</span>
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent>Visualizar Detalhes</TooltipContent>
@@ -110,7 +168,103 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 					<>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCreateOrder} disabled={isCreateOrderPending}>
+								<Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
+									<Edit className="h-4 w-4" />
+									<span className="sr-only">Editar Simulação</span>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Editar Simulação</TooltipContent>
+						</Tooltip>
+
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant="ghost" size="icon" onClick={() => setIsStatusDialogOpen(true)}>
+									<RefreshCw className="h-4 w-4" />
+									<span className="sr-only">Alterar Status</span>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Alterar Status</TooltipContent>
+						</Tooltip>
+					</>
+				)}
+
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button variant="ghost" size="icon" onClick={handleDownloadPdf} disabled={isPdfPending}>
+							{isPdfPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+							<span className="sr-only">Baixar Proposta</span>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Baixar Proposta PDF</TooltipContent>
+				</Tooltip>
+
+				<DropdownMenu
+					open={isDownloadDropdownOpen}
+					onOpenChange={(open) => {
+						setIsDownloadDropdownOpen(open)
+						if (!open) {
+							setSelectedDocs(new Set())
+						}
+					}}
+				>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" size="icon" disabled={isDownloadPending}>
+									{isDownloadPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+									<span className="sr-only">Baixar Documentos</span>
+								</Button>
+							</DropdownMenuTrigger>
+						</TooltipTrigger>
+						<TooltipContent>Baixar Documentos Anexados</TooltipContent>
+					</Tooltip>
+					<DropdownMenuContent align="end">
+						<DropdownMenuLabel>Selecione para baixar</DropdownMenuLabel>
+						<DropdownMenuSeparator />
+						{isLoadingFiles ? (
+							<DropdownMenuItem disabled>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Carregando...
+							</DropdownMenuItem>
+						) : existingDocumentFields.length > 0 ? (
+							<>
+								{existingDocumentFields.map((doc) => (
+									<DropdownMenuCheckboxItem
+										key={doc.name}
+										checked={selectedDocs.has(doc.name)}
+										onSelect={(e) => e.preventDefault()}
+										onCheckedChange={(checked) => {
+											setSelectedDocs((prev) => {
+												const newSet = new Set(prev)
+												if (checked) {
+													newSet.add(doc.name)
+												} else {
+													newSet.delete(doc.name)
+												}
+												return newSet
+											})
+										}}
+									>
+										{doc.label.replace(" *", "")}
+									</DropdownMenuCheckboxItem>
+								))}
+								<DropdownMenuSeparator />
+								<DropdownMenuItem onSelect={handleFileDownload} disabled={selectedDocs.size === 0}>
+									<Download className="mr-2 h-4 w-4" />
+									Baixar {selectedDocs.size > 0 ? `(${selectedDocs.size})` : ""}
+								</DropdownMenuItem>
+							</>
+						) : (
+							<DropdownMenuItem disabled>Nenhum documento anexado</DropdownMenuItem>
+						)}
+					</DropdownMenuContent>
+				</DropdownMenu>
+
+				{canCreateSimulations && (
+					<>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant="ghost" size="icon" onClick={handleCreateOrder} disabled={isCreateOrderPending}>
 									{isCreateOrderPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
 									<span className="sr-only">Criar Pedido</span>
 								</Button>
@@ -120,44 +274,8 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownloadPdf} disabled={isPdfPending}>
-									{isPdfPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-									<span className="sr-only">Baixar Proposta</span>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Baixar Proposta</TooltipContent>
-						</Tooltip>
-
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsStatusDialogOpen(true)}>
-									<RefreshCw className="h-4 w-4" />
-									<span className="sr-only">Alterar Status</span>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Alterar Status</TooltipContent>
-						</Tooltip>
-
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditDialogOpen(true)}>
-									<Edit className="h-4 w-4" />
-									<span className="sr-only">Editar</span>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Editar Simulação</TooltipContent>
-						</Tooltip>
-
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="h-8 w-8 text-destructive hover:text-destructive"
-									onClick={handleDelete}
-									disabled={isDeletePending}
-								>
-									{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+								<Button variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
+									{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin text-destructive" /> : <Trash2 className="h-4 w-4 text-destructive" />}
 									<span className="sr-only">Deletar</span>
 								</Button>
 							</TooltipTrigger>
