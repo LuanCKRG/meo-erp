@@ -3,13 +3,12 @@
 import { PostgrestError } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
 
-import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
+import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { Customer } from "@/lib/definitions/customers"
 import type { Order } from "@/lib/definitions/orders"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
 import { uploadOrderFiles } from "."
-import type { EditSimulationData } from "@/lib/validations/new-simulation/new-simulation"
 
 const parseCurrencyStringToNumber = (value: string | undefined | null): number => {
 	if (!value) return 0
