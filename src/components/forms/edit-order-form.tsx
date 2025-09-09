@@ -27,6 +27,7 @@ import {
 	simulationStep4Schema,
 	simulationStep5Schema
 } from "./new-simulation/validation/new-simulation"
+import { SimulationProvider } from "@/contexts/simulation-context"
 
 const STEPS_CONFIG = [
 	{ id: 1, name: "Dados do Projeto", schema: simulationStep1Schema },
@@ -266,5 +267,9 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		fotosOperacao: new FileList()
 	}
 
-	return <EditOrderContent orderId={orderId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
+	return (
+		<SimulationProvider>
+			<EditOrderContent orderId={orderId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
+		</SimulationProvider>
+	)
 }
