@@ -13,7 +13,7 @@ interface Step5Props {
 	onBack: () => void
 }
 
-const documentFields = [
+export const documentFields = [
 	{ name: "rgCnhSocios", label: "RG / CNH Sócios *" },
 	{ name: "balancoDRE2022", label: "Balanço e DRE 2022 *" },
 	{ name: "balancoDRE2023", label: "Balanço e DRE 2023 *" },
