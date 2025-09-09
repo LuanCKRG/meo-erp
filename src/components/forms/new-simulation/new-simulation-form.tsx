@@ -1,4 +1,4 @@
-// new-simulation-form.tsx
+// src/components/forms/new-simulation/new-simulation-form.tsx
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -15,20 +15,23 @@ import { SimulationStep1 } from "./step-1-project-data"
 import { SimulationStep2 } from "./step-2-client-data"
 import { SimulationStep3 } from "./step-3-installation"
 import { SimulationStep4 } from "./step-4-values"
+import { SimulationStep5 } from "./step-5-documents"
 import {
 	type SimulationData,
 	newSimulationSchema,
 	simulationStep1Schema,
 	simulationStep2Schema,
 	simulationStep3Schema,
-	simulationStep4Schema
+	simulationStep4Schema,
+	simulationStep5Schema
 } from "./validation/new-simulation"
 
 const STEPS_CONFIG = [
 	{ id: 1, name: "Dados do Projeto", schema: simulationStep1Schema },
 	{ id: 2, name: "Dados do Cliente", schema: simulationStep2Schema },
 	{ id: 3, name: "Instalação", schema: simulationStep3Schema },
-	{ id: 4, name: "Valores", schema: simulationStep4Schema }
+	{ id: 4, name: "Valores", schema: simulationStep4Schema },
+	{ id: 5, name: "Documentos", schema: simulationStep5Schema }
 ]
 
 type ExtendedSimulationData = SimulationData & {
@@ -114,6 +117,14 @@ export function NewSimulationForm({
 			equipmentValue: "",
 			laborValue: "",
 			otherCosts: "",
+			rgCnhSocios: undefined,
+			balancoDRE2022: undefined,
+			balancoDRE2023: undefined,
+			balancoDRE2024: undefined,
+			relacaoFaturamento: undefined,
+			comprovanteEndereco: undefined,
+			irpfSocios: undefined,
+			fotosOperacao: undefined,
 			...initialData
 		},
 		mode: "onChange"
@@ -124,10 +135,9 @@ export function NewSimulationForm({
 		if (!stepSchema) return true
 
 		const currentData = form.getValues()
-		const result = stepSchema.safeParse(currentData)
+		const result = await stepSchema.safeParseAsync(currentData)
 
 		if (!result.success) {
-			// Marcar campos com erro para mostrar as mensagens
 			const errors = result.error.issues
 			errors.forEach((error) => {
 				if (error.path.length > 0) {
@@ -152,7 +162,7 @@ export function NewSimulationForm({
 	const nextStep = async () => {
 		const isValid = await validateCurrentStep(currentStep)
 		if (isValid) {
-			setCurrentStep((prev) => Math.min(prev + 1, 4))
+			setCurrentStep((prev) => Math.min(prev + 1, STEPS_CONFIG.length))
 		}
 	}
 
@@ -161,7 +171,7 @@ export function NewSimulationForm({
 	}
 
 	const handleSubmitEntireForm = async () => {
-		const isValid = await validateCurrentStep(4)
+		const isValid = await validateCurrentStep(currentStep)
 		if (!isValid) return
 
 		const formData = form.getValues()
@@ -175,7 +185,6 @@ export function NewSimulationForm({
 			return
 		}
 
-		// Garante que o partnerId do contexto (ou da sessão do parceiro) exista.
 		if (!partnerId) {
 			toast.error("Contexto inválido", {
 				description: "O ID do parceiro não foi definido. Por favor, reinicie o processo de simulação."
@@ -185,7 +194,7 @@ export function NewSimulationForm({
 
 		const simulationContext = {
 			partnerId,
-			sellerId // pode ser null, e isso é esperado.
+			sellerId
 		}
 
 		toast.promise(createSimulation(result.data, simulationContext), {
@@ -232,7 +241,8 @@ export function NewSimulationForm({
 								{currentStep === 1 && <SimulationStep1 onNext={nextStep} />}
 								{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
 								{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
-								{currentStep === 4 && <SimulationStep4 onSubmit={handleSubmitEntireForm} onBack={backStep} />}
+								{currentStep === 4 && <SimulationStep4 onNext={nextStep} onBack={backStep} />}
+								{currentStep === 5 && <SimulationStep5 onSubmit={handleSubmitEntireForm} onBack={backStep} />}
 							</motion.div>
 						</AnimatePresence>
 					</CardContent>

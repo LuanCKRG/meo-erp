@@ -1,7 +1,8 @@
+// src/components/forms/new-simulation/step-4-values.tsx
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: <dont need this> */
 "use client"
 
-import { ArrowLeft, DollarSign, Send } from "lucide-react"
+import { ArrowLeft, DollarSign, Send, ArrowRight } from "lucide-react"
 import { useFormContext } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -30,7 +31,7 @@ const installmentTerms = [12, 24, 36, 48, 60, 72]
 const interestRate = 0.021 // 2.1%
 
 interface Step4Props {
-	onSubmit: () => void
+	onNext: () => void
 	onBack: () => void
 }
 
@@ -43,14 +44,12 @@ const getFontSizeForValue = (value: string): string => {
 	return "text-xs"
 }
 
-const SimulationStep4 = ({ onSubmit, onBack }: Step4Props) => {
+const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 	const form = useFormContext()
 	const { state } = useSidebar()
 
-	// Observe os valores
 	const watchedStringValues = form.watch(["equipmentValue", "laborValue", "otherCosts"])
 
-	// Calcule o valor total diretamente na renderização, em vez de usar useEffect/useState
 	const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
 	const totalInvestment = (equipment || 0) + (labor || 0) + (others || 0)
 
@@ -171,9 +170,8 @@ const SimulationStep4 = ({ onSubmit, onBack }: Step4Props) => {
 				<Button type="button" variant="outline" onClick={onBack}>
 					<ArrowLeft className="mr-2 h-4 w-4" /> Voltar
 				</Button>
-				<Button type="button" onClick={onSubmit} disabled={form.formState.isSubmitting}>
-					<Send className="mr-2 h-4 w-4" />
-					Enviar Simulação
+				<Button type="button" onClick={onNext} disabled={form.formState.isSubmitting}>
+					Próximo <ArrowRight className="ml-2 h-4 w-4" />
 				</Button>
 			</div>
 		</form>

@@ -61,18 +61,42 @@ export const simulationStep4Schema = z.object({
 	notes: z.string().optional()
 })
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const ACCEPTED_FILE_TYPES = ["application/pdf"]
+
+// Schema para React Hook Form - usa FileList do input HTML
+const fileSchema = z
+	.instanceof(FileList, { message: "É necessário anexar um arquivo" })
+	.refine((files) => files.length > 0, "É necessário anexar um arquivo.")
+	.refine((files) => files.length <= 1, "Apenas um arquivo é permitido.")
+	.refine((files) => Array.from(files).every((file) => file.size <= MAX_FILE_SIZE), `O tamanho máximo do arquivo é de 10MB.`)
+	.refine((files) => Array.from(files).every((file) => ACCEPTED_FILE_TYPES.includes(file.type)), "Apenas arquivos .pdf são permitidos.")
+
+export const simulationStep5Schema = z.object({
+	rgCnhSocios: fileSchema,
+	balancoDRE2022: fileSchema,
+	balancoDRE2023: fileSchema,
+	balancoDRE2024: fileSchema,
+	relacaoFaturamento: fileSchema,
+	comprovanteEndereco: fileSchema,
+	irpfSocios: fileSchema,
+	fotosOperacao: fileSchema
+})
+
 // Tipos de dados para cada passo
 export type SimulationStep1Data = z.infer<typeof simulationStep1Schema>
 export type SimulationStep2Data = z.infer<typeof simulationStep2Schema>
 export type SimulationStep3Data = z.infer<typeof simulationStep3Schema>
 export type SimulationStep4Data = z.infer<typeof simulationStep4Schema>
+export type SimulationStep5Data = z.infer<typeof simulationStep5Schema>
 
 // Schema completo combinando as 'shapes' de todos os steps
 export const newSimulationSchema = z.object({
 	...simulationStep1Schema.shape,
 	...simulationStep2Schema.shape,
 	...simulationStep3Schema.shape,
-	...simulationStep4Schema.shape
+	...simulationStep4Schema.shape,
+	...simulationStep5Schema.shape
 })
 
 // Tipo unificado para todos os dados do formulário
