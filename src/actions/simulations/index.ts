@@ -5,5 +5,15 @@ import updateSimulation from "@/actions/simulations/update-simulation"
 import getSimulationById from "@/actions/simulations/get-simulation-by-id"
 import generateSimulationPdf from "@/actions/simulations/generate-simulation-pdf"
 import updateSimulationStatus from "@/actions/simulations/update-simulation-status"
+import uploadSimulationFiles from "./upload-simulation-files"
 
-export { createSimulation, getAllSimulations, deleteSimulation, updateSimulation, getSimulationById, generateSimulationPdf, updateSimulationStatus }
+export {
+	createSimulation,
+	getAllSimulations,
+	deleteSimulation,
+	updateSimulation,
+	getSimulationById,
+	generateSimulationPdf,
+	updateSimulationStatus,
+	uploadSimulationFiles
+}

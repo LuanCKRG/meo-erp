@@ -1,11 +1,14 @@
+// src/actions/simulations/create-simulation.ts
 "use server"
 
 import { PostgrestError } from "@supabase/supabase-js"
 
 import { createCustomer, deleteCustomer, getCustomerByCnpj } from "@/actions/customers"
+import { uploadSimulationFiles } from "@/actions/simulations"
 import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { CustomerInsert } from "@/lib/definitions/customers"
 import type { SimulationInsert } from "@/lib/definitions/simulations"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
 import type { ActionResponse } from "@/types/action-response"
 
@@ -17,12 +20,16 @@ const parseCurrencyStringToNumber = (value: string | undefined | null): number =
 }
 
 interface SimulationContext {
-	partnerId: string
+	partnerId: string | null // Ajustado para aceitar null
 	sellerId: string | null
 }
 
+// A action agora também aceita os dados dos arquivos.
 async function createSimulation(data: SimulationData, context: SimulationContext): Promise<ActionResponse<{ kdi: number }>> {
+	// Cliente padrão (usuário) para obter a sessão
 	const supabase = await createClient()
+	// Cliente com privilégios de admin para operações no DB
+	const supabaseAdmin = createAdminClient()
 
 	const {
 		data: { user }
@@ -38,22 +45,19 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 
 	let customerId: string | null = null
 	let wasCustomerNewlyCreated = false
+	let simulationId: string | null = null
 
 	try {
-		// Passo 1: Verificar se o cliente já existe
 		const cleanedCnpj = data.cnpj.replace(/\D/g, "")
 		const existingCustomerResponse = await getCustomerByCnpj(cleanedCnpj)
 
 		if (!existingCustomerResponse.success) {
-			// Se a própria busca falhou, retorna o erro.
 			return { success: false, message: existingCustomerResponse.message }
 		}
 
 		if (existingCustomerResponse.data) {
-			// Cliente já existe, usamos o ID dele.
 			customerId = existingCustomerResponse.data.id
 		} else {
-			// Cliente não existe, criamos um novo.
 			const customerData: CustomerInsert = {
 				cnpj: cleanedCnpj,
 				company_name: data.legalName,
@@ -85,11 +89,10 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 		}
 
 		if (!customerId) {
-			// Verificação de segurança, embora improvável de acontecer.
 			throw new Error("Não foi possível obter um ID de cliente para a simulação.")
 		}
 
-		// Passo 2: Criar a simulação
+		// A simulação ainda não armazena os documentos, mas a action está pronta para recebê-los.
 		const simulationData: SimulationInsert = {
 			customer_id: customerId,
 			system_power: parseCurrencyStringToNumber(data.systemPower),
@@ -108,10 +111,18 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 			notes: data.notes
 		}
 
-		const { data: simulationResult, error: simulationError } = await supabase.from("simulations").insert(simulationData).select("kdi").single()
+		const { data: simulationResult, error: simulationError } = await supabaseAdmin.from("simulations").insert(simulationData).select("id, kdi").single()
 
 		if (simulationError) {
 			throw simulationError
+		}
+
+		simulationId = simulationResult.id
+
+		// Upload dos arquivos
+		const uploadResponse = await uploadSimulationFiles(simulationId, data)
+		if (!uploadResponse.success) {
+			throw new Error(`Falha no upload de arquivos: ${uploadResponse.message}`)
 		}
 
 		return {
@@ -124,7 +135,10 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 	} catch (error) {
 		console.error("Erro inesperado na action 'createSimulation':", error)
 
-		// Ação de compensação: deleta o cliente apenas se ele foi criado nesta transação.
+		// Ações de compensação em caso de falha
+		if (simulationId) {
+			await supabaseAdmin.from("simulations").delete().eq("id", simulationId)
+		}
 		if (wasCustomerNewlyCreated && customerId) {
 			await deleteCustomer(customerId)
 		}
@@ -134,6 +148,9 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 				success: false,
 				message: `Ocorreu um problema de comunicação com o sistema. Código: ${error.code}`
 			}
+		}
+		if (error instanceof Error) {
+			return { success: false, message: error.message }
 		}
 
 		return { success: false, message: "Ocorreu um erro inesperado. A operação foi cancelada para garantir a consistência dos dados." }

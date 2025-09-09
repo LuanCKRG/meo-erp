@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import type { PermissionId } from "@/lib/constants"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
 
 interface UpdateUserPermissionsParams {
@@ -17,7 +17,7 @@ async function updateUserPermissions({ userId, permissions }: UpdateUserPermissi
 	}
 
 	try {
-		const supabase = await createClient()
+		const supabase = createAdminClient()
 
 		const permissionsToUpsert = Object.entries(permissions).map(([permission_id, has_permission]) => ({
 			user_id: userId,

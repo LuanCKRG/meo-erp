@@ -8,6 +8,7 @@ import type { ActionResponse } from "@/types/action-response"
 // Este tipo combina os dados do pedido, do cliente e dos equipamentos do kit.
 export type FullOrderDetails = Order & {
 	customer: Customer
+	structure_type_name: string
 	kit_module_brand_id: string | null
 	kit_inverter_brand_id: string | null
 	kit_others_brand_id: string | null
@@ -21,13 +22,14 @@ async function getOrderById(orderId: string): Promise<ActionResponse<FullOrderDe
 	try {
 		const supabase = await createClient()
 
-		// 1. Busca o pedido e o cliente
+		// 1. Busca o pedido, o cliente e o nome do tipo de estrutura
 		const { data: order, error } = await supabase
 			.from("orders")
 			.select(
 				`
         *,
-        customers(*)
+        customers(*),
+        structure_types ( name )
       `
 			)
 			.eq("id", orderId)
@@ -41,6 +43,9 @@ async function getOrderById(orderId: string): Promise<ActionResponse<FullOrderDe
 		if (!order.customers) {
 			return { success: false, message: "Dados do cliente associado não encontrados." }
 		}
+		if (!order.structure_types) {
+			return { success: false, message: "Dados do tipo de estrutura associado não encontrados. Inconsistência de dados." }
+		}
 
 		// 2. Busca os brand_ids dos equipamentos do kit em paralelo
 		const [moduleRes, inverterRes, othersRes] = await Promise.all([
@@ -53,6 +58,7 @@ async function getOrderById(orderId: string): Promise<ActionResponse<FullOrderDe
 		const result: FullOrderDetails = {
 			...order,
 			customer: order.customers,
+			structure_type_name: order.structure_types.name,
 			kit_module_brand_id: moduleRes.data?.brand_id || null,
 			kit_inverter_brand_id: inverterRes.data?.brand_id || null,
 			kit_others_brand_id: othersRes.data?.brand_id || null

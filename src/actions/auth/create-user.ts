@@ -4,6 +4,7 @@ import { PostgrestError } from "@supabase/supabase-js"
 
 import type { Database } from "@/lib/definitions/supabase"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
 
 type UserInsert = Database["public"]["Tables"]["users"]["Insert"]
@@ -28,7 +29,10 @@ const createUserErrorMessages: Record<string, string> = {
 }
 
 async function createUser(params: CreateUserParams): Promise<ActionResponse<CreateUserOutput>> {
+	// Usamos o cliente de servidor normal para a pré-verificação,
+	// pois ele atua no contexto da permissão do usuário que o invoca.
 	const supabase = await createClient()
+	const supabaseAdmin = createAdminClient()
 	let newAuthUserId: string | null = null
 
 	try {
@@ -44,8 +48,8 @@ async function createUser(params: CreateUserParams): Promise<ActionResponse<Crea
 			return { success: false, message: createUserErrorMessages.emailExists }
 		}
 
-		// 2. Criar o usuário na auth.users se não existir
-		const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+		// 2. Criar o usuário na auth.users se não existir (operação de admin)
+		const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
 			email: params.email,
 			password: params.password,
 			email_confirm: true
@@ -58,8 +62,8 @@ async function createUser(params: CreateUserParams): Promise<ActionResponse<Crea
 
 		newAuthUserId = authData.user.id
 
-		// 3. Inserir na nossa public.users
-		const { data: publicUserData, error: publicUserError } = await supabase
+		// 3. Inserir na nossa public.users (operação de admin)
+		const { data: publicUserData, error: publicUserError } = await supabaseAdmin
 			.from("users")
 			.insert({
 				id: newAuthUserId,
@@ -73,7 +77,7 @@ async function createUser(params: CreateUserParams): Promise<ActionResponse<Crea
 		if (publicUserError) {
 			console.error("Erro ao inserir na public.users:", publicUserError)
 			if (newAuthUserId) {
-				await supabase.auth.admin.deleteUser(newAuthUserId)
+				await supabaseAdmin.auth.admin.deleteUser(newAuthUserId)
 			}
 			if (publicUserError instanceof PostgrestError && publicUserError.code === "23505") {
 				return { success: false, message: createUserErrorMessages.dbInsertionFailure }
@@ -95,7 +99,7 @@ async function createUser(params: CreateUserParams): Promise<ActionResponse<Crea
 		console.error("Erro inesperado na action 'createUser':", error)
 
 		if (newAuthUserId) {
-			await supabase.auth.admin.deleteUser(newAuthUserId).catch(console.error)
+			await supabaseAdmin.auth.admin.deleteUser(newAuthUserId).catch(console.error)
 		}
 
 		return {
