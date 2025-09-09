@@ -6,6 +6,8 @@ import getSimulationById from "@/actions/simulations/get-simulation-by-id"
 import generateSimulationPdf from "@/actions/simulations/generate-simulation-pdf"
 import updateSimulationStatus from "@/actions/simulations/update-simulation-status"
 import uploadSimulationFiles from "./upload-simulation-files"
+import downloadSimulationFiles from "./download-simulation-files"
+import listSimulationFiles from "./list-simulation-files"
 
 export {
 	createSimulation,
@@ -15,5 +17,7 @@ export {
 	getSimulationById,
 	generateSimulationPdf,
 	updateSimulationStatus,
-	uploadSimulationFiles
+	uploadSimulationFiles,
+	downloadSimulationFiles,
+	listSimulationFiles
 }
