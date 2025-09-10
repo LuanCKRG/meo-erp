@@ -18,8 +18,8 @@ import { SimulationStep3 } from "./new-simulation/step-3-installation"
 import { SimulationStep4 } from "./new-simulation/step-4-values"
 import { SimulationStep5 } from "./new-simulation/step-5-documents"
 import {
-	type SimulationData,
-	newSimulationSchema,
+	type EditSimulationData,
+	editSimulationSchema,
 	simulationStep1Schema,
 	simulationStep2Schema,
 	simulationStep3Schema,
@@ -36,7 +36,7 @@ const STEPS_CONFIG = [
 	{ id: 5, name: "Documentos", schema: simulationStep5Schema }
 ]
 
-type ExtendedOrderData = SimulationData & {
+type ExtendedOrderData = EditSimulationData & {
 	kit_module_brand_id?: string | null
 	kit_inverter_brand_id?: string | null
 	kit_others_brand_id?: string | null
@@ -89,7 +89,7 @@ function EditOrderContent({
 	const [currentStep, setCurrentStep] = React.useState(1)
 
 	const form = useForm<ExtendedOrderData>({
-		resolver: zodResolver(newSimulationSchema), // Reutilizando schema
+		resolver: zodResolver(editSimulationSchema), // Reutilizando schema
 		defaultValues: initialData,
 		mode: "onChange"
 	})
@@ -143,7 +143,7 @@ function EditOrderContent({
 	const handleSubmitEntireForm = (data: ExtendedOrderData) => {
 		const finalData = { ...initialData, ...data }
 
-		const result = newSimulationSchema.safeParse(finalData)
+		const result = editSimulationSchema.safeParse(finalData)
 
 		if (!result.success) {
 			toast.error("Erro de validação final", {
