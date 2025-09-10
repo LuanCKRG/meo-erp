@@ -12,7 +12,7 @@ interface EditOrderDialogProps {
 export function EditOrderDialog({ orderId, open, onOpenChange }: EditOrderDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
+			<DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto sm:max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>Editar Pedido</DialogTitle>
 					<DialogDescription>Altere os dados do pedido. As alterações serão salvas ao final do processo.</DialogDescription>
