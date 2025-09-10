@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
 import * as React from "react"
@@ -10,6 +10,7 @@ import { toast } from "sonner"
 
 import { getOrderById, updateOrder } from "@/actions/orders"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { useSimulation } from "@/contexts/simulation-context"
 import { maskCep, maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
 import { cn } from "@/lib/utils"
 import { SimulationStep1 } from "./new-simulation/step-1-project-data"
@@ -20,11 +21,11 @@ import { SimulationStep5 } from "./new-simulation/step-5-documents"
 import {
 	type EditSimulationData,
 	editSimulationSchema,
+	editSimulationStep5Schema,
 	simulationStep1Schema,
 	simulationStep2Schema,
 	simulationStep3Schema,
-	simulationStep4Schema,
-	simulationStep5Schema
+	simulationStep4Schema
 } from "./new-simulation/validation/new-simulation"
 import { SimulationProvider } from "@/contexts/simulation-context"
 
@@ -33,7 +34,7 @@ const STEPS_CONFIG = [
 	{ id: 2, name: "Dados do Cliente", schema: simulationStep2Schema },
 	{ id: 3, name: "Instalação", schema: simulationStep3Schema },
 	{ id: 4, name: "Valores", schema: simulationStep4Schema },
-	{ id: 5, name: "Documentos", schema: simulationStep5Schema }
+	{ id: 5, name: "Documentos", schema: editSimulationStep5Schema }
 ]
 
 type ExtendedOrderData = EditSimulationData & {
@@ -87,9 +88,15 @@ function EditOrderContent({
 	initialData: ExtendedOrderData
 }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
+	const { setIsCustomerDataLocked } = useSimulation()
+	const queryClient = useQueryClient()
+
+	React.useEffect(() => {
+		setIsCustomerDataLocked(true)
+	}, [setIsCustomerDataLocked])
 
 	const form = useForm<ExtendedOrderData>({
-		resolver: zodResolver(editSimulationSchema), // Reutilizando schema
+		resolver: zodResolver(editSimulationSchema),
 		defaultValues: initialData,
 		mode: "onChange"
 	})
@@ -140,10 +147,8 @@ function EditOrderContent({
 		exit: { opacity: 0, x: 20 }
 	}
 
-	const handleSubmitEntireForm = (data: ExtendedOrderData) => {
-		const finalData = { ...initialData, ...data }
-
-		const result = editSimulationSchema.safeParse(finalData)
+	const handleSubmitEntireForm = (data: EditSimulationData) => {
+		const result = editSimulationSchema.safeParse(data)
 
 		if (!result.success) {
 			toast.error("Erro de validação final", {
@@ -157,6 +162,8 @@ function EditOrderContent({
 			loading: "Atualizando pedido...",
 			success: (res) => {
 				if (res.success) {
+					queryClient.invalidateQueries({ queryKey: ["orders"] })
+					queryClient.invalidateQueries({ queryKey: ["order-details", orderId] })
 					onFinished()
 					return "Pedido atualizado com sucesso!"
 				}
@@ -256,14 +263,14 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		equipmentValue: maskNumber(order.equipment_value?.toString() || "0", 14),
 		laborValue: maskNumber(order.labor_value?.toString() || "0", 14),
 		otherCosts: maskNumber(order.other_costs?.toString() || "0", 14),
-		rgCnhSocios: new FileList(),
-		balancoDRE2022: new FileList(),
-		balancoDRE2023: new FileList(),
-		balancoDRE2024: new FileList(),
-		relacaoFaturamento: new FileList(),
-		comprovanteEndereco: new FileList(),
-		irpfSocios: new FileList(),
-		fotosOperacao: new FileList()
+		rgCnhSocios: undefined,
+		balancoDRE2022: undefined,
+		balancoDRE2023: undefined,
+		balancoDRE2024: undefined,
+		relacaoFaturamento: undefined,
+		comprovanteEndereco: undefined,
+		irpfSocios: undefined,
+		fotosOperacao: undefined
 	}
 
 	return (

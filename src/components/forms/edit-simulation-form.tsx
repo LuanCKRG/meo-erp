@@ -13,7 +13,6 @@ import { getSimulationById, updateSimulation } from "@/actions/simulations"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { maskCep, maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
 import { cn } from "@/lib/utils"
-import { SimulationProvider } from "@/contexts/simulation-context"
 import { SimulationStep1 } from "./new-simulation/step-1-project-data"
 import { SimulationStep2 } from "./new-simulation/step-2-client-data"
 import { SimulationStep3 } from "./new-simulation/step-3-installation"
@@ -269,9 +268,5 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 		fotosOperacao: undefined
 	}
 
-	return (
-		<SimulationProvider>
-			<EditSimulationContent simulationId={simulationId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
-		</SimulationProvider>
-	)
+	return <EditSimulationContent simulationId={simulationId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
 }
