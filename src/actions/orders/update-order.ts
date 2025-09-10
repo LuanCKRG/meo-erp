@@ -3,15 +3,16 @@
 import { PostgrestError } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
 
-import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { Customer } from "@/lib/definitions/customers"
 import type { Order } from "@/lib/definitions/orders"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
 import { uploadOrderFiles } from "."
+import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 
 const parseCurrencyStringToNumber = (value: string | undefined | null): number => {
 	if (!value) return 0
+	// Removemos todos os caracteres não numéricos, exceto a vírgula
 	const sanitizedValue = value.replace(/\./g, "").replace(",", ".")
 	const numberValue = parseFloat(sanitizedValue)
 	return Number.isNaN(numberValue) ? 0 : numberValue
@@ -20,7 +21,7 @@ const parseCurrencyStringToNumber = (value: string | undefined | null): number =
 interface UpdateOrderParams {
 	orderId: string
 	customerId: string
-	data: EditSimulationData // Reutilizando a validação da simulação
+	data: EditSimulationData
 }
 
 async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Promise<ActionResponse<null>> {
@@ -63,7 +64,8 @@ async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Pr
 			kit_others: data.kit_others ? Number(data.kit_others) : null,
 			equipment_value: parseCurrencyStringToNumber(data.equipmentValue),
 			labor_value: parseCurrencyStringToNumber(data.laborValue),
-			other_costs: parseCurrencyStringToNumber(data.otherCosts)
+			other_costs: parseCurrencyStringToNumber(data.otherCosts),
+			notes: data.notes
 		}
 
 		const { error: orderError } = await supabase.from("orders").update(orderData).eq("id", orderId)
@@ -80,6 +82,7 @@ async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Pr
 		}
 
 		revalidatePath("/dashboard/orders")
+		revalidatePath(`/dashboard/orders/${orderId}`)
 
 		return {
 			success: true,
