@@ -1,21 +1,14 @@
 "use client"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { CheckCircle, MoreHorizontal, Pencil, ToggleLeft, ToggleRight, XCircle } from "lucide-react"
+import { CheckCircle, Loader2, Pencil, ToggleLeft, ToggleRight, XCircle } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { approveSeller, rejectSeller, setSellerActiveStatus } from "@/actions/sellers"
 import { EditSellerDialog } from "@/components/dialogs/edit-seller-dialog"
 import { Button } from "@/components/ui/button"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { Seller } from "@/lib/definitions/sellers"
 
 const SellerActions = ({ seller }: { seller: Seller }) => {
@@ -51,50 +44,62 @@ const SellerActions = ({ seller }: { seller: Seller }) => {
 
 	return (
 		<>
-			<div className="flex items-center justify-center space-x-2">
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button aria-haspopup="true" size="icon" variant="ghost">
-							<MoreHorizontal className="size-4" />
-							<span className="sr-only">Abrir/Fechar menu</span>
+			<div className="flex items-center justify-center space-x-1">
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
+							<Pencil className="h-4 w-4" />
+							<span className="sr-only">Editar Vendedor</span>
 						</Button>
-					</DropdownMenuTrigger>
+					</TooltipTrigger>
+					<TooltipContent>Editar Vendedor</TooltipContent>
+				</Tooltip>
 
-					<DropdownMenuContent align="end" side="left">
-						<DropdownMenuLabel>Ações</DropdownMenuLabel>
-						<DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
-							<Pencil />
-							Editar
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
+				{seller.status === "pending" && (
+					<>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant="ghost" size="icon" onClick={() => handleApprovalAction("approve")} disabled={isPending}>
+									{isPending ? <Loader2 className="h-4 w-4 animate-spin text-green-500" /> : <CheckCircle className="h-4 w-4 text-green-500" />}
+									<span className="sr-only">Aprovar</span>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Aprovar</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant="ghost" size="icon" onClick={() => handleApprovalAction("reject")} disabled={isPending}>
+									{isPending ? <Loader2 className="h-4 w-4 animate-spin text-destructive" /> : <XCircle className="h-4 w-4 text-destructive" />}
+									<span className="sr-only">Rejeitar</span>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Rejeitar</TooltipContent>
+						</Tooltip>
+					</>
+				)}
 
-						{seller.status === "pending" && (
-							<>
-								<DropdownMenuItem onSelect={() => handleApprovalAction("approve")} disabled={isPending}>
-									<CheckCircle />
-									Aprovar
-								</DropdownMenuItem>
-								<DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleApprovalAction("reject")} disabled={isPending}>
-									<XCircle />
-									Rejeitar
-								</DropdownMenuItem>
-							</>
-						)}
-
-						{seller.status === "approved" &&
-							(seller.is_active ? (
-								<DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleToggleActive(false)} disabled={isPending}>
-									<ToggleLeft />
-									Inativar
-								</DropdownMenuItem>
-							) : (
-								<DropdownMenuItem onClick={() => handleToggleActive(true)} disabled={isPending}>
-									<ToggleRight />
-									Reativar
-								</DropdownMenuItem>
-							))}
-					</DropdownMenuContent>
-				</DropdownMenu>
+				{seller.status === "approved" &&
+					(seller.is_active ? (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant="ghost" size="icon" onClick={() => handleToggleActive(false)} disabled={isPending}>
+									{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ToggleLeft className="h-4 w-4" />}
+									<span className="sr-only">Inativar</span>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Inativar</TooltipContent>
+						</Tooltip>
+					) : (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button variant="ghost" size="icon" onClick={() => handleToggleActive(true)} disabled={isPending}>
+									{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ToggleRight className="h-4 w-4" />}
+									<span className="sr-only">Reativar</span>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Reativar</TooltipContent>
+						</Tooltip>
+					))}
 			</div>
 			<EditSellerDialog seller={seller} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
 		</>
