@@ -42,6 +42,9 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 	const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
 	const totalInvestment = (equipment || 0) + (labor || 0) + (others || 0)
 
+	const commissionValue = totalInvestment * 0.35
+	const formattedCommissionValue = formatCurrency(commissionValue)
+
 	const calculateInstallment = (term: number) => {
 		if (totalInvestment === 0) return 0
 		const totalWithInterest = totalInvestment * (1 + interestRate)
@@ -103,6 +106,16 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 							</FormItem>
 						)}
 					/>
+
+					<FormItem>
+						<FormLabel>Serviços</FormLabel>
+						<FormControl>
+							<div className="relative">
+								<DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+								<Input type="text" className="pl-9" value={formattedCommissionValue} disabled />
+							</div>
+						</FormControl>
+					</FormItem>
 
 					<FormField
 						control={form.control}
