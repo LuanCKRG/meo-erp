@@ -11,7 +11,6 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { useSidebar } from "@/components/ui/sidebar"
 import { maskNumber } from "@/lib/masks"
 import { cn } from "@/lib/utils"
 
@@ -35,18 +34,8 @@ interface Step4Props {
 	onBack: () => void
 }
 
-const getFontSizeForValue = (value: string): string => {
-	const length = value.length
-	if (length <= 12) return "text-2xl"
-	if (length <= 16) return "text-xl"
-	if (length <= 19) return "text-lg"
-	if (length <= 22) return "text-sm"
-	return "text-xs"
-}
-
 const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 	const form = useFormContext()
-	const { state } = useSidebar()
 
 	const watchedStringValues = form.watch(["equipmentValue", "laborValue", "otherCosts"])
 
@@ -63,8 +52,8 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 
 	return (
 		<form className="space-y-6">
-			<div className="flex flex-col gap-6 md:flex-row">
-				<div className="w-full space-y-6 md:w-1/2">
+			<div className="grid grid-cols-1 @lg:grid-cols-2 gap-6">
+				<div className="w-full space-y-6">
 					<h3 className="text-lg font-medium">Passo 4: Valores</h3>
 					<FormField
 						control={form.control}
@@ -132,7 +121,7 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 						)}
 					/>
 				</div>
-				<div className="w-full md:w-1/2">
+				<div className="w-full">
 					<Card className="sticky top-20 shadow-md">
 						<CardHeader>
 							<CardTitle>Resumo do Investimento</CardTitle>
@@ -141,15 +130,7 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 						<CardContent className="space-y-4">
 							<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
 								<span className="text-sm text-muted-foreground">Total do Investimento</span>
-								<span
-									className={cn(
-										"hidden sm:flex font-bold",
-										state === "expanded" ? `${getFontSizeForValue(formattedTotalInvestment)} lg:text-xl xl:text-2xl` : "md:text-xl lg:text-2xl"
-									)}
-								>
-									{formattedTotalInvestment}
-								</span>
-								<span className={cn("font-bold md:hidden", getFontSizeForValue(formattedTotalInvestment))}>{formattedTotalInvestment}</span>
+								<span className="font-bold text-fluid-2xl">{formattedTotalInvestment}</span>
 							</div>
 							<Separator />
 							<h4 className="font-medium">Parcelamento</h4>
@@ -171,7 +152,7 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 					<ArrowLeft className="mr-2 h-4 w-4" /> Voltar
 				</Button>
 				<Button type="button" onClick={onNext} disabled={form.formState.isSubmitting}>
-					Próximo <ArrowRight className="ml-2 h-4 w-4" />
+					Próximo <ArrowRight className="mr-2 h-4 w-4" />
 				</Button>
 			</div>
 		</form>

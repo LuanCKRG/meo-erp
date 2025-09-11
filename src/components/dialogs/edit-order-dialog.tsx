@@ -2,6 +2,7 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { EditOrderForm } from "@/components/forms/edit-order-form"
+import { SimulationProvider } from "@/contexts/simulation-context"
 
 interface EditOrderDialogProps {
 	orderId: string
@@ -18,7 +19,11 @@ export function EditOrderDialog({ orderId, open, onOpenChange }: EditOrderDialog
 					<DialogDescription>Altere os dados do pedido. As alterações serão salvas ao final do processo.</DialogDescription>
 				</DialogHeader>
 				{/* A key garante que o componente e seu estado sejam resetados se o ID mudar */}
-				{open && <EditOrderForm key={orderId} orderId={orderId} onFinished={() => onOpenChange(false)} />}
+				{open && (
+					<SimulationProvider>
+						<EditOrderForm key={orderId} orderId={orderId} onFinished={() => onOpenChange(false)} />
+					</SimulationProvider>
+				)}
 			</DialogContent>
 		</Dialog>
 	)

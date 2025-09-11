@@ -125,3 +125,11 @@
     @apply hover:cursor-pointer
   }
 }
+
+@layer utilities {
+	.text-fluid-2xl {
+		/* Min: 1.25rem (text-xl), Max: 1.875rem (text-3xl) */
+		/* Ideal: 5 container-width-units */
+		font-size: clamp(1.25rem, 5cqw, 1.875rem);
+	}
+}

@@ -27,7 +27,6 @@ import {
 	simulationStep3Schema,
 	simulationStep4Schema
 } from "./new-simulation/validation/new-simulation"
-import { SimulationProvider } from "@/contexts/simulation-context"
 
 const STEPS_CONFIG = [
 	{ id: 1, name: "Dados do Projeto", schema: simulationStep1Schema },
@@ -88,12 +87,7 @@ function EditOrderContent({
 	initialData: ExtendedOrderData
 }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
-	const { setIsCustomerDataLocked } = useSimulation()
 	const queryClient = useQueryClient()
-
-	React.useEffect(() => {
-		setIsCustomerDataLocked(true)
-	}, [setIsCustomerDataLocked])
 
 	const form = useForm<ExtendedOrderData>({
 		resolver: zodResolver(editSimulationSchema),
@@ -206,10 +200,12 @@ function EditOrderContent({
 }
 
 export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFinished: () => void }) {
+	const { setIsCustomerDataLocked } = useSimulation()
 	const {
 		data: queryData,
 		isLoading,
-		error
+		error,
+		isSuccess
 	} = useQuery({
 		queryKey: ["order-details", orderId],
 		queryFn: () => getOrderById(orderId),
@@ -217,6 +213,12 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		refetchOnWindowFocus: false,
 		enabled: !!orderId
 	})
+
+	React.useEffect(() => {
+		if (isSuccess && queryData?.success) {
+			setIsCustomerDataLocked(true)
+		}
+	}, [isSuccess, queryData, setIsCustomerDataLocked])
 
 	if (isLoading) {
 		return (
@@ -263,6 +265,7 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		equipmentValue: maskNumber(order.equipment_value?.toString() || "0", 14),
 		laborValue: maskNumber(order.labor_value?.toString() || "0", 14),
 		otherCosts: maskNumber(order.other_costs?.toString() || "0", 14),
+		// Os campos de arquivo são iniciados como undefined para edição
 		rgCnhSocios: undefined,
 		balancoDRE2022: undefined,
 		balancoDRE2023: undefined,
@@ -273,9 +276,5 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		fotosOperacao: undefined
 	}
 
-	return (
-		<SimulationProvider>
-			<EditOrderContent orderId={orderId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
-		</SimulationProvider>
-	)
+	return <EditOrderContent orderId={orderId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
 }
