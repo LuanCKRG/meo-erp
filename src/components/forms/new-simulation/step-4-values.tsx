@@ -1,8 +1,7 @@
-// src/components/forms/new-simulation/step-4-values.tsx
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: <dont need this> */
 "use client"
 
-import { ArrowLeft, DollarSign, Send, ArrowRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, DollarSign } from "lucide-react"
 import { useFormContext } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
@@ -12,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { maskNumber } from "@/lib/masks"
-import { cn } from "@/lib/utils"
+import { calculateInstallmentPayment } from "@/lib/utils"
 
 const formatCurrency = (value: number): string => {
 	return new Intl.NumberFormat("pt-BR", {
@@ -27,7 +26,9 @@ const parseCurrency = (value: string | undefined): number => {
 }
 
 const installmentTerms = [12, 24, 36, 48, 60, 72]
-const interestRate = 0.021 // 2.1%
+
+const serviceFee = 0.35
+const interestRate = 0.021
 
 interface Step4Props {
 	onNext: () => void
@@ -40,17 +41,12 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 	const watchedStringValues = form.watch(["equipmentValue", "laborValue", "otherCosts"])
 
 	const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
-	const totalInvestment = (equipment || 0) + (labor || 0) + (others || 0)
+	const subtotal = (equipment || 0) + (labor || 0) + (others || 0)
 
-	const commissionValue = totalInvestment * 0.35
-	const formattedCommissionValue = formatCurrency(commissionValue)
+	const servicesValue = subtotal * serviceFee
+	const formattedServicesValue = formatCurrency(servicesValue)
 
-	const calculateInstallment = (term: number) => {
-		if (totalInvestment === 0) return 0
-		const totalWithInterest = totalInvestment * (1 + interestRate)
-		return totalWithInterest / term
-	}
-
+	const totalInvestment = subtotal + servicesValue
 	const formattedTotalInvestment = formatCurrency(totalInvestment)
 
 	return (
@@ -112,7 +108,7 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 						<FormControl>
 							<div className="relative">
 								<DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-								<Input type="text" className="pl-9" value={formattedCommissionValue} disabled />
+								<Input type="text" className="pl-9" value={formattedServicesValue} disabled />
 							</div>
 						</FormControl>
 					</FormItem>
@@ -148,12 +144,19 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 							<Separator />
 							<h4 className="font-medium">Parcelamento</h4>
 							<div className="space-y-2">
-								{installmentTerms.map((term, index) => (
-									<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
-										<span className="text-muted-foreground">{term}x de</span>
-										<span className="font-semibold">{formatCurrency(calculateInstallment(term))}</span>
-									</div>
-								))}
+								{installmentTerms.map((term, index) => {
+									const installment = calculateInstallmentPayment({
+										rate: interestRate,
+										numberOfPeriods: term,
+										presentValue: totalInvestment
+									})
+									return (
+										<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
+											<span className="text-muted-foreground">{term}x de</span>
+											<span className="font-semibold">{formatCurrency(installment)}</span>
+										</div>
+									)
+								})}
 							</div>
 						</CardContent>
 					</Card>
@@ -165,7 +168,7 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 					<ArrowLeft className="mr-2 h-4 w-4" /> Voltar
 				</Button>
 				<Button type="button" onClick={onNext} disabled={form.formState.isSubmitting}>
-					Próximo <ArrowRight className="mr-2 h-4 w-4" />
+					Próximo <ArrowRight className="ml-2 h-4 w-4" />
 				</Button>
 			</div>
 		</form>
