@@ -142,6 +142,9 @@ export const columns: ColumnDef<OrderWithRelations>[] = [
 					{statusTranslations[status]}
 				</Badge>
 			)
+		},
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
 		}
 	},
 	{

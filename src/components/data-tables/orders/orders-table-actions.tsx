@@ -1,26 +1,22 @@
 "use client"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { Edit, MoreHorizontal, Trash2, Loader2, FileDown } from "lucide-react"
+import { Eye, FileDown, Loader2, RefreshCw, Trash2, Edit } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { deleteOrder, generateOrderPdf } from "@/actions/orders"
 import { EditOrderDialog } from "@/components/dialogs/edit-order-dialog"
 import { UpdateOrderStatusDialog } from "@/components/dialogs/update-order-status-dialog"
+import { ViewOrderSheet } from "@/components/dialogs/view-order-sheet"
 import { Button } from "@/components/ui/button"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { OrderWithRelations } from "@/lib/definitions/orders"
 
 export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+	const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
+	const [isViewSheetOpen, setIsViewSheetOpen] = useState(false)
 	const [isDeletePending, startDeleteTransition] = useTransition()
 	const [isPdfPending, startPdfTransition] = useTransition()
 	const queryClient = useQueryClient()
@@ -66,34 +62,61 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 
 	return (
 		<>
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" className="h-8 w-8 p-0">
-						<span className="sr-only">Abrir menu</span>
-						<MoreHorizontal className="h-4 w-4" />
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end">
-					<DropdownMenuLabel>Ações</DropdownMenuLabel>
-					<DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
-						<Edit className="mr-2 h-4 w-4" />
-						Editar Pedido
-					</DropdownMenuItem>
-					<DropdownMenuItem onSelect={handleDownloadPdf} disabled={isPdfPending}>
-						{isPdfPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
-						Baixar Proposta
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<UpdateOrderStatusDialog order={order} />
-					<DropdownMenuSeparator />
-					<DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={handleDelete} disabled={isDeletePending}>
-						{isDeletePending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-						Deletar
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
+			<div className="flex items-center justify-center space-x-1">
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button variant="ghost" size="icon" onClick={() => setIsViewSheetOpen(true)}>
+							<Eye className="h-4 w-4" />
+							<span className="sr-only">Visualizar Detalhes</span>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Visualizar Detalhes</TooltipContent>
+				</Tooltip>
+
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
+							<Edit className="h-4 w-4" />
+							<span className="sr-only">Editar Pedido</span>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Editar Pedido</TooltipContent>
+				</Tooltip>
+
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button variant="ghost" size="icon" onClick={() => setIsStatusDialogOpen(true)}>
+							<RefreshCw className="h-4 w-4" />
+							<span className="sr-only">Alterar Status</span>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Alterar Status</TooltipContent>
+				</Tooltip>
+
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button variant="ghost" size="icon" onClick={handleDownloadPdf} disabled={isPdfPending}>
+							{isPdfPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+							<span className="sr-only">Baixar Proposta</span>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Baixar Proposta PDF</TooltipContent>
+				</Tooltip>
+
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
+							{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin text-destructive" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+							<span className="sr-only">Deletar</span>
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Deletar Pedido</TooltipContent>
+				</Tooltip>
+			</div>
 
 			<EditOrderDialog orderId={order.id} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
+			<UpdateOrderStatusDialog order={order} open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen} />
+			<ViewOrderSheet orderId={order.id} open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen} />
 		</>
 	)
 }

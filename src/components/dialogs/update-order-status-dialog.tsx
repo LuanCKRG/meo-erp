@@ -1,12 +1,13 @@
 "use client"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { Check, Loader2, RefreshCw } from "lucide-react"
+import { Check, Loader2 } from "lucide-react"
 import { useTransition } from "react"
 import { toast } from "sonner"
 
 import { updateOrderStatus } from "@/actions/orders"
-import { DropdownMenuItem, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { OrderStatus, OrderWithRelations } from "@/lib/definitions/orders"
 import { cn } from "@/lib/utils"
 
@@ -24,12 +25,19 @@ const availableStatuses: { value: OrderStatus; label: string }[] = [
 	{ value: "canceled", label: "Cancelado" }
 ]
 
-export const UpdateOrderStatusDialog = ({ order }: { order: OrderWithRelations }) => {
+interface UpdateOrderStatusDialogProps {
+	order: OrderWithRelations
+	open: boolean
+	onOpenChange: (open: boolean) => void
+}
+
+export const UpdateOrderStatusDialog = ({ order, open, onOpenChange }: UpdateOrderStatusDialogProps) => {
 	const [isPending, startTransition] = useTransition()
 	const queryClient = useQueryClient()
 
 	const handleStatusChange = (newStatus: OrderStatus) => {
 		if (newStatus === order.status) {
+			onOpenChange(false)
 			return
 		}
 
@@ -39,6 +47,7 @@ export const UpdateOrderStatusDialog = ({ order }: { order: OrderWithRelations }
 				success: (res) => {
 					if (res.success) {
 						queryClient.invalidateQueries({ queryKey: ["orders"] })
+						onOpenChange(false)
 						return res.message
 					}
 					throw new Error(res.message)
@@ -51,21 +60,31 @@ export const UpdateOrderStatusDialog = ({ order }: { order: OrderWithRelations }
 	}
 
 	return (
-		<DropdownMenuSub>
-			<DropdownMenuSubTrigger disabled={isPending}>
-				{isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-				Alterar Status
-			</DropdownMenuSubTrigger>
-			<DropdownMenuPortal>
-				<DropdownMenuSubContent>
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Alterar Status do Pedido</DialogTitle>
+					<DialogDescription>Selecione o novo status para o pedido #{order.kdi}.</DialogDescription>
+				</DialogHeader>
+				<div className="grid grid-cols-1 gap-2 py-4 sm:grid-cols-2">
 					{availableStatuses.map((status) => (
-						<DropdownMenuItem key={status.value} onClick={() => handleStatusChange(status.value)}>
-							<Check className={cn("mr-2 h-4 w-4", order.status === status.value ? "opacity-100" : "opacity-0")} />
+						<Button
+							key={status.value}
+							variant="outline"
+							className={cn("justify-start", order.status === status.value && "ring-2 ring-primary")}
+							onClick={() => handleStatusChange(status.value)}
+							disabled={isPending}
+						>
+							{isPending ? (
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							) : (
+								<Check className={cn("mr-2 h-4 w-4", order.status === status.value ? "opacity-100" : "opacity-0")} />
+							)}
 							{status.label}
-						</DropdownMenuItem>
+						</Button>
 					))}
-				</DropdownMenuSubContent>
-			</DropdownMenuPortal>
-		</DropdownMenuSub>
+				</div>
+			</DialogContent>
+		</Dialog>
 	)
 }
