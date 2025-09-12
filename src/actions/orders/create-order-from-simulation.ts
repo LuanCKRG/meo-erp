@@ -3,19 +3,22 @@
 import { PostgrestError } from "@supabase/supabase-js"
 
 import type { OrderInsert } from "@/lib/definitions/orders"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
-import { createClient } from "@/lib/supabase/server"
+
+const BUCKET_NAME = "docs_simulation"
 
 async function createOrderFromSimulation(simulationId: string): Promise<ActionResponse<{ orderId: string }>> {
 	if (!simulationId) {
 		return { success: false, message: "ID da simulação não fornecido." }
 	}
 
-	const supabase = await createClient()
+	const supabaseAdmin = createAdminClient()
+	let newOrderId: string | null = null
 
 	try {
 		// 1. Buscar os dados completos da simulação
-		const { data: simulation, error: fetchError } = await supabase.from("simulations").select("*").eq("id", simulationId).single()
+		const { data: simulation, error: fetchError } = await supabaseAdmin.from("simulations").select("*").eq("id", simulationId).single()
 
 		if (fetchError || !simulation) {
 			console.error("Erro ao buscar simulação para criar pedido:", fetchError)
@@ -23,8 +26,6 @@ async function createOrderFromSimulation(simulationId: string): Promise<ActionRe
 		}
 
 		// 2. Preparar os dados para a nova tabela 'orders'
-		// Omitimos 'id', 'kdi' e 'created_at' para que o banco gere novos valores.
-		// Omitimos 'updated_at' pois será atualizado pelo banco.
 		const orderData: OrderInsert = {
 			connection_voltage: simulation.connection_voltage,
 			created_by_user_id: simulation.created_by_user_id,
@@ -38,34 +39,73 @@ async function createOrderFromSimulation(simulationId: string): Promise<ActionRe
 			labor_value: simulation.labor_value,
 			other_costs: simulation.other_costs,
 			seller_id: simulation.seller_id,
-			status: "analysis_pending", // O status do pedido começa como pendente de análise.
+			status: "analysis_pending",
 			structure_type: simulation.structure_type,
 			system_power: simulation.system_power,
-			notes: simulation.notes // Copiando as notas da simulação para o pedido
+			notes: simulation.notes
 		}
 
 		// 3. Inserir na tabela 'orders'
-		const { data: newOrder, error: insertError } = await supabase.from("orders").insert(orderData).select("id").single()
+		const { data: newOrder, error: insertError } = await supabaseAdmin.from("orders").insert(orderData).select("id").single()
 
 		if (insertError) {
 			console.error("Erro ao criar pedido (Supabase):", insertError)
 			if (insertError instanceof PostgrestError && insertError.code === "23503") {
-				// Ex: customer_id não existe mais
 				return { success: false, message: "Erro de referência ao criar pedido. Verifique se os dados relacionados ainda existem." }
 			}
-			return { success: false, message: "Ocorreu um erro no banco de dados ao tentar criar o pedido." }
+			throw insertError // Lança para o catch principal
+		}
+
+		newOrderId = newOrder.id
+
+		// 4. Listar arquivos do bucket da simulação
+		const { data: files, error: listError } = await supabaseAdmin.storage.from(BUCKET_NAME).list(simulationId)
+
+		if (listError) {
+			console.error(`Erro ao listar arquivos da simulação ${simulationId}:`, listError)
+			throw new Error(`Falha ao listar documentos da simulação de origem: ${listError.message}`)
+		}
+
+		// 5. Copiar cada arquivo para o novo diretório do pedido
+		if (files && files.length > 0) {
+			for (const file of files) {
+				const fromPath = `${simulationId}/${file.name}`
+				const toPath = `${newOrderId}/${file.name}`
+				const { error: copyError } = await supabaseAdmin.storage.from(BUCKET_NAME).copy(fromPath, toPath)
+
+				if (copyError) {
+					console.error(`Erro ao copiar arquivo ${fromPath} para ${toPath}:`, copyError)
+					throw new Error(`Falha ao copiar documento: ${file.name}. A operação foi cancelada.`)
+				}
+			}
 		}
 
 		return {
 			success: true,
 			message: `Pedido #${newOrder.id} criado com sucesso!`,
 			data: {
-				orderId: newOrder.id
+				orderId: newOrderId
 			}
 		}
 	} catch (e) {
 		console.error("Erro inesperado em createOrderFromSimulation:", e)
-		return { success: false, message: "Ocorreu um erro inesperado no servidor." }
+
+		// Ação de compensação: se o pedido foi criado mas a cópia de arquivos falhou, removemos o pedido.
+		if (newOrderId) {
+			await supabaseAdmin.from("orders").delete().eq("id", newOrderId)
+			// Também podemos tentar deletar a pasta do novo pedido no storage se ela foi criada
+			const { data: newFiles } = await supabaseAdmin.storage.from(BUCKET_NAME).list(newOrderId)
+			if (newFiles && newFiles.length > 0) {
+				const filesToRemove = newFiles.map((f) => `${newOrderId}/${f.name}`)
+				await supabaseAdmin.storage.from(BUCKET_NAME).remove(filesToRemove)
+			}
+		}
+
+		const errorMessage = e instanceof Error ? e.message : "Ocorreu um erro desconhecido."
+		return {
+			success: false,
+			message: `Ocorreu um erro inesperado: ${errorMessage}`
+		}
 	}
 }
 
