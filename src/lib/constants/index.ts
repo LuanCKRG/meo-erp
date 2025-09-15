@@ -5,6 +5,7 @@ import { INVERTER_TYPE_ID, MODULE_TYPE_ID, OTHERS_TYPE_ID } from "@/lib/constant
 import PERMISSIONS from "@/lib/constants/permissions"
 import PDF_TEMPLATE_SIMULATION_BASE64 from "@/lib/constants/template-simulation-base44"
 import MONTSERRAT_BASE64 from "@/lib/constants/montserrat-base64"
+import MONTSERRAT_SEMIBOLD_BASE64 from "@/lib/constants/montserrat-semibold-base64"
 
 type PermissionId = (typeof PERMISSIONS)[number]
 
@@ -18,5 +19,6 @@ export {
 	PERMISSIONS,
 	type PermissionId,
 	PDF_TEMPLATE_SIMULATION_BASE64,
-	MONTSERRAT_BASE64
+	MONTSERRAT_BASE64,
+	MONTSERRAT_SEMIBOLD_BASE64
 }
