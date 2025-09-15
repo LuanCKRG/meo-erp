@@ -68,7 +68,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// Adiciona o CNPJ
 		firstPage.drawText(formatCnpj(customer.cnpj), {
 			x: 100,
-			y: height - 150,
+			y: height - 145,
 			size: 12,
 			color: textColor,
 			font: montserratFont
@@ -87,7 +87,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// Adiciona a Razão Social com o tamanho da fonte ajustado
 		firstPage.drawText(customer.company_name, {
 			x: 100,
-			y: height - 168,
+			y: height - 163,
 			size: companyNameFontSize,
 			color: textColor,
 			font: montserratFont
@@ -107,7 +107,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// Adiciona Cidade/Estado com fonte ajustada
 		firstPage.drawText(cidadeUf, {
 			x: 100,
-			y: height - 185,
+			y: height - 180,
 			size: cidadeUfFontSize,
 			color: textColor,
 			font: montserratFont
@@ -117,7 +117,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const creationDate = formatDate(created_at)
 		firstPage.drawText(creationDate, {
 			x: 115,
-			y: height - 201,
+			y: height - 197,
 			size: 12,
 			color: textColor,
 			font: montserratFont
@@ -127,7 +127,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const currentDate = formatDate(new Date().toISOString())
 		firstPage.drawText(currentDate, {
 			x: width - 72,
-			y: height - 85,
+			y: height - 83,
 			size: 12,
 			color: textColor,
 			font: montserratFont
@@ -137,7 +137,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const formattedPower = `${system_power} kWp`
 		firstPage.drawText(formattedPower, {
 			x: width - 138,
-			y: height - 152,
+			y: height - 150,
 			size: 12,
 			color: textColor,
 			font: montserratFont
