@@ -4,9 +4,9 @@ import fontkit from "@pdf-lib/fontkit"
 import { PDFDocument, rgb } from "pdf-lib"
 
 import { getOrderById } from "@/actions/orders"
-import { MONTSERRAT_BASE64, PDF_TEMPLATE_SIMULATION_BASE64 } from "@/lib/constants"
+import { MONTSERRAT_BASE64, MONTSERRAT_SEMIBOLD_BASE64, PDF_TEMPLATE_SIMULATION_BASE64 } from "@/lib/constants"
 import { formatCnpj } from "@/lib/formatters"
-import { formatDate } from "@/lib/utils"
+import { formatDate, calculateInstallmentPayment } from "@/lib/utils"
 import type { ActionResponse } from "@/types/action-response"
 
 const formatCurrency = (value: number | null | undefined): string => {
@@ -15,24 +15,6 @@ const formatCurrency = (value: number | null | undefined): string => {
 		style: "currency",
 		currency: "BRL"
 	}).format(value)
-}
-
-const formatResidualValue = (value: number | null | undefined): string => {
-	if (value === null || value === undefined) return "R$ 0"
-	const options: Intl.NumberFormatOptions = {
-		style: "currency",
-		currency: "BRL"
-	}
-	// Se o número for inteiro, formata sem casas decimais.
-	if (value % 1 === 0) {
-		options.minimumFractionDigits = 0
-		options.maximumFractionDigits = 0
-	} else {
-		// Se tiver decimais, formata com eles.
-		options.minimumFractionDigits = 2
-		options.maximumFractionDigits = 2
-	}
-	return new Intl.NumberFormat("pt-BR", options).format(value)
 }
 
 async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBase64: string }>> {
@@ -47,27 +29,33 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 			return { success: false, message: orderDetails.message || "Não foi possível encontrar o pedido." }
 		}
 
-		const { customer, created_at, equipment_value, labor_value, other_costs, system_power } = orderDetails.data
+		const { customer, created_at, equipment_value, labor_value, other_costs, system_power, current_consumption } = orderDetails.data
 
 		// 2. Carregar o template PDF e a fonte do Base64
 		const templateBytes = Buffer.from(PDF_TEMPLATE_SIMULATION_BASE64, "base64")
 		const montserratFontBytes = Buffer.from(MONTSERRAT_BASE64, "base64")
+		const montserratSemiBoldFontBytes = Buffer.from(MONTSERRAT_SEMIBOLD_BASE64, "base64")
 
 		const pdfDoc = await PDFDocument.load(templateBytes)
 
 		// Registrar o fontkit
 		pdfDoc.registerFontkit(fontkit)
 
-		const montserratFont = await pdfDoc.embedFont(montserratFontBytes)
+		const montserratFont = await pdfDoc.embedFont(montserratFontBytes, { subset: true })
+		const montserratSemiBoldFont = await pdfDoc.embedFont(montserratSemiBoldFontBytes, { subset: true })
 		const textColor = rgb(0, 0, 0) // Cor preta
 
 		// 3. Adicionar dados ao PDF
 		const firstPage = pdfDoc.getPages()[0]
 		const { width, height } = firstPage.getSize()
+		const rightMargin = 36
+		const rightAlignX = 260 // Ponto de ancoragem para o alinhamento à direita
 
 		// Adiciona o CNPJ
-		firstPage.drawText(formatCnpj(customer.cnpj), {
-			x: 100,
+		const formattedCnpj = formatCnpj(customer.cnpj)
+		const cnpjWidth = montserratFont.widthOfTextAtSize(formattedCnpj, 12)
+		firstPage.drawText(formattedCnpj, {
+			x: rightAlignX - cnpjWidth,
 			y: height - 145,
 			size: 12,
 			color: textColor,
@@ -76,7 +64,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 
 		// Lógica para ajustar dinamicamente o tamanho da fonte da Razão Social
 		let companyNameFontSize = 12
-		const maxCompanyNameWidth = 168 // Largura máxima permitida para a razão social
+		const maxCompanyNameWidth = 250 // Largura máxima permitida
 		let companyNameWidth = montserratFont.widthOfTextAtSize(customer.company_name, companyNameFontSize)
 
 		while (companyNameWidth > maxCompanyNameWidth && companyNameFontSize > 8) {
@@ -86,7 +74,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 
 		// Adiciona a Razão Social com o tamanho da fonte ajustado
 		firstPage.drawText(customer.company_name, {
-			x: 100,
+			x: rightAlignX - companyNameWidth,
 			y: height - 163,
 			size: companyNameFontSize,
 			color: textColor,
@@ -95,8 +83,8 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 
 		// Lógica para ajustar dinamicamente o tamanho da fonte de Cidade/UF
 		const cidadeUf = `${customer.city}/${customer.state}`
+		const maxCidadeUfWidth = 250
 		let cidadeUfFontSize = 12
-		const maxCidadeUfWidth = 168
 		let cidadeUfWidth = montserratFont.widthOfTextAtSize(cidadeUf, cidadeUfFontSize)
 
 		while (cidadeUfWidth > maxCidadeUfWidth && cidadeUfFontSize > 8) {
@@ -106,7 +94,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 
 		// Adiciona Cidade/Estado com fonte ajustada
 		firstPage.drawText(cidadeUf, {
-			x: 100,
+			x: rightAlignX - cidadeUfWidth,
 			y: height - 180,
 			size: cidadeUfFontSize,
 			color: textColor,
@@ -115,109 +103,118 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 
 		// Adiciona a Data de Criação do Pedido
 		const creationDate = formatDate(created_at)
+		const creationDateWidth = montserratFont.widthOfTextAtSize(creationDate, 12)
 		firstPage.drawText(creationDate, {
-			x: 115,
+			x: rightAlignX - creationDateWidth,
 			y: height - 197,
 			size: 12,
 			color: textColor,
 			font: montserratFont
 		})
 
-		// Adiciona a Data Atual
+		// Adiciona a Data Atual (alinhado à direita)
 		const currentDate = formatDate(new Date().toISOString())
+		const currentDateWidth = montserratFont.widthOfTextAtSize(currentDate, 12)
 		firstPage.drawText(currentDate, {
-			x: width - 72,
-			y: height - 83,
+			x: width - 96,
+			y: height - 76,
 			size: 12,
 			color: textColor,
 			font: montserratFont
 		})
 
-		// Adiciona a Potência do Sistema
+		// Adiciona a Potência do Sistema (alinhado à direita)
 		const formattedPower = `${system_power} kWp`
+		const powerWidth = montserratFont.widthOfTextAtSize(formattedPower, 12)
 		firstPage.drawText(formattedPower, {
-			x: width - 138,
-			y: height - 150,
+			x: width - rightMargin - powerWidth,
+			y: height - 145,
 			size: 12,
 			color: textColor,
 			font: montserratFont
 		})
 
-		// Calcula e adiciona o Valor Residual
-		const totalValue = (equipment_value || 0) + (labor_value || 0) + (other_costs || 0)
-		const residual_value = totalValue * 0.1 // 10%
-		const formattedResidualValue = formatResidualValue(residual_value)
-
-		let residualValueFontSize = 12
-		const maxResidualValueWidth = 53
-		let residualValueWidth = montserratFont.widthOfTextAtSize(formattedResidualValue, residualValueFontSize)
-
-		while (residualValueWidth > maxResidualValueWidth && residualValueFontSize > 8) {
-			residualValueFontSize -= 0.5
-			residualValueWidth = montserratFont.widthOfTextAtSize(formattedResidualValue, residualValueFontSize)
-		}
-
-		const residualValueY = height - 360
-		const residualValueX = 150
-
-		// Adiciona o valor residual formatado
-		firstPage.drawText(formattedResidualValue, {
-			x: residualValueX,
-			y: residualValueY,
-			size: residualValueFontSize,
+		// Adiciona o Consumo Atual (alinhado à direita)
+		const formattedConsumption = `${current_consumption} kWh`
+		const consumptionWidth = montserratFont.widthOfTextAtSize(formattedConsumption, 12)
+		firstPage.drawText(formattedConsumption, {
+			x: width - rightMargin - consumptionWidth,
+			y: height - 161,
+			size: 12,
 			color: textColor,
 			font: montserratFont
 		})
 
-		// Calcular e adicionar valores das parcelas
-		const maxInstallmentWidth = 59
-		const installment36 = formatCurrency(totalValue / 36)
-		const installment48 = formatCurrency(totalValue / 48)
-		const installment60 = formatCurrency(totalValue / 60)
-
-		// Parcela 36x
-		let installment36FontSize = 12
-		let installment36Width = montserratFont.widthOfTextAtSize(installment36, installment36FontSize)
-		while (installment36Width > maxInstallmentWidth && installment36FontSize > 8) {
-			installment36FontSize -= 0.5
-			installment36Width = montserratFont.widthOfTextAtSize(installment36, installment36FontSize)
-		}
-		firstPage.drawText(installment36, {
-			x: 82,
-			y: height - 330,
-			size: installment36FontSize,
+		// Calcula e adiciona o Valor Total do Investimento
+		const subtotal = (equipment_value || 0) + (labor_value || 0) + (other_costs || 0)
+		const totalInvestment = subtotal * 1.35
+		const formattedTotalInvestment = formatCurrency(totalInvestment)
+		const totalValueWidth = montserratSemiBoldFont.widthOfTextAtSize(formattedTotalInvestment, 12)
+		firstPage.drawText(formattedTotalInvestment, {
+			x: width - rightMargin - totalValueWidth,
+			y: height - 197,
+			size: 12,
 			color: textColor,
-			font: montserratFont
+			font: montserratSemiBoldFont
 		})
 
-		// Parcela 48x
-		let installment48FontSize = 12
-		let installment48Width = montserratFont.widthOfTextAtSize(installment48, installment48FontSize)
-		while (installment48Width > maxInstallmentWidth && installment48FontSize > 8) {
-			installment48FontSize -= 0.5
-			installment48Width = montserratFont.widthOfTextAtSize(installment48, installment48FontSize)
-		}
-		firstPage.drawText(installment48, {
-			x: 82,
-			y: height - 362,
-			size: installment48FontSize,
+		// Adiciona o total com a taxa nos outros locais
+		firstPage.drawText(formattedTotalInvestment, {
+			x: 175,
+			y: height - 312,
+			size: 12,
 			color: textColor,
-			font: montserratFont
+			font: montserratSemiBoldFont
 		})
 
-		// Parcela 60x
-		let installment60FontSize = 12
-		let installment60Width = montserratFont.widthOfTextAtSize(installment60, installment60FontSize)
-		while (installment60Width > maxInstallmentWidth && installment60FontSize > 8) {
-			installment60FontSize -= 0.5
-			installment60Width = montserratFont.widthOfTextAtSize(installment60, installment60FontSize)
-		}
-		firstPage.drawText(installment60, {
-			x: 82,
-			y: height - 390,
-			size: installment60FontSize,
+		firstPage.drawText(formattedTotalInvestment, {
+			x: 175,
+			y: height - 338,
+			size: 12,
 			color: textColor,
-			font: montserratFont
+			font: montserratSemiBoldFont
+		})
+
+		firstPage.drawText(formattedTotalInvestment, {
+			x: 175,
+			y: height - 364,
+			size: 12,
+			color: textColor,
+			font: montserratSemiBoldFont
+		})
+
+		// Calcula e adiciona as parcelas e o fator de leasing
+		const interestRate = 0.021
+		const terms = [36, 48, 60]
+		const yPositions = [height - 312, height - 338, height - 364]
+		const installmentX = 355
+		const factorX = 265
+
+		terms.forEach((term, index) => {
+			const installment = calculateInstallmentPayment({
+				rate: interestRate,
+				numberOfPeriods: term,
+				presentValue: totalInvestment
+			})
+
+			const factor = totalInvestment > 0 ? (installment / totalInvestment).toFixed(5) : "N/A"
+			const formattedFactor = factor.toString().replace(".", ",")
+
+			firstPage.drawText(formatCurrency(installment), {
+				x: installmentX,
+				y: yPositions[index],
+				size: 12,
+				color: textColor,
+				font: montserratSemiBoldFont
+			})
+
+			firstPage.drawText(formattedFactor, {
+				x: factorX,
+				y: yPositions[index],
+				size: 12,
+				color: textColor,
+				font: montserratFont
+			})
 		})
 
 		// 4. Salvar o PDF em memória e converter para Base64
