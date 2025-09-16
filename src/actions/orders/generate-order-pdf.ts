@@ -43,7 +43,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 
 		const montserratFont = await pdfDoc.embedFont(montserratFontBytes, { subset: true })
 		const montserratSemiBoldFont = await pdfDoc.embedFont(montserratSemiBoldFontBytes, { subset: true })
-		const textColor = rgb(0, 0, 0) // Cor preta
+		const textColor = rgb(83 / 255, 86 / 255, 90 / 255) // Cor #53565A
 
 		// 3. Adicionar dados ao PDF
 		const firstPage = pdfDoc.getPages()[0]
@@ -187,7 +187,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const interestRate = 0.021
 		const terms = [36, 48, 60]
 		const yPositions = [height - 312, height - 338, height - 364]
-		const installmentX = 355
+		const installmentX = 342
 		const factorX = 265
 
 		terms.forEach((term, index) => {
