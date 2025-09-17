@@ -273,7 +273,8 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		relacaoFaturamento: undefined,
 		comprovanteEndereco: undefined,
 		irpfSocios: undefined,
-		fotosOperacao: undefined
+		fotosOperacao: undefined,
+		contaDeEnergia: undefined
 	}
 
 	return <EditOrderContent orderId={orderId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
