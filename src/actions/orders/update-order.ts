@@ -1,18 +1,15 @@
 "use server"
 
-import { PostgrestError } from "@supabase/supabase-js"
-import { revalidatePath } from "next/cache"
-
+import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { Customer } from "@/lib/definitions/customers"
 import type { Order } from "@/lib/definitions/orders"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
-import { uploadOrderFiles } from "@/actions/orders"
-import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
+import { revalidatePath } from "next/cache"
+import { checkOrderDocumentsStatus, uploadOrderFiles } from "."
 
 const parseCurrencyStringToNumber = (value: string | undefined | null): number => {
 	if (!value) return 0
-	// Removemos todos os caracteres não numéricos, exceto a vírgula
 	const sanitizedValue = value.replace(/\./g, "").replace(",", ".")
 	const numberValue = parseFloat(sanitizedValue)
 	return Number.isNaN(numberValue) ? 0 : numberValue
@@ -25,7 +22,7 @@ interface UpdateOrderParams {
 }
 
 async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Promise<ActionResponse<null>> {
-	const supabase = createAdminClient()
+	const supabaseAdmin = createAdminClient()
 
 	try {
 		// 1. Atualizar os dados do cliente
@@ -45,14 +42,10 @@ async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Pr
 			state: data.state
 		}
 
-		const { error: customerError } = await supabase.from("customers").update(customerData).eq("id", customerId)
+		const { error: customerError } = await supabaseAdmin.from("customers").update(customerData).eq("id", customerId)
+		if (customerError) throw customerError
 
-		if (customerError) {
-			console.error("Erro ao atualizar cliente:", customerError)
-			throw customerError
-		}
-
-		// 2. Atualizar os dados do pedido
+		// 2. Atualizar os dados do pedido/simulação
 		const orderData: Partial<Order> = {
 			system_power: parseCurrencyStringToNumber(data.systemPower),
 			current_consumption: parseCurrencyStringToNumber(data.currentConsumption),
@@ -68,21 +61,20 @@ async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Pr
 			notes: data.notes
 		}
 
-		const { error: orderError } = await supabase.from("orders").update(orderData).eq("id", orderId)
+		const { error: orderError } = await supabaseAdmin.from("orders").update(orderData).eq("id", orderId)
+		if (orderError) throw orderError
 
-		if (orderError) {
-			console.error("Erro ao atualizar pedido:", orderError)
-			throw orderError
-		}
-
-		// 3. Fazer upload de novos arquivos, se houver
+		// 3. Fazer upload de novos arquivos
 		const uploadResponse = await uploadOrderFiles(orderId, data)
 		if (!uploadResponse.success) {
-			console.warn("O pedido foi atualizado, mas houve um erro no upload de novos arquivos:", uploadResponse.message)
+			// Não é um erro crítico, mas registra um aviso
+			console.warn("Pedido atualizado, mas houve um erro no upload de novos arquivos:", uploadResponse.message)
+		} else if (uploadResponse.data.uploadedCount > 0) {
+			// 4. Se houver upload, checa o status dos documentos e atualiza o pedido se necessário
+			await checkOrderDocumentsStatus(orderId)
 		}
 
 		revalidatePath("/dashboard/orders")
-		revalidatePath(`/dashboard/orders/${orderId}`)
 
 		return {
 			success: true,
@@ -91,7 +83,7 @@ async function updateOrder({ orderId, customerId, data }: UpdateOrderParams): Pr
 		}
 	} catch (error) {
 		console.error("Erro inesperado em updateOrder:", error)
-		if (error instanceof PostgrestError) {
+		if (error instanceof Error) {
 			return { success: false, message: `Erro no banco de dados: ${error.message}` }
 		}
 		return { success: false, message: "Ocorreu um erro inesperado ao salvar as alterações." }
