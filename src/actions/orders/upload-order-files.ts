@@ -8,7 +8,15 @@ const BUCKET_NAME = "docs_simulation"
 
 type DocumentField = keyof Pick<
 	EditSimulationData,
-	"rgCnhSocios" | "balancoDRE2022" | "balancoDRE2023" | "balancoDRE2024" | "relacaoFaturamento" | "comprovanteEndereco" | "irpfSocios" | "fotosOperacao"
+	| "rgCnhSocios"
+	| "balancoDRE2022"
+	| "balancoDRE2023"
+	| "balancoDRE2024"
+	| "relacaoFaturamento"
+	| "comprovanteEndereco"
+	| "irpfSocios"
+	| "fotosOperacao"
+	| "contaDeEnergia"
 >
 
 const documentFields: DocumentField[] = [
@@ -19,7 +27,8 @@ const documentFields: DocumentField[] = [
 	"relacaoFaturamento",
 	"comprovanteEndereco",
 	"irpfSocios",
-	"fotosOperacao"
+	"fotosOperacao",
+	"contaDeEnergia"
 ]
 
 async function uploadOrderFiles(orderId: string, data: EditSimulationData): Promise<ActionResponse<{ paths: string[] }>> {
