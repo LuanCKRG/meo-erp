@@ -1,17 +1,30 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
-import { Eye, FileDown, Loader2, RefreshCw, Trash2, Edit } from "lucide-react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { Download, Edit, Eye, FileDown, Loader2, RefreshCw, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
-import { deleteOrder, generateOrderPdf } from "@/actions/orders"
+import { deleteOrder, generateOrderPdf, listOrderFiles } from "@/actions/orders"
+import { downloadSimulationFiles } from "@/actions/simulations"
+import { documentFields } from "@/components/forms/new-simulation/step-5-documents"
 import { EditOrderDialog } from "@/components/dialogs/edit-order-dialog"
 import { UpdateOrderStatusDialog } from "@/components/dialogs/update-order-status-dialog"
 import { ViewOrderSheet } from "@/components/dialogs/view-order-sheet"
 import { Button } from "@/components/ui/button"
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { OrderWithRelations } from "@/lib/definitions/orders"
+
+type DocumentFieldName = (typeof documentFields)[number]["name"]
 
 export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -19,7 +32,18 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 	const [isViewSheetOpen, setIsViewSheetOpen] = useState(false)
 	const [isDeletePending, startDeleteTransition] = useTransition()
 	const [isPdfPending, startPdfTransition] = useTransition()
+	const [isDownloadPending, startDownloadTransition] = useTransition()
+	const [isDownloadDropdownOpen, setIsDownloadDropdownOpen] = useState(false)
+	const [selectedDocs, setSelectedDocs] = useState<Set<DocumentFieldName>>(new Set())
+
 	const queryClient = useQueryClient()
+
+	const { data: availableFiles, isLoading: isLoadingFiles } = useQuery({
+		queryKey: ["order-files", order.id],
+		queryFn: () => listOrderFiles(order.id),
+		enabled: isDownloadDropdownOpen, // Apenas busca quando o dropdown é aberto
+		staleTime: 5 * 60 * 1000 // Cache por 5 minutos
+	})
 
 	const handleDelete = () => {
 		startDeleteTransition(() => {
@@ -59,6 +83,44 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 			})
 		})
 	}
+
+	const handleFileDownload = () => {
+		if (selectedDocs.size === 0) {
+			toast.info("Nenhum documento selecionado", {
+				description: "Por favor, selecione pelo menos um documento para baixar."
+			})
+			return
+		}
+
+		startDownloadTransition(() => {
+			toast.promise(
+				downloadSimulationFiles({
+					simulationId: order.id, // Reutilizando a action de simulação, pois o ID é o mesmo
+					documentNames: Array.from(selectedDocs)
+				}),
+				{
+					loading: "Preparando arquivos para download...",
+					success: (result) => {
+						if (!result.success) {
+							throw new Error(result.message)
+						}
+
+						const link = document.createElement("a")
+						link.href = `data:${result.data.contentType};base64,${result.data.fileBase64}`
+						link.download = result.data.fileName
+						document.body.appendChild(link)
+						link.click()
+						document.body.removeChild(link)
+
+						return "Download iniciado!"
+					},
+					error: (err: Error) => err.message
+				}
+			)
+		})
+	}
+
+	const existingDocumentFields = documentFields.filter((docField) => availableFiles?.success && availableFiles.data.some((file) => file.name === docField.name))
 
 	return (
 		<>
@@ -102,6 +164,68 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 					</TooltipTrigger>
 					<TooltipContent>Baixar Proposta PDF</TooltipContent>
 				</Tooltip>
+
+				<DropdownMenu
+					open={isDownloadDropdownOpen}
+					onOpenChange={(open) => {
+						setIsDownloadDropdownOpen(open)
+						if (!open) {
+							setSelectedDocs(new Set())
+						}
+					}}
+				>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" size="icon" disabled={isDownloadPending}>
+									{isDownloadPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+									<span className="sr-only">Baixar Documentos</span>
+								</Button>
+							</DropdownMenuTrigger>
+						</TooltipTrigger>
+						<TooltipContent>Baixar Documentos Anexados</TooltipContent>
+					</Tooltip>
+					<DropdownMenuContent align="end">
+						<DropdownMenuLabel>Selecione para baixar</DropdownMenuLabel>
+						<DropdownMenuSeparator />
+						{isLoadingFiles ? (
+							<DropdownMenuItem disabled>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Carregando...
+							</DropdownMenuItem>
+						) : existingDocumentFields.length > 0 ? (
+							<>
+								{existingDocumentFields.map((doc) => (
+									<DropdownMenuCheckboxItem
+										key={doc.name}
+										checked={selectedDocs.has(doc.name)}
+										onSelect={(e) => e.preventDefault()}
+										onCheckedChange={(checked) => {
+											setSelectedDocs((prev) => {
+												const newSet = new Set(prev)
+												if (checked) {
+													newSet.add(doc.name)
+												} else {
+													newSet.delete(doc.name)
+												}
+												return newSet
+											})
+										}}
+									>
+										{doc.label.replace(" *", "")}
+									</DropdownMenuCheckboxItem>
+								))}
+								<DropdownMenuSeparator />
+								<DropdownMenuItem onSelect={handleFileDownload} disabled={selectedDocs.size === 0}>
+									<Download className="mr-2 h-4 w-4" />
+									Baixar {selectedDocs.size > 0 ? `(${selectedDocs.size})` : ""}
+								</DropdownMenuItem>
+							</>
+						) : (
+							<DropdownMenuItem disabled>Nenhum documento anexado</DropdownMenuItem>
+						)}
+					</DropdownMenuContent>
+				</DropdownMenu>
 
 				<Tooltip>
 					<TooltipTrigger asChild>
