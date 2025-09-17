@@ -125,6 +125,7 @@ export function NewSimulationForm({
 			comprovanteEndereco: undefined,
 			irpfSocios: undefined,
 			fotosOperacao: undefined,
+			contaDeEnergia: undefined,
 			...initialData
 		},
 		mode: "onChange"
