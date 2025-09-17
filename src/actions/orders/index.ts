@@ -7,6 +7,7 @@ import deleteOrder from "./delete-order"
 import generateOrderPdf from "./generate-order-pdf"
 import uploadOrderFiles from "./upload-order-files"
 import listOrderFiles from "./list-order-files"
+import checkOrderDocumentsStatus from "./check-order-documents-status"
 
 export {
 	createOrderFromSimulation,
@@ -17,5 +18,6 @@ export {
 	deleteOrder,
 	generateOrderPdf,
 	uploadOrderFiles,
-	listOrderFiles
+	listOrderFiles,
+	checkOrderDocumentsStatus
 }
