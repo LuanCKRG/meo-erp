@@ -66,22 +66,10 @@ const ACCEPTED_FILE_TYPES = ["application/pdf"]
 
 // Schema para React Hook Form - usa FileList do input HTML
 const fileSchema = z
-	.instanceof(FileList, { message: "É necessário anexar um arquivo" })
+	.instanceof(FileList, { error: "É necessário anexar um arquivo" })
 	.refine((files) => files?.length > 0, "É necessário anexar um arquivo.")
 	.refine((files) => Array.from(files).every((file) => file.size <= MAX_FILE_SIZE), `O tamanho máximo do arquivo é de 10MB.`)
 	.refine((files) => Array.from(files).every((file) => ACCEPTED_FILE_TYPES.includes(file.type)), "Apenas arquivos .pdf são permitidos.")
-
-export const simulationStep5Schema = z.object({
-	rgCnhSocios: fileSchema,
-	balancoDRE2022: fileSchema,
-	balancoDRE2023: fileSchema,
-	balancoDRE2024: fileSchema,
-	relacaoFaturamento: fileSchema,
-	comprovanteEndereco: fileSchema,
-	irpfSocios: fileSchema,
-	fotosOperacao: fileSchema
-})
-
 // Schema para arquivos OPCIONAIS para o formulário de edição
 const optionalFileSchema = z
 	.instanceof(FileList)
@@ -92,6 +80,18 @@ const optionalFileSchema = z
 		"Apenas arquivos .pdf são permitidos."
 	)
 
+export const simulationStep5Schema = z.object({
+	rgCnhSocios: optionalFileSchema,
+	balancoDRE2022: optionalFileSchema,
+	balancoDRE2023: optionalFileSchema,
+	balancoDRE2024: optionalFileSchema,
+	relacaoFaturamento: optionalFileSchema,
+	comprovanteEndereco: optionalFileSchema,
+	irpfSocios: optionalFileSchema,
+	fotosOperacao: optionalFileSchema,
+	contaDeEnergia: optionalFileSchema
+})
+
 // Schema do Passo 5 para EDIÇÃO, com campos de arquivo opcionais
 export const editSimulationStep5Schema = z.object({
 	rgCnhSocios: optionalFileSchema,
@@ -101,7 +101,8 @@ export const editSimulationStep5Schema = z.object({
 	relacaoFaturamento: optionalFileSchema,
 	comprovanteEndereco: optionalFileSchema,
 	irpfSocios: optionalFileSchema,
-	fotosOperacao: optionalFileSchema
+	fotosOperacao: optionalFileSchema,
+	contaDeEnergia: optionalFileSchema
 })
 
 // Tipos de dados para cada passo
