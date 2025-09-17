@@ -1,7 +1,7 @@
 "use server"
 
 import fontkit from "@pdf-lib/fontkit"
-import { PDFDocument, rgb } from "pdf-lib"
+import { PDFDocument, PDFFont, rgb } from "pdf-lib"
 
 import { getOrderById } from "@/actions/orders"
 import { MONTSERRAT_BASE64, MONTSERRAT_SEMIBOLD_BASE64, PDF_TEMPLATE_SIMULATION_BASE64 } from "@/lib/constants"
@@ -15,6 +15,24 @@ const formatCurrency = (value: number | null | undefined): string => {
 		style: "currency",
 		currency: "BRL"
 	}).format(value)
+}
+
+function truncateTextByWidth(text: string, font: PDFFont, fontSize: number, maxWidth: number) {
+	let truncatedText = text
+	let textWidth = font.widthOfTextAtSize(truncatedText, fontSize)
+
+	// Se o texto já cabe, retorna o texto original
+	if (textWidth <= maxWidth) {
+		return text
+	}
+
+	// Vai removendo caracteres do final até caber na largura máxima
+	while (textWidth > maxWidth && truncatedText.length > 0) {
+		truncatedText = truncatedText.slice(0, -1)
+		textWidth = font.widthOfTextAtSize(truncatedText, fontSize)
+	}
+
+	return truncatedText
 }
 
 async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBase64: string }>> {
@@ -48,34 +66,30 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// 3. Adicionar dados ao PDF
 		const firstPage = pdfDoc.getPages()[0]
 		const { width, height } = firstPage.getSize()
-		const rightMargin = 36
-		const rightAlignX = 260 // Ponto de ancoragem para o alinhamento à direita
+		const rightMargin = 27
+		const rightAlignX = 272 // Ponto de ancoragem para o alinhamento à direita
 
 		// Adiciona o CNPJ
 		const formattedCnpj = formatCnpj(customer.cnpj)
 		const cnpjWidth = montserratFont.widthOfTextAtSize(formattedCnpj, 12)
 		firstPage.drawText(formattedCnpj, {
 			x: rightAlignX - cnpjWidth,
-			y: height - 145,
+			y: height - 148,
 			size: 12,
 			color: textColor,
 			font: montserratFont
 		})
 
 		// Lógica para ajustar dinamicamente o tamanho da fonte da Razão Social
-		let companyNameFontSize = 12
-		const maxCompanyNameWidth = 250 // Largura máxima permitida
-		let companyNameWidth = montserratFont.widthOfTextAtSize(customer.company_name, companyNameFontSize)
+		const maxCompanyNameWidth = 164 // Largura máxima permitida (164px como você pediu)
+		const companyNameFontSize = 12 // Tamanho fixo da fonte
+		const truncatedCompanyName = truncateTextByWidth(customer.company_name, montserratFont, companyNameFontSize, maxCompanyNameWidth)
+		const companyNameWidth = montserratFont.widthOfTextAtSize(truncatedCompanyName, companyNameFontSize)
 
-		while (companyNameWidth > maxCompanyNameWidth && companyNameFontSize > 8) {
-			companyNameFontSize -= 0.5
-			companyNameWidth = montserratFont.widthOfTextAtSize(customer.company_name, companyNameFontSize)
-		}
-
-		// Adiciona a Razão Social com o tamanho da fonte ajustado
-		firstPage.drawText(customer.company_name, {
+		// Adiciona a Razão Social truncada
+		firstPage.drawText(truncatedCompanyName, {
 			x: rightAlignX - companyNameWidth,
-			y: height - 163,
+			y: height - 166,
 			size: companyNameFontSize,
 			color: textColor,
 			font: montserratFont
@@ -95,7 +109,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// Adiciona Cidade/Estado com fonte ajustada
 		firstPage.drawText(cidadeUf, {
 			x: rightAlignX - cidadeUfWidth,
-			y: height - 180,
+			y: height - 183,
 			size: cidadeUfFontSize,
 			color: textColor,
 			font: montserratFont
@@ -106,7 +120,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const creationDateWidth = montserratFont.widthOfTextAtSize(creationDate, 12)
 		firstPage.drawText(creationDate, {
 			x: rightAlignX - creationDateWidth,
-			y: height - 197,
+			y: height - 200,
 			size: 12,
 			color: textColor,
 			font: montserratFont
@@ -116,8 +130,8 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const currentDate = formatDate(new Date().toISOString())
 		const currentDateWidth = montserratFont.widthOfTextAtSize(currentDate, 12)
 		firstPage.drawText(currentDate, {
-			x: width - 96,
-			y: height - 76,
+			x: width - rightMargin - currentDateWidth + 3,
+			y: height - 82,
 			size: 12,
 			color: textColor,
 			font: montserratFont
@@ -128,7 +142,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const powerWidth = montserratFont.widthOfTextAtSize(formattedPower, 12)
 		firstPage.drawText(formattedPower, {
 			x: width - rightMargin - powerWidth,
-			y: height - 145,
+			y: height - 148,
 			size: 12,
 			color: textColor,
 			font: montserratFont
@@ -139,7 +153,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const consumptionWidth = montserratFont.widthOfTextAtSize(formattedConsumption, 12)
 		firstPage.drawText(formattedConsumption, {
 			x: width - rightMargin - consumptionWidth,
-			y: height - 161,
+			y: height - 166,
 			size: 12,
 			color: textColor,
 			font: montserratFont
@@ -152,7 +166,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		const totalValueWidth = montserratSemiBoldFont.widthOfTextAtSize(formattedTotalInvestment, 12)
 		firstPage.drawText(formattedTotalInvestment, {
 			x: width - rightMargin - totalValueWidth,
-			y: height - 197,
+			y: height - 200,
 			size: 12,
 			color: textColor,
 			font: montserratSemiBoldFont
@@ -161,7 +175,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// Adiciona o total com a taxa nos outros locais
 		firstPage.drawText(formattedTotalInvestment, {
 			x: 175,
-			y: height - 312,
+			y: height - 315,
 			size: 12,
 			color: textColor,
 			font: montserratSemiBoldFont
@@ -169,7 +183,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 
 		firstPage.drawText(formattedTotalInvestment, {
 			x: 175,
-			y: height - 338,
+			y: height - 341,
 			size: 12,
 			color: textColor,
 			font: montserratSemiBoldFont
@@ -177,7 +191,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 
 		firstPage.drawText(formattedTotalInvestment, {
 			x: 175,
-			y: height - 364,
+			y: height - 367,
 			size: 12,
 			color: textColor,
 			font: montserratSemiBoldFont
@@ -186,9 +200,9 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// Calcula e adiciona as parcelas e o fator de leasing
 		const interestRate = 0.021
 		const terms = [36, 48, 60]
-		const yPositions = [height - 312, height - 338, height - 364]
+		const yPositions = [height - 315, height - 341, height - 367]
 		const installmentX = 342
-		const factorX = 265
+		const factorX = 278
 
 		terms.forEach((term, index) => {
 			const installment = calculateInstallmentPayment({
