@@ -2,7 +2,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, X } from "lucide-react"
 import { useFormContext } from "react-hook-form"
 
 import { getStructureTypes } from "@/actions/equipments"
@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { connectionVoltageTypes, energyProviders, INVERTER_TYPE_ID, MODULE_TYPE_ID, OTHERS_TYPE_ID } from "@/lib/constants"
 import { maskNumber } from "@/lib/masks"
 import { DynamicEquipmentSelect } from "./dynamic-equipment-selector"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface Step1Props {
 	onNext: () => void
@@ -32,6 +33,11 @@ const SimulationStep1 = ({ onNext }: Step1Props) => {
 	const handleNext = (e: React.MouseEvent) => {
 		e.preventDefault()
 		onNext()
+	}
+
+	const handleClearOthers = () => {
+		form.setValue("kit_others", "")
+		form.setValue("kit_others_brand_id", "")
 	}
 
 	return (
@@ -171,7 +177,17 @@ const SimulationStep1 = ({ onNext }: Step1Props) => {
 				</Card>
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-lg">Outros</CardTitle>
+						<div className="flex justify-between items-center">
+							<CardTitle className="text-lg">Outros</CardTitle>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={handleClearOthers}>
+										<X className="h-4 w-4" />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>Limpar seleção</TooltipContent>
+							</Tooltip>
+						</div>
 					</CardHeader>
 					<DynamicEquipmentSelect equipmentTypeId={OTHERS_TYPE_ID} formFieldName="kit_others" brandIdFieldName="kit_others_brand_id" formLabel="Outros" />
 				</Card>
