@@ -4,7 +4,7 @@ import JSZip from "jszip"
 
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
-import type { documentFields } from "@/components/forms/new-simulation/step-5-documents"
+import type { documentFields } from "@/lib/constants"
 
 const BUCKET_NAME = "docs_simulation"
 

@@ -7,7 +7,7 @@ import { toast } from "sonner"
 
 import { deleteOrder, generateOrderPdf, listOrderFiles } from "@/actions/orders"
 import { downloadSimulationFiles } from "@/actions/simulations"
-import { documentFields } from "@/components/forms/new-simulation/step-5-documents"
+import { documentFields } from "@/lib/constants"
 import { EditOrderDialog } from "@/components/dialogs/edit-order-dialog"
 import { UpdateOrderStatusDialog } from "@/components/dialogs/update-order-status-dialog"
 import { ViewOrderSheet } from "@/components/dialogs/view-order-sheet"

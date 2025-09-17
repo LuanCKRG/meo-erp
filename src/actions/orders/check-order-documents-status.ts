@@ -2,7 +2,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { documentFields } from "@/components/forms/new-simulation/step-5-documents"
+import { documentFields } from "@/lib/constants"
 import type { ActionResponse } from "@/types/action-response"
 import { listOrderFiles, updateOrderStatus } from "."
 import { getOrderById } from "."

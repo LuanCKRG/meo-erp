@@ -7,23 +7,12 @@ import { useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { FileInput } from "@/components/ui/file-input"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { documentFields } from "@/lib/constants"
 
 interface Step5Props {
 	onSubmit: () => void
 	onBack: () => void
 }
-
-export const documentFields = [
-	{ name: "rgCnhSocios", label: "RG / CNH Sócios" },
-	{ name: "balancoDRE2022", label: "Balanço e DRE 2022" },
-	{ name: "balancoDRE2023", label: "Balanço e DRE 2023" },
-	{ name: "balancoDRE2024", label: "Balanço e DRE 2024" },
-	{ name: "relacaoFaturamento", label: "Relação de Faturamento" },
-	{ name: "comprovanteEndereco", label: "Comprovante de Endereço" },
-	{ name: "irpfSocios", label: "IRPF dos Sócios" },
-	{ name: "fotosOperacao", label: "Fotos da Operação" },
-	{ name: "contaDeEnergia", label: "Conta de Energia" }
-] as const
 
 export function SimulationStep5({ onSubmit, onBack }: Step5Props) {
 	const form = useFormContext()
