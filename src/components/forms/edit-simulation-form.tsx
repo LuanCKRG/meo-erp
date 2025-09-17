@@ -265,7 +265,8 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 		relacaoFaturamento: undefined,
 		comprovanteEndereco: undefined,
 		irpfSocios: undefined,
-		fotosOperacao: undefined
+		fotosOperacao: undefined,
+		contaDeEnergia: undefined
 	}
 
 	return <EditSimulationContent simulationId={simulationId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
