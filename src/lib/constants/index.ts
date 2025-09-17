@@ -3,7 +3,7 @@ import connectionVoltageTypes from "@/lib/constants/connection-voltage-types"
 import energyProviders from "@/lib/constants/energy-providers"
 import { INVERTER_TYPE_ID, MODULE_TYPE_ID, OTHERS_TYPE_ID } from "@/lib/constants/equipment-types-ids"
 import PERMISSIONS from "@/lib/constants/permissions"
-import PDF_TEMPLATE_SIMULATION_BASE64 from "@/lib/constants/template-simulation-base44"
+import PDF_TEMPLATE_SIMULATION_BASE64 from "@/lib/constants/template-simulation-base64"
 import MONTSERRAT_BASE64 from "@/lib/constants/montserrat-base64"
 import MONTSERRAT_SEMIBOLD_BASE64 from "@/lib/constants/montserrat-semibold-base64"
 
