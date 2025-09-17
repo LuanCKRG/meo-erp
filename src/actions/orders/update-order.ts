@@ -7,7 +7,7 @@ import type { Customer } from "@/lib/definitions/customers"
 import type { Order } from "@/lib/definitions/orders"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
-import { uploadOrderFiles } from "."
+import { uploadOrderFiles } from "@/actions/orders"
 import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 
 const parseCurrencyStringToNumber = (value: string | undefined | null): number => {
