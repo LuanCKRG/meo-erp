@@ -40,6 +40,7 @@ const parseCurrency = (value: string | undefined): number | null => {
 // É usado antes de enviar para a action.
 export const editCustomerSchema = editCustomerFormSchema.transform((data) => ({
 	...data,
+	incorporation_date: data.incorporation_date.split("/").reverse().join("-"), // Converte DD/MM/YYYY para YYYY-MM-DD
 	annual_revenue: parseCurrency(data.annual_revenue),
 	contact_phone: data.contact_phone.replace(/\D/g, ""),
 	postal_code: data.postal_code.replace(/\D/g, "")
