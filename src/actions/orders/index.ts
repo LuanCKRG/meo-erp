@@ -6,5 +6,16 @@ import updateOrderStatus from "./update-order-status"
 import deleteOrder from "./delete-order"
 import generateOrderPdf from "./generate-order-pdf"
 import uploadOrderFiles from "./upload-order-files"
+import listOrderFiles from "./list-order-files"
 
-export { createOrderFromSimulation, getAllOrders, getOrderById, updateOrder, updateOrderStatus, deleteOrder, generateOrderPdf, uploadOrderFiles }
+export {
+	createOrderFromSimulation,
+	getAllOrders,
+	getOrderById,
+	updateOrder,
+	updateOrderStatus,
+	deleteOrder,
+	generateOrderPdf,
+	uploadOrderFiles,
+	listOrderFiles
+}
