@@ -56,7 +56,7 @@ export function SimulationStep5({ onSubmit, onBack }: Step5Props) {
 				</Button>
 				<Button type="button" onClick={onSubmit} disabled={form.formState.isSubmitting}>
 					<Send className="mr-2 h-4 w-4" />
-					Enviar
+					Salvar
 				</Button>
 			</div>
 		</form>
