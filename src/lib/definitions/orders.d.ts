@@ -2,7 +2,7 @@ import type { Database } from "@/lib/definitions/supabase"
 
 export type Order = Database["public"]["Tables"]["orders"]["Row"]
 export type OrderInsert = Database["public"]["Tables"]["orders"]["Insert"]
-export type OrderStatus = Database["public"]["Enums"]["application_status"]
+export type OrderStatus = Database["public"]["Enums"]["enum_order_status"]
 
 export type OrderWithRelations = {
 	id: string
