@@ -1,3 +1,4 @@
+// src/actions/orders/upload-order-files.ts
 "use server"
 
 import type { EditSimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
@@ -31,9 +32,11 @@ const documentFields: DocumentField[] = [
 	"contaDeEnergia"
 ]
 
-async function uploadOrderFiles(orderId: string, data: EditSimulationData): Promise<ActionResponse<{ paths: string[] }>> {
+// Updated to return the count of uploaded files
+async function uploadOrderFiles(orderId: string, data: EditSimulationData): Promise<ActionResponse<{ paths: string[]; uploadedCount: number }>> {
 	const supabase = createAdminClient()
 	const uploadedPaths: string[] = []
+	let uploadedCount = 0
 
 	try {
 		for (const field of documentFields) {
@@ -58,13 +61,14 @@ async function uploadOrderFiles(orderId: string, data: EditSimulationData): Prom
 					return { success: false, message: `Erro ao enviar o arquivo para ${field}.` }
 				}
 				uploadedPaths.push(filePath)
+				uploadedCount++
 			}
 		}
 
 		return {
 			success: true,
-			message: "Todos os arquivos foram enviados com sucesso.",
-			data: { paths: uploadedPaths }
+			message: "Arquivos enviados com sucesso.",
+			data: { paths: uploadedPaths, uploadedCount }
 		}
 	} catch (e) {
 		console.error("Erro inesperado em uploadOrderFiles:", e)
