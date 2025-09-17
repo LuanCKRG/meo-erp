@@ -17,6 +17,7 @@ const availableStatuses: { value: OrderStatus; label: string }[] = [
 	{ value: "confirmation_pending", label: "Em Confirmação" },
 	{ value: "credit_analysis", label: "Análise de Crédito" },
 	{ value: "documents_pending", label: "Ag. Documentos" },
+	{ value: "docs_analysis", label: "Análise Docs" },
 	{ value: "final_analysis", label: "Análise Final" },
 	{ value: "approved", label: "Aprovado" },
 	{ value: "rejected", label: "Reprovado" },
