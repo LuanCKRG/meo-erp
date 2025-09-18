@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 
+import { BrandsTableActions } from "@/components/data-tables/brands/brands-table-actions"
 import { Button } from "@/components/ui/button"
 import type { EquipmentBrand } from "@/lib/definitions/equipments"
 import { formatDate } from "@/lib/utils"
@@ -33,6 +34,10 @@ const columns: ColumnDef<EquipmentBrand>[] = [
 		cell: ({ row }) => {
 			return <div className="text-center">{formatDate(row.getValue("created_at"))}</div>
 		}
+	},
+	{
+		id: "actions",
+		cell: ({ row }) => <BrandsTableActions brand={row.original} />
 	}
 ]
 
