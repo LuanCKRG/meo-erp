@@ -3,7 +3,7 @@
 import type { EquipmentBrand } from "@/lib/definitions/equipments"
 import { createClient } from "@/lib/supabase/server"
 
-async function getBrandsByEquipmentType(typeId: string): Promise<EquipmentBrand[]> {
+async function getBrandsByEquipmentType(typeId: string): Promise<Omit<EquipmentBrand, "created_at" | "updated_at">[]> {
 	if (!typeId) return []
 
 	try {
