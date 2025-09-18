@@ -6,6 +6,7 @@ import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { StructureType } from "@/lib/definitions/equipments"
 import { formatDate } from "@/lib/utils"
+import { StructureTypesTableActions } from "./structure-types-table-actions"
 
 const columns: ColumnDef<StructureType>[] = [
 	{
@@ -33,6 +34,10 @@ const columns: ColumnDef<StructureType>[] = [
 		cell: ({ row }) => {
 			return <div className="text-center">{formatDate(row.getValue("created_at"))}</div>
 		}
+	},
+	{
+		id: "actions",
+		cell: ({ row }) => <StructureTypesTableActions structureType={row.original} />
 	}
 ]
 
