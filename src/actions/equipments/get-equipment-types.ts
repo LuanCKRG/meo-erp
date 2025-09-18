@@ -3,7 +3,7 @@
 import type { EquipmentType } from "@/lib/definitions/equipments"
 import { createClient } from "@/lib/supabase/server"
 
-async function getEquipmentTypes(): Promise<EquipmentType[]> {
+async function getEquipmentTypes(): Promise<Omit<EquipmentType, "created_at" | "updated_at">[]> {
 	try {
 		const supabase = await createClient()
 
