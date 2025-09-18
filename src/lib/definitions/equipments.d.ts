@@ -1,6 +1,6 @@
-import type { Database } from "@/lib/supabase"
+import type { Database } from "@/lib/definitions/supabase"
 
-type Equipment = Database["public"]["Tables"]["equipment"]["Row"]
+type Equipment = Database["public"]["Tables"]["equipments"]["Row"]
 type EquipmentBrand = Database["public"]["Tables"]["equipment_brands"]["Row"]
 type EquipmentType = Database["public"]["Tables"]["equipment_types"]["Row"]
 type StructureType = Database["public"]["Tables"]["structure_types"]["Row"]

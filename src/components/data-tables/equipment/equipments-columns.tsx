@@ -6,6 +6,7 @@ import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { EquipmentWithRelations } from "@/lib/definitions/equipments"
 import { formatDate } from "@/lib/utils"
+import { EquipmentsTableActions } from "./equipments-table-actions"
 
 const columns: ColumnDef<EquipmentWithRelations>[] = [
 	{
@@ -57,6 +58,10 @@ const columns: ColumnDef<EquipmentWithRelations>[] = [
 		cell: ({ row }) => {
 			return <div className="text-center">{formatDate(row.getValue("created_at"))}</div>
 		}
+	},
+	{
+		id: "actions",
+		cell: ({ row }) => <EquipmentsTableActions equipment={row.original} />
 	}
 ]
 

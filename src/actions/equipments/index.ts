@@ -11,6 +11,8 @@ import deleteBrand from "@/actions/equipments/delete-brand"
 import updateBrand from "@/actions/equipments/update-brand"
 import deleteStructureType from "@/actions/equipments/delete-structure-type"
 import updateStructureType from "@/actions/equipments/update-structure-type"
+import deleteEquipment from "@/actions/equipments/delete-equipment"
+import updateEquipment from "@/actions/equipments/update-equipment"
 
 export {
 	getBrandsByEquipmentType,
@@ -25,5 +27,7 @@ export {
 	deleteBrand,
 	updateBrand,
 	deleteStructureType,
-	updateStructureType
+	updateStructureType,
+	deleteEquipment,
+	updateEquipment
 }
