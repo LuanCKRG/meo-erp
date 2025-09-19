@@ -6,6 +6,7 @@ import { useEffect } from "react"
 
 import { getCurrentUser } from "@/actions/auth"
 import { getCurrentPartnerDetails } from "@/actions/partners"
+import { getSellerByUserId } from "@/actions/sellers"
 import { NewSimulationForm } from "@/components/forms/new-simulation/new-simulation-form"
 import { SimulationSelector } from "@/components/forms/new-simulation/simulation-selector"
 import { SimulationProvider, useSimulation } from "@/contexts/simulation-context"
@@ -23,6 +24,7 @@ function SimulationPageContent() {
 	})
 
 	const isPartner = user?.role === "partner"
+	const isSeller = user?.role === "seller"
 
 	const {
 		data: partnerDetails,
@@ -31,10 +33,27 @@ function SimulationPageContent() {
 	} = useQuery({
 		queryKey: ["currentPartnerDetails"],
 		queryFn: getCurrentPartnerDetails,
-		enabled: isPartner // Apenas busca se o usuário for um parceiro
+		enabled: isPartner
 	})
 
-	const { setPartnerId, setSellerId, partnerId, partnerName, sellerName, setPartnerName, setSellerName } = useSimulation()
+	// Busca dados do seller pelo user.id quando o usuário for um seller
+	const {
+		data: sellerQuery,
+		isLoading: isLoadingSeller,
+		error: sellerError
+	} = useQuery({
+		queryKey: ["currentSellerDetails", user?.id],
+		queryFn: () => {
+			if (!user?.id) {
+				return Promise.resolve(null)
+			}
+			return getSellerByUserId(user.id)
+		},
+		enabled: isSeller && !!user?.id
+	})
+	const sellerDetails = sellerQuery?.success ? sellerQuery.data : null
+
+	const { setPartnerId, setSellerId, partnerId, sellerId, partnerName, sellerName, setPartnerName, setSellerName } = useSimulation()
 
 	// Preenche o contexto automaticamente APENAS se o usuário for um parceiro
 	useEffect(() => {
@@ -42,13 +61,19 @@ function SimulationPageContent() {
 			setPartnerId(user.id)
 			setSellerId(partnerDetails.sellerId)
 			setPartnerName(user.name) // Parceiro logado é o parceiro da simulação
-			// O nome do seller associado precisaria de outra busca, mas o ID é o suficiente para a action.
-			// Podemos adicionar a busca do nome do seller se for necessário exibir.
 		}
 	}, [isPartner, user, partnerDetails, setPartnerId, setSellerId, setPartnerName])
 
-	const isLoading = isLoadingUser || (isPartner && isLoadingPartner)
-	const error = userError || (isPartner && partnerError)
+	// Auto-preenche o sellerId se o usuário for um seller
+	useEffect(() => {
+		if (isSeller && sellerDetails) {
+			setSellerId(sellerDetails.id)
+			setSellerName(sellerDetails.name)
+		}
+	}, [isSeller, sellerDetails, setSellerId, setSellerName])
+
+	const isLoading = isLoadingUser || (isPartner && isLoadingPartner) || (isSeller && isLoadingSeller)
+	const error = userError || (isPartner && partnerError) || (sellerQuery && !sellerQuery.success)
 
 	if (isLoading) {
 		return (
@@ -63,13 +88,16 @@ function SimulationPageContent() {
 		return <p className="text-destructive text-center">Não foi possível carregar os dados do usuário. Tente recarregar a página.</p>
 	}
 
-	const showSelector = user.role === "admin" || user.role === "seller"
-	const isFormDisabled = showSelector && !partnerId
+	const showAdminSelector = user.role === "admin"
+	const showSellerSelector = user.role === "seller" && !!sellerId // Garante que o sellerId está pronto
+
+	const isFormDisabled = (showAdminSelector || showSellerSelector) && !partnerId
 
 	const getContextText = () => {
-		if (!showSelector || !partnerId) return null
+		if (!partnerId) return null
+
 		if (user.role === "admin" && sellerName && partnerName) {
-			return `para ${sellerName} / ${partnerName}`
+			return `para ${sellerName.split(" ")[0]} / ${partnerName}`
 		}
 		if (user.role === "seller" && partnerName) {
 			return `para ${partnerName}`
@@ -86,7 +114,9 @@ function SimulationPageContent() {
 				</div>
 				{getContextText() && <p className="font-medium text-muted-foreground text-sm text-right">Criando simulação {getContextText()}</p>}
 			</div>
-			{showSelector && <SimulationSelector role={user.role} />}
+			{showAdminSelector && <SimulationSelector userRole="admin" />}
+			{showSellerSelector && <SimulationSelector userRole="seller" />}
+
 			<NewSimulationForm isDisabled={isFormDisabled} />
 		</div>
 	)
