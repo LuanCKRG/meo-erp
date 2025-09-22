@@ -133,3 +133,53 @@
 		font-size: clamp(1.25rem, 5cqw, 1.875rem);
 	}
 }
+/* Estilos para drag and drop fluido com Tailwind v4 */
+				[data-swapy-slot] {
+					transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+				}
+
+				[data-swapy-item] {
+					transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+				}
+
+				[data-swapy-item]:hover .drag-handle {
+					opacity: 1;
+					transform: scale(1);
+				}
+
+				.drag-handle {
+					opacity: 0;
+					transform: scale(0.8);
+					transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+					cursor: grab;
+				}
+
+				.drag-handle:active {
+					cursor: grabbing;
+				}
+
+				[data-swapy-item][data-swapy-is-dragging] {
+					opacity: 0.8;
+					transform: rotate(2deg) scale(1.02);
+					z-index: 1000;
+					box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+				}
+
+				[data-swapy-slot][data-swapy-highlighted] {
+					background-color: rgba(59, 130, 246, 0.1);
+					border-radius: 0.375rem;
+					border: 2px dashed rgba(59, 130, 246, 0.3);
+				}
+
+				/* Animação suave para os slots vazios */
+				[data-swapy-slot]:empty {
+					min-height: 2rem;
+					border: 2px dashed transparent;
+					border-radius: 0.375rem;
+					transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+				}
+
+				[data-swapy-slot]:empty[data-swapy-highlighted] {
+					border-color: rgba(59, 130, 246, 0.5);
+					background-color: rgba(59, 130, 246, 0.05);
+				}

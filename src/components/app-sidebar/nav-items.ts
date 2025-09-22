@@ -25,17 +25,6 @@ interface NavSection {
 const navItems: NavSection[] = [
 	{
 		id: 0,
-		title: "Admin",
-		permission: "admin:dashboard:view",
-		items: [
-			{ title: "Admin Dashboard", url: "/dashboard/admin", icon: Home, permission: "admin:dashboard:view" },
-			{ title: "Gerenciar Dados", url: "/dashboard/admin/data", icon: Package, permission: "admin:data:manage" },
-			{ title: "Configurações", url: "/dashboard/admin/settings", icon: Settings, permission: "admin:settings:manage" },
-			{ title: "Usuários", url: "/dashboard/admin/users", icon: Users, permission: "admin:users:view" }
-		]
-	},
-	{
-		id: 1,
 		title: "Operações",
 		items: [
 			{ title: "Home", url: "/dashboard/home", icon: Home },
@@ -43,37 +32,13 @@ const navItems: NavSection[] = [
 				title: "Vendedores",
 				url: "/dashboard/sellers",
 				icon: Briefcase,
-				permission: "sellers:view", // Permissão base para ver o menu
-				subItems: [
-					{
-						title: "Visão Geral",
-						url: "/dashboard/sellers",
-						permission: "sellers:view"
-					},
-					{
-						title: "Adicionar",
-						url: "/dashboard/sellers/add",
-						permission: "sellers:manage"
-					}
-				]
+				permission: "sellers:view" // Permissão base para ver o menu
 			},
 			{
 				title: "Parceiros",
 				url: "/dashboard/partners",
 				icon: Handshake,
-				permission: "partners:view",
-				subItems: [
-					{
-						title: "Visão Geral",
-						url: "/dashboard/partners",
-						permission: "partners:view"
-					},
-					{
-						title: "Adicionar",
-						url: "/dashboard/partners/add",
-						permission: "partners:manage"
-					}
-				]
+				permission: "partners:view"
 			},
 			{
 				title: "Clientes",
@@ -105,6 +70,17 @@ const navItems: NavSection[] = [
 				icon: FileText,
 				permission: "orders:view"
 			}
+		]
+	},
+	{
+		id: 1,
+		title: "Admin",
+		permission: "admin:dashboard:view",
+		items: [
+			{ title: "Admin Dashboard", url: "/dashboard/admin", icon: Home, permission: "admin:dashboard:view" },
+			{ title: "Gerenciar Dados", url: "/dashboard/admin/data", icon: Package, permission: "admin:data:manage" },
+			{ title: "Configurações", url: "/dashboard/admin/settings", icon: Settings, permission: "admin:settings:manage" },
+			{ title: "Usuários", url: "/dashboard/admin/users", icon: Users, permission: "admin:users:view" }
 		]
 	}
 ]
