@@ -404,6 +404,27 @@ export type Database = {
 				}
 				Relationships: []
 			}
+			rates: {
+				Row: {
+					created_at: string
+					id: string
+					updated_at: string
+					value: number
+				}
+				Insert: {
+					created_at?: string
+					id: string
+					updated_at?: string
+					value: number
+				}
+				Update: {
+					created_at?: string
+					id?: string
+					updated_at?: string
+					value?: number
+				}
+				Relationships: []
+			}
 			role_permissions: {
 				Row: {
 					permission_id: string
