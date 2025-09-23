@@ -4,6 +4,7 @@
 import { PostgrestError } from "@supabase/supabase-js"
 
 import { createCustomer, deleteCustomer, getCustomerByCnpj } from "@/actions/customers"
+import { getRate } from "@/actions/settings"
 import { uploadSimulationFiles } from "@/actions/simulations"
 import type { SimulationData } from "@/components/forms/new-simulation/validation/new-simulation"
 import type { CustomerInsert } from "@/lib/definitions/customers"
@@ -92,6 +93,13 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 			throw new Error("Não foi possível obter um ID de cliente para a simulação.")
 		}
 
+		// Busca as taxas atuais do banco de dados.
+		const [interestRateRes, serviceFeeRes] = await Promise.all([getRate("interest_rate"), getRate("service_fee")])
+
+		if (!interestRateRes.success || !serviceFeeRes.success) {
+			throw new Error("Não foi possível carregar as taxas de juros e serviços para a simulação.")
+		}
+
 		// A simulação ainda não armazena os documentos, mas a action está pronta para recebê-los.
 		const simulationData: SimulationInsert = {
 			customer_id: customerId,
@@ -108,7 +116,9 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 			other_costs: parseCurrencyStringToNumber(data.otherCosts),
 			created_by_user_id: user.id,
 			seller_id: context.sellerId,
-			notes: data.notes
+			notes: data.notes,
+			interest_rate: interestRateRes.data,
+			service_fee: serviceFeeRes.data
 		}
 
 		const { data: simulationResult, error: simulationError } = await supabaseAdmin.from("simulations").insert(simulationData).select("id, kdi").single()
