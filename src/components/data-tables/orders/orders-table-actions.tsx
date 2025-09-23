@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { OrderWithRelations } from "@/lib/definitions/orders"
+import { hasPermission } from "@/actions/auth"
 
 type DocumentFieldName = (typeof documentFields)[number]["name"]
 
@@ -37,6 +38,11 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 	const [selectedDocs, setSelectedDocs] = useState<Set<DocumentFieldName>>(new Set())
 
 	const queryClient = useQueryClient()
+
+	const { data: canManageStatus } = useQuery({
+		queryKey: ["permission", "orders:status"],
+		queryFn: () => hasPermission("orders:status")
+	})
 
 	const { data: availableFiles, isLoading: isLoadingFiles } = useQuery({
 		queryKey: ["order-files", order.id],
@@ -145,15 +151,17 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 					<TooltipContent>Editar Pedido</TooltipContent>
 				</Tooltip>
 
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<Button variant="ghost" size="icon" onClick={() => setIsStatusDialogOpen(true)}>
-							<RefreshCw className="h-4 w-4" />
-							<span className="sr-only">Alterar Status</span>
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent>Alterar Status</TooltipContent>
-				</Tooltip>
+				{canManageStatus && (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button variant="ghost" size="icon" onClick={() => setIsStatusDialogOpen(true)}>
+								<RefreshCw className="h-4 w-4" />
+								<span className="sr-only">Alterar Status</span>
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>Alterar Status</TooltipContent>
+					</Tooltip>
+				)}
 
 				<Tooltip>
 					<TooltipTrigger asChild>
