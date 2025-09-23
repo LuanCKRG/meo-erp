@@ -196,6 +196,7 @@ export type Database = {
 					energy_provider: string
 					equipment_value: number
 					id: string
+					interest_rate: number
 					kdi: number
 					kit_inverter_id: number
 					kit_module_id: number
@@ -204,6 +205,7 @@ export type Database = {
 					notes: string | null
 					other_costs: number | null
 					seller_id: string | null
+					service_fee: number
 					status: Database["public"]["Enums"]["enum_order_status"]
 					structure_type: string
 					system_power: number
@@ -218,6 +220,7 @@ export type Database = {
 					energy_provider: string
 					equipment_value: number
 					id?: string
+					interest_rate: number
 					kdi?: number
 					kit_inverter_id: number
 					kit_module_id: number
@@ -226,6 +229,7 @@ export type Database = {
 					notes?: string | null
 					other_costs?: number | null
 					seller_id?: string | null
+					service_fee: number
 					status?: Database["public"]["Enums"]["enum_order_status"]
 					structure_type: string
 					system_power: number
@@ -240,6 +244,7 @@ export type Database = {
 					energy_provider?: string
 					equipment_value?: number
 					id?: string
+					interest_rate?: number
 					kdi?: number
 					kit_inverter_id?: number
 					kit_module_id?: number
@@ -248,6 +253,7 @@ export type Database = {
 					notes?: string | null
 					other_costs?: number | null
 					seller_id?: string | null
+					service_fee?: number
 					status?: Database["public"]["Enums"]["enum_order_status"]
 					structure_type?: string
 					system_power?: number
@@ -526,6 +532,7 @@ export type Database = {
 					energy_provider: string
 					equipment_value: number
 					id: string
+					interest_rate: number
 					kdi: number
 					kit_inverter_id: number
 					kit_module_id: number
@@ -534,6 +541,7 @@ export type Database = {
 					notes: string | null
 					other_costs: number | null
 					seller_id: string | null
+					service_fee: number
 					status: Database["public"]["Enums"]["enum_simulation_status"]
 					structure_type: string
 					system_power: number
@@ -548,6 +556,7 @@ export type Database = {
 					energy_provider: string
 					equipment_value: number
 					id?: string
+					interest_rate: number
 					kdi?: number
 					kit_inverter_id: number
 					kit_module_id: number
@@ -556,6 +565,7 @@ export type Database = {
 					notes?: string | null
 					other_costs?: number | null
 					seller_id?: string | null
+					service_fee: number
 					status?: Database["public"]["Enums"]["enum_simulation_status"]
 					structure_type: string
 					system_power: number
@@ -570,6 +580,7 @@ export type Database = {
 					energy_provider?: string
 					equipment_value?: number
 					id?: string
+					interest_rate?: number
 					kdi?: number
 					kit_inverter_id?: number
 					kit_module_id?: number
@@ -578,6 +589,7 @@ export type Database = {
 					notes?: string | null
 					other_costs?: number | null
 					seller_id?: string | null
+					service_fee?: number
 					status?: Database["public"]["Enums"]["enum_simulation_status"]
 					structure_type?: string
 					system_power?: number
