@@ -1,14 +1,17 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: <dont need this> */
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, ArrowRight, DollarSign } from "lucide-react"
 import { useFormContext } from "react-hook-form"
 
+import { getRate } from "@/actions/settings"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { maskNumber } from "@/lib/masks"
 import { calculateInstallmentPayment } from "@/lib/utils"
@@ -27,9 +30,6 @@ const parseCurrency = (value: string | undefined): number => {
 
 const installmentTerms = [12, 24, 36, 48, 60, 72]
 
-const serviceFee = 0.35
-const interestRate = 0.021
-
 interface Step4Props {
 	onNext: () => void
 	onBack: () => void
@@ -38,10 +38,36 @@ interface Step4Props {
 const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 	const form = useFormContext()
 
+	const { data: rates, isLoading: isLoadingRates } = useQuery({
+		queryKey: ["rates", "interest_rate", "service_fee"],
+		queryFn: async () => {
+			const [interest, service] = await Promise.all([getRate("interest_rate"), getRate("service_fee")])
+
+			// Validação para garantir que os dados foram carregados corretamente
+			if (!interest.success || !service.success) {
+				throw new Error("Erro ao carregar taxas do banco de dados")
+			}
+
+			return {
+				// Dividindo por 100 apenas uma vez aqui, já que vem como % do banco
+				interest_rate: interest.data / 100,
+				service_fee: service.data / 100
+			}
+		},
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		// Valores padrão em caso de erro
+		retry: 3,
+		retryDelay: 1000
+	})
+
 	const watchedStringValues = form.watch(["equipmentValue", "laborValue", "otherCosts"])
 
 	const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
 	const subtotal = (equipment || 0) + (labor || 0) + (others || 0)
+
+	// Usando valores padrão caso não tenha carregado ainda ou houve erro
+	const serviceFee = rates?.service_fee ?? 0.35 // 35% padrão
+	const interestRate = rates?.interest_rate ?? 0.021 // 2.1% padrão
 
 	const servicesValue = subtotal * serviceFee
 	const formattedServicesValue = formatCurrency(servicesValue)
@@ -137,27 +163,45 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 							<CardDescription>Cálculo em tempo real baseado nos valores fornecidos.</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
-								<span className="text-sm text-muted-foreground">Total do Investimento</span>
-								<span className="font-bold text-fluid-2xl">{formattedTotalInvestment}</span>
-							</div>
-							<Separator />
-							<h4 className="font-medium">Parcelamento</h4>
-							<div className="space-y-2">
-								{installmentTerms.map((term, index) => {
-									const installment = calculateInstallmentPayment({
-										rate: interestRate,
-										numberOfPeriods: term,
-										presentValue: totalInvestment
-									})
-									return (
-										<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
-											<span className="text-muted-foreground">{term}x de</span>
-											<span className="font-semibold">{formatCurrency(installment)}</span>
-										</div>
-									)
-								})}
-							</div>
+							{isLoadingRates ? (
+								<div className="space-y-4">
+									<Skeleton className="h-16 w-full" />
+									<Separator />
+									<Skeleton className="h-5 w-24" />
+									<div className="space-y-2">
+										{[...Array(6)].map((_, i) => (
+											<div key={i} className="flex justify-between">
+												<Skeleton className="h-4 w-16" />
+												<Skeleton className="h-4 w-24" />
+											</div>
+										))}
+									</div>
+								</div>
+							) : (
+								<>
+									<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
+										<span className="text-sm text-muted-foreground">Total do Investimento</span>
+										<span className="font-bold text-fluid-2xl">{formattedTotalInvestment}</span>
+									</div>
+									<Separator />
+									<h4 className="font-medium">Parcelamento</h4>
+									<div className="space-y-2">
+										{installmentTerms.map((term, index) => {
+											const installment = calculateInstallmentPayment({
+												rate: interestRate,
+												numberOfPeriods: term,
+												presentValue: totalInvestment
+											})
+											return (
+												<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
+													<span className="text-muted-foreground">{term}x de</span>
+													<span className="font-semibold">{formatCurrency(installment)}</span>
+												</div>
+											)
+										})}
+									</div>
+								</>
+							)}
 						</CardContent>
 					</Card>
 				</div>
