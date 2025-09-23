@@ -8,6 +8,7 @@ import { MONTSERRAT_BASE64, MONTSERRAT_SEMIBOLD_BASE64, PDF_TEMPLATE_SIMULATION_
 import { formatCnpj } from "@/lib/formatters"
 import { formatDate, calculateInstallmentPayment } from "@/lib/utils"
 import type { ActionResponse } from "@/types/action-response"
+import { getRate } from "@/actions/settings"
 
 const formatCurrency = (value: number | null | undefined): string => {
 	if (value === null || value === undefined) return "R$ 0,00"
@@ -48,6 +49,16 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		}
 
 		const { customer, created_at, equipment_value, labor_value, other_costs, system_power, current_consumption } = simulationDetails.data
+
+		// Busca as taxas atuais do banco de dados.
+		const [interestRateRes, serviceFeeRes] = await Promise.all([getRate("interest_rate"), getRate("service_fee")])
+
+		if (!interestRateRes.success || !serviceFeeRes.success) {
+			throw new Error("Não foi possível carregar as taxas de juros e serviços para a simulação.")
+		}
+
+		const interestRate = interestRateRes.data / 100 // 0.021
+		const serviceFee = serviceFeeRes.data / 100 // 0.035
 
 		// 2. Carregar o template PDF e a fonte do Base64
 		const templateBytes = Buffer.from(PDF_TEMPLATE_SIMULATION_BASE64, "base64")
@@ -161,7 +172,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 
 		// Calcula e adiciona o Valor Total do Investimento
 		const subtotal = (equipment_value || 0) + (labor_value || 0) + (other_costs || 0)
-		const totalInvestment = subtotal * 1.35
+		const totalInvestment = subtotal * (1 + serviceFee / 100)
 		const formattedTotalInvestment = formatCurrency(totalInvestment)
 		const totalValueWidth = montserratSemiBoldFont.widthOfTextAtSize(formattedTotalInvestment, 12)
 		firstPage.drawText(formattedTotalInvestment, {
@@ -198,7 +209,6 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		})
 
 		// Calcula e adiciona as parcelas e o fator de leasing
-		const interestRate = 0.021
 		const terms = [36, 48, 60]
 		const yPositions = [height - 315, height - 341, height - 367]
 		const installmentX = 342
