@@ -185,23 +185,32 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 
 		// Adiciona o total com a taxa nos outros locais
 		firstPage.drawText(formattedTotalInvestment, {
-			x: 175,
-			y: height - 315,
+			x: width - rightMargin - totalValueWidth,
+			y: height - 200,
+			size: 12,
+			color: textColor,
+			font: montserratSemiBoldFont
+		})
+
+		// Adiciona o total com a taxa nos outros locais
+		firstPage.drawText(formattedTotalInvestment, {
+			x: 184,
+			y: height - 319,
 			size: 12,
 			color: textColor,
 			font: montserratSemiBoldFont
 		})
 
 		firstPage.drawText(formattedTotalInvestment, {
-			x: 175,
-			y: height - 341,
+			x: 184,
+			y: height - 343,
 			size: 12,
 			color: textColor,
 			font: montserratSemiBoldFont
 		})
 
 		firstPage.drawText(formattedTotalInvestment, {
-			x: 175,
+			x: 184,
 			y: height - 367,
 			size: 12,
 			color: textColor,
@@ -210,7 +219,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 
 		// Calcula e adiciona as parcelas e o fator de leasing
 		const terms = [36, 48, 60]
-		const yPositions = [height - 315, height - 341, height - 367]
+		const yPositions = [height - 319, height - 343, height - 367]
 		const installmentX = 342
 		const factorX = 278
 
