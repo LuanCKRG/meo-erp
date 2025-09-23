@@ -16,7 +16,7 @@ interface RateFormProps {
 	rateId: "interest_rate" | "service_fee"
 }
 
-const RateForm = ({ rateId }: RateFormProps) => {
+export const RateForm = ({ rateId }: RateFormProps) => {
 	const [value, setValue] = useState("")
 	const [isPending, startTransition] = useTransition()
 	const queryClient = useQueryClient()
@@ -32,12 +32,15 @@ const RateForm = ({ rateId }: RateFormProps) => {
 
 	useEffect(() => {
 		if (rateData?.success) {
-			const formattedRate = maskNumber(rateData.data.toString(), 4)
-			setValue(formattedRate)
+			// O valor do banco já vem no formato correto (35.00, 2.10)
+			// Convertemos para string com vírgula para exibição brasileira
+			const displayValue = rateData.data.toString().replace(".", ",")
+			setValue(displayValue)
 		}
 	}, [rateData])
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+		// Aplica máscara apenas no que o usuário digita
 		const maskedValue = maskNumber(e.target.value, 4)
 		setValue(maskedValue)
 	}
@@ -45,6 +48,7 @@ const RateForm = ({ rateId }: RateFormProps) => {
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault()
 
+		// Converte de volta para formato numérico (35,00 -> 35.00)
 		const numericValue = parseFloat(value.replace(/\./g, "").replace(",", "."))
 		if (Number.isNaN(numericValue) || numericValue < 0) {
 			toast.error("Valor inválido", {
@@ -59,6 +63,8 @@ const RateForm = ({ rateId }: RateFormProps) => {
 				success: (res) => {
 					if (res.success) {
 						queryClient.invalidateQueries({ queryKey: ["rate", rateId] })
+						// Invalida também as queries do step-4 para atualizar os cálculos
+						queryClient.invalidateQueries({ queryKey: ["rates", "interest_rate", "service_fee"] })
 						return "Taxa salva com sucesso!"
 					}
 					throw new Error(res.message)
@@ -93,5 +99,3 @@ const RateForm = ({ rateId }: RateFormProps) => {
 		</form>
 	)
 }
-
-export { RateForm }
