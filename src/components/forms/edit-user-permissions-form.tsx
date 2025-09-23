@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Save } from "lucide-react"
-import { useEffect, useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useTransition } from "react"
 import { toast } from "sonner"
 
 import { getUserPermissionsDetailed, updateUserPermissions } from "@/actions/users"
@@ -35,7 +35,8 @@ const permissionTranslations: Record<PermissionId, string> = {
 	"sellers:view": "Visualizar Lista de Vendedores",
 	"simulations:create": "Criar Novas Simulações",
 	"simulations:view": "Ver Simulações Criadas",
-	"orders:view": "Ver Pedidos"
+	"orders:view": "Ver Pedidos",
+	"orders:status": "Alterar Status"
 }
 
 const resourceTitleTranslations: Record<string, string> = {
