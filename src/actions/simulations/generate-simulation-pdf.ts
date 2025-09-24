@@ -73,6 +73,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		const montserratFont = await pdfDoc.embedFont(montserratFontBytes, { subset: true })
 		const montserratSemiBoldFont = await pdfDoc.embedFont(montserratSemiBoldFontBytes, { subset: true })
 		const textColor = rgb(83 / 255, 86 / 255, 90 / 255) // Cor #53565A
+		const fontSize = 10
 
 		// 3. Adicionar dados ao PDF
 		const firstPage = pdfDoc.getPages()[0]
@@ -86,7 +87,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(formattedCnpj, {
 			x: rightAlignX - cnpjWidth,
 			y: height - 148,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
@@ -132,7 +133,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(creationDate, {
 			x: rightAlignX - creationDateWidth,
 			y: height - 200,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
@@ -143,7 +144,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(currentDate, {
 			x: width - rightMargin - currentDateWidth + 3,
 			y: height - 82,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
@@ -154,7 +155,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(formattedPower, {
 			x: width - rightMargin - powerWidth,
 			y: height - 148,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
@@ -165,7 +166,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(formattedConsumption, {
 			x: width - rightMargin - consumptionWidth,
 			y: height - 166,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
@@ -178,7 +179,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(formattedTotalInvestment, {
 			x: width - rightMargin - totalValueWidth,
 			y: height - 200,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratSemiBoldFont
 		})
@@ -187,7 +188,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(formattedTotalInvestment, {
 			x: width - rightMargin - totalValueWidth,
 			y: height - 200,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratSemiBoldFont
 		})
@@ -196,7 +197,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(formattedTotalInvestment, {
 			x: 184,
 			y: height - 319,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratSemiBoldFont
 		})
@@ -204,7 +205,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(formattedTotalInvestment, {
 			x: 184,
 			y: height - 343,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratSemiBoldFont
 		})
@@ -212,7 +213,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		firstPage.drawText(formattedTotalInvestment, {
 			x: 184,
 			y: height - 367,
-			size: 12,
+			size: fontSize,
 			color: textColor,
 			font: montserratSemiBoldFont
 		})
@@ -236,7 +237,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			firstPage.drawText(formatCurrency(installment), {
 				x: installmentX,
 				y: yPositions[index],
-				size: 12,
+				size: fontSize,
 				color: textColor,
 				font: montserratSemiBoldFont
 			})
@@ -244,7 +245,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			firstPage.drawText(formattedFactor, {
 				x: factorX,
 				y: yPositions[index],
-				size: 12,
+				size: fontSize,
 				color: textColor,
 				font: montserratFont
 			})
