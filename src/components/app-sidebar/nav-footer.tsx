@@ -1,6 +1,7 @@
 "use client"
 
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react"
+import Link from "next/link"
 
 import { signOut } from "@/actions/auth"
 import {
@@ -72,9 +73,11 @@ const NavUser = ({
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
-							<DropdownMenuItem>
-								<BadgeCheck />
-								Minha conta
+							<DropdownMenuItem asChild>
+								<Link href="/dashboard/my-account">
+									<BadgeCheck />
+									Minha conta
+								</Link>
 							</DropdownMenuItem>
 							<DropdownMenuItem>
 								<Bell />
