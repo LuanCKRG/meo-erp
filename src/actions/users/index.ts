@@ -1,5 +1,7 @@
 import getAllUsers from "./get-all-users"
 import getUserPermissionsDetailed from "./get-user-permissions-detailed"
 import updateUserPermissions from "./update-user-permissions"
+import updateUserName from "./update-user-name"
+import updateUserPassword from "./update-user-password"
 
-export { getAllUsers, getUserPermissionsDetailed, updateUserPermissions }
+export { getAllUsers, getUserPermissionsDetailed, updateUserPermissions, updateUserName, updateUserPassword }
