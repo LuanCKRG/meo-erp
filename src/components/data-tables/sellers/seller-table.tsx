@@ -14,10 +14,12 @@ import {
 	type VisibilityState
 } from "@tanstack/react-table"
 import { useState } from "react"
-import { getAllSellers } from "@/actions/sellers"
+
+import { getSellersForCurrentUser } from "@/actions/sellers"
 import { columns } from "@/components/data-tables/sellers/columns"
 import { SellerTableToolbar } from "@/components/data-tables/sellers/seller-table-toolbar"
 import { DataTable } from "@/components/ui/data-table"
+import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options"
 import { usePersistedTableState } from "@/hooks/use-persisted-table-state"
 
@@ -45,7 +47,7 @@ const SellerTable = () => {
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["sellers"],
-		queryFn: getAllSellers
+		queryFn: getSellersForCurrentUser
 	})
 
 	const table = useReactTable({
@@ -90,7 +92,7 @@ const SellerTable = () => {
 	)
 
 	if (isLoading) {
-		return <div>Carregando...</div>
+		return <DataTableSkeleton columnCount={6} />
 	}
 
 	return <DataTable table={table} toolbar={toolbar} />
