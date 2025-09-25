@@ -8,6 +8,7 @@ import updateSimulationStatus from "@/actions/simulations/update-simulation-stat
 import uploadSimulationFiles from "./upload-simulation-files"
 import downloadSimulationFiles from "./download-simulation-files"
 import listSimulationFiles from "./list-simulation-files"
+import getSimulationsForCurrentUser from "./get-simulations-for-current-user"
 
 export {
 	createSimulation,
@@ -19,5 +20,6 @@ export {
 	updateSimulationStatus,
 	uploadSimulationFiles,
 	downloadSimulationFiles,
-	listSimulationFiles
+	listSimulationFiles,
+	getSimulationsForCurrentUser
 }

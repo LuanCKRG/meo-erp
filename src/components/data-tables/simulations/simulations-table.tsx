@@ -11,7 +11,7 @@ import {
 	useReactTable
 } from "@tanstack/react-table"
 
-import { getAllSimulations } from "@/actions/simulations"
+import { getSimulationsForCurrentUser } from "@/actions/simulations"
 import { columns } from "@/components/data-tables/simulations/simulations-columns"
 import { SimulationsTableToolbar } from "@/components/data-tables/simulations/simulations-table-toolbar"
 import { DataTable } from "@/components/ui/data-table"
@@ -34,7 +34,7 @@ export const SimulationsTable = () => {
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["simulations"],
-		queryFn: getAllSimulations
+		queryFn: getSimulationsForCurrentUser
 	})
 
 	const table = useReactTable({
