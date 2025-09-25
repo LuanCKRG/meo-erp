@@ -153,7 +153,7 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 
 	return (
 		<>
-			<div className="flex items-center justify-center space-x-1">
+			<div className="flex items-center justify-center space-x-1 alternative-buttons">
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button variant="ghost" size="icon" onClick={() => setIsViewSheetOpen(true)}>
@@ -275,11 +275,11 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
-									{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin text-destructive" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+									{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
 									<span className="sr-only">Deletar</span>
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent>Deletar Simulação</TooltipContent>
+							<TooltipContent className="tooltip-content bg-destructive fill-destructive text-white">Deletar Simulação</TooltipContent>
 						</Tooltip>
 					</>
 				)}
