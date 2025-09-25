@@ -12,7 +12,7 @@ import {
 } from "@tanstack/react-table"
 import { useState } from "react"
 
-import { getAllPartners } from "@/actions/partners"
+import { getPartnersForCurrentUser } from "@/actions/partners"
 import { columns } from "@/components/data-tables/partners/columns"
 import { PartnerTableToolbar } from "@/components/data-tables/partners/partner-table-toolbar"
 import { DataTable } from "@/components/ui/data-table"
@@ -46,7 +46,7 @@ const PartnerTable = () => {
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["partners"],
-		queryFn: getAllPartners
+		queryFn: () => getPartnersForCurrentUser()
 	})
 
 	const table = useReactTable({

@@ -8,6 +8,7 @@ import updatePartner from "@/actions/partners/update-partner"
 import getCurrentPartnerDetails from "@/actions/partners/get-current-partner-details"
 import getPartnersBySellerId from "@/actions/partners/get-partner-by-seller-id"
 import getAllPartnersWithSeller from "./get-all-partners-with-sellers"
+import getPartnersForCurrentUser from "./get-partners-for-current-user"
 
 export {
 	getAllPartners,
@@ -19,5 +20,6 @@ export {
 	setPartnerActiveStatus,
 	getCurrentPartnerDetails,
 	getPartnersBySellerId,
-	getAllPartnersWithSeller
+	getAllPartnersWithSeller,
+	getPartnersForCurrentUser
 }
