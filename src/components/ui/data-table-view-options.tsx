@@ -22,7 +22,11 @@ export const DataTableViewOptions = <TData,>({ table, columnNameMap }: DataTable
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
+				<Button
+					variant="outline"
+					size="sm"
+					className="ml-auto hidden h-8 lg:flex bg-secondary-foreground/10 hover:bg-secondary-foreground text-secondary-foreground hover:text-secondary"
+				>
 					<SlidersHorizontal className="mr-2 h-4 w-4" />
 					Colunas
 				</Button>

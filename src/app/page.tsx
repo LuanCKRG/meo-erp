@@ -7,7 +7,7 @@ const HomePage = () => {
 	return (
 		<div className="bg-gradient-to-br from-background to-primary/20 flex min-h-svh flex-col items-center  p-6 md:p-10">
 			<div className="w-full max-w-sm md:max-w-md">
-				<Image src="/logo.png" alt="MEO Ernegia" width={300} height={200} className="w-full" />
+				<Image src="/logo.png" alt="MEO Leasing" width={300} height={200} className="w-full" />
 				<AuthFormTabs />
 				<div className="text-muted-foreground mt-6 text-center text-xs text-balance">
 					<p>

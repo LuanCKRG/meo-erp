@@ -13,7 +13,7 @@ export const CustomerTableActions = ({ customer }: { customer: CustomerWithRelat
 
 	return (
 		<>
-			<div className="flex items-center justify-center space-x-1">
+			<div className="flex items-center justify-center space-x-1 alternative-buttons-no-trash">
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>

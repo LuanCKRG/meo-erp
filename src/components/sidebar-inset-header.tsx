@@ -9,7 +9,7 @@ const SidebarInsetHeader = () => (
 			<Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
 			<HeaderBreadcrumb />
 			<div className="ml-auto flex items-center gap-2">
-				<span className="hidden sm:flex font-semibold text-primary">MEO Ernegia</span>
+				<span className="hidden sm:flex font-semibold text-primary-foreground">MEO Leasing</span>
 			</div>
 		</div>
 	</header>

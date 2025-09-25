@@ -130,7 +130,7 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 
 	return (
 		<>
-			<div className="flex items-center justify-center space-x-1">
+			<div className="flex items-center justify-center gap-x-2 alternative-buttons">
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button variant="ghost" size="icon" onClick={() => setIsViewSheetOpen(true)}>
@@ -238,11 +238,11 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
-							{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin text-destructive" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+							{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
 							<span className="sr-only">Deletar</span>
 						</Button>
 					</TooltipTrigger>
-					<TooltipContent>Deletar Pedido</TooltipContent>
+					<TooltipContent className="tooltip-content bg-destructive fill-destructive text-white">Deletar Pedido</TooltipContent>
 				</Tooltip>
 			</div>
 
