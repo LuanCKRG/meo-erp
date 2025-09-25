@@ -58,87 +58,111 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 	return (
 		<>
 			<div className="flex items-center justify-center space-x-1">
-				<Popover>
+				<div className="contents space-x-1 alternative-buttons-no-trash">
+					<Popover>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<PopoverTrigger asChild>
+									<Button aria-haspopup="true" size="icon" variant="ghost">
+										<Eye className="h-4 w-4" />
+										<span className="sr-only">Ver detalhes</span>
+									</Button>
+								</PopoverTrigger>
+							</TooltipTrigger>
+							<TooltipContent>Ver Detalhes</TooltipContent>
+						</Tooltip>
+						<PopoverContent className="w-96">
+							<div className="grid gap-4 text-left">
+								<div className="space-y-2">
+									<h4 className="font-medium leading-none">{partner.legal_business_name}</h4>
+									<p className="text-sm text-muted-foreground">Detalhes completos do parceiro.</p>
+								</div>
+								<Separator />
+								<div className="grid gap-2 text-sm">
+									<h5 className="font-semibold">Dados da Empresa</h5>
+									<div className="grid grid-cols-[100px_1fr] items-center">
+										<span className="font-medium text-muted-foreground">CNPJ</span>
+										<span>{formatCnpj(partner.cnpj)}</span>
+									</div>
+									<Separator />
+									<h5 className="font-semibold pt-2">Contato</h5>
+									<div className="grid grid-cols-[100px_1fr] items-center">
+										<span className="font-medium text-muted-foreground">Responsável</span>
+										<span>{partner.contact_name}</span>
+									</div>
+									<div className="grid grid-cols-[100px_1fr] items-center">
+										<span className="font-medium text-muted-foreground">Celular</span>
+										<span>{formatPhone(partner.contact_mobile)}</span>
+									</div>
+									<div className="grid grid-cols-[100px_1fr] items-center">
+										<span className="font-medium text-muted-foreground">Email</span>
+										<span>{partner.contact_email}</span>
+									</div>
+									<Separator />
+									<h5 className="font-semibold pt-2">Endereço</h5>
+									<div className="grid grid-cols-[100px_1fr] items-center">
+										<span className="font-medium text-muted-foreground">CEP</span>
+										<span>{formatCep(partner.cep)}</span>
+									</div>
+									<div className="grid grid-cols-[100px_1fr] items-center">
+										<span className="font-medium text-muted-foreground">Logradouro</span>
+										<span>
+											{partner.street}, {partner.number}
+										</span>
+									</div>
+									{partner.complement && (
+										<div className="grid grid-cols-[100px_1fr] items-center">
+											<span className="font-medium text-muted-foreground">Complemento</span>
+											<span>{partner.complement}</span>
+										</div>
+									)}
+									<div className="grid grid-cols-[100px_1fr] items-center">
+										<span className="font-medium text-muted-foreground">Bairro</span>
+										<span>{partner.neighborhood}</span>
+									</div>
+									<div className="grid grid-cols-[100px_1fr] items-center">
+										<span className="font-medium text-muted-foreground">Cidade/UF</span>
+										<span>
+											{partner.city}/{partner.state}
+										</span>
+									</div>
+								</div>
+							</div>
+						</PopoverContent>
+					</Popover>
+
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<PopoverTrigger asChild>
-								<Button aria-haspopup="true" size="icon" variant="ghost">
-									<Eye className="h-4 w-4" />
-									<span className="sr-only">Ver detalhes</span>
-								</Button>
-							</PopoverTrigger>
+							<Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
+								<Pencil className="h-4 w-4" />
+								<span className="sr-only">Editar Parceiro</span>
+							</Button>
 						</TooltipTrigger>
-						<TooltipContent>Ver Detalhes</TooltipContent>
+						<TooltipContent>Editar Parceiro</TooltipContent>
 					</Tooltip>
-					<PopoverContent className="w-96">
-						<div className="grid gap-4 text-left">
-							<div className="space-y-2">
-								<h4 className="font-medium leading-none">{partner.legal_business_name}</h4>
-								<p className="text-sm text-muted-foreground">Detalhes completos do parceiro.</p>
-							</div>
-							<Separator />
-							<div className="grid gap-2 text-sm">
-								<h5 className="font-semibold">Dados da Empresa</h5>
-								<div className="grid grid-cols-[100px_1fr] items-center">
-									<span className="font-medium text-muted-foreground">CNPJ</span>
-									<span>{formatCnpj(partner.cnpj)}</span>
-								</div>
-								<Separator />
-								<h5 className="font-semibold pt-2">Contato</h5>
-								<div className="grid grid-cols-[100px_1fr] items-center">
-									<span className="font-medium text-muted-foreground">Responsável</span>
-									<span>{partner.contact_name}</span>
-								</div>
-								<div className="grid grid-cols-[100px_1fr] items-center">
-									<span className="font-medium text-muted-foreground">Celular</span>
-									<span>{formatPhone(partner.contact_mobile)}</span>
-								</div>
-								<div className="grid grid-cols-[100px_1fr] items-center">
-									<span className="font-medium text-muted-foreground">Email</span>
-									<span>{partner.contact_email}</span>
-								</div>
-								<Separator />
-								<h5 className="font-semibold pt-2">Endereço</h5>
-								<div className="grid grid-cols-[100px_1fr] items-center">
-									<span className="font-medium text-muted-foreground">CEP</span>
-									<span>{formatCep(partner.cep)}</span>
-								</div>
-								<div className="grid grid-cols-[100px_1fr] items-center">
-									<span className="font-medium text-muted-foreground">Logradouro</span>
-									<span>
-										{partner.street}, {partner.number}
-									</span>
-								</div>
-								{partner.complement && (
-									<div className="grid grid-cols-[100px_1fr] items-center">
-										<span className="font-medium text-muted-foreground">Complemento</span>
-										<span>{partner.complement}</span>
-									</div>
-								)}
-								<div className="grid grid-cols-[100px_1fr] items-center">
-									<span className="font-medium text-muted-foreground">Bairro</span>
-									<span>{partner.neighborhood}</span>
-								</div>
-								<div className="grid grid-cols-[100px_1fr] items-center">
-									<span className="font-medium text-muted-foreground">Cidade/UF</span>
-									<span>
-										{partner.city}/{partner.state}
-									</span>
-								</div>
-							</div>
-						</div>
-					</PopoverContent>
-				</Popover>
-
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
-							<Pencil className="h-4 w-4" />
-							<span className="sr-only">Editar Parceiro</span>
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent>Editar Parceiro</TooltipContent>
-				</Tooltip>
+					{partner.status === "approved" &&
+						(partner.is_active ? (
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button variant="ghost" size="icon" onClick={() => handleToggleActive(false)} disabled={isPending}>
+										{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ToggleLeft className="h-4 w-4" />}
+										<span className="sr-only">Inativar</span>
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>Inativar</TooltipContent>
+							</Tooltip>
+						) : (
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button variant="ghost" size="icon" onClick={() => handleToggleActive(true)} disabled={isPending}>
+										{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ToggleRight className="h-4 w-4" />}
+										<span className="sr-only">Reativar</span>
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>Reativar</TooltipContent>
+							</Tooltip>
+						))}
+				</div>
 
 				{partner.status === "pending" && (
 					<>
@@ -162,30 +186,8 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 						</Tooltip>
 					</>
 				)}
-
-				{partner.status === "approved" &&
-					(partner.is_active ? (
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant="ghost" size="icon" onClick={() => handleToggleActive(false)} disabled={isPending}>
-									{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ToggleLeft className="h-4 w-4" />}
-									<span className="sr-only">Inativar</span>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Inativar</TooltipContent>
-						</Tooltip>
-					) : (
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button variant="ghost" size="icon" onClick={() => handleToggleActive(true)} disabled={isPending}>
-									{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ToggleRight className="h-4 w-4" />}
-									<span className="sr-only">Reativar</span>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Reativar</TooltipContent>
-						</Tooltip>
-					))}
 			</div>
+
 			<EditPartnerDialog partner={partner} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
 			<ApprovePartnerDialog partner={partner} open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen} />
 		</>
