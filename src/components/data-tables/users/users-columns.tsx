@@ -6,8 +6,11 @@ import { ArrowUpDown } from "lucide-react"
 import { EditUserPermissionsDialog } from "@/components/dialogs/edit-user-permissions-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import type { Database } from "@/lib/definitions/supabase"
 import type { User } from "@/lib/definitions/users"
 import { formatDate } from "@/lib/utils"
+
+type UserRole = Database["public"]["Enums"]["user_role"]
 
 const ActionsCell = ({ user, canManage }: { user: User; canManage: boolean }) => {
 	if (!canManage) {
@@ -15,6 +18,18 @@ const ActionsCell = ({ user, canManage }: { user: User; canManage: boolean }) =>
 	}
 
 	return <EditUserPermissionsDialog user={user} />
+}
+
+const roleTranslations: Record<UserRole, string> = {
+	admin: "Admin",
+	seller: "Vendedor",
+	partner: "Parceiro"
+}
+
+const roleVariant: Record<UserRole, "default" | "secondary" | "outline" | "destructive"> = {
+	admin: "default",
+	seller: "secondary",
+	partner: "outline"
 }
 
 export const columns = (canManageUsers: boolean): ColumnDef<User>[] => [
@@ -42,12 +57,8 @@ export const columns = (canManageUsers: boolean): ColumnDef<User>[] => [
 		accessorKey: "role",
 		header: "Função",
 		cell: ({ row }) => {
-			const role = row.getValue("role") as string
-			return (
-				<Badge variant="secondary" className="capitalize">
-					{role}
-				</Badge>
-			)
+			const role = row.getValue("role") as UserRole
+			return <Badge variant={roleVariant[role]}>{roleTranslations[role]}</Badge>
 		}
 	},
 	{
