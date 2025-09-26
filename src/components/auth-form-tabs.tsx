@@ -7,8 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const AuthFormTabs = () => {
 	return (
-		<Tabs defaultValue="signin" className="w-full">
-			<TabsList className="grid w-full grid-cols-2">
+		<Tabs defaultValue="signin" className="w-full max-w-md mx-auto">
+			<TabsList className="grid grid-cols-2 w-full max-w-md">
 				<TabsTrigger value="signin">Entrar</TabsTrigger>
 				<TabsTrigger value="register">Cadastre-se</TabsTrigger>
 			</TabsList>
