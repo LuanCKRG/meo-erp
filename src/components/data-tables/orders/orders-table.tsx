@@ -11,7 +11,7 @@ import {
 	useReactTable
 } from "@tanstack/react-table"
 
-import { getAllOrders } from "@/actions/orders"
+import { getOrdersForCurrentUser } from "@/actions/orders"
 import { columns } from "@/components/data-tables/orders/orders-columns"
 import { OrdersTableToolbar } from "@/components/data-tables/orders/orders-table-toolbar"
 import { DataTable } from "@/components/ui/data-table"
@@ -34,7 +34,7 @@ export const OrdersTable = () => {
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["orders"],
-		queryFn: getAllOrders
+		queryFn: getOrdersForCurrentUser
 	})
 
 	const table = useReactTable({

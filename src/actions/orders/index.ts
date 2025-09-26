@@ -8,6 +8,7 @@ import generateOrderPdf from "./generate-order-pdf"
 import uploadOrderFiles from "./upload-order-files"
 import listOrderFiles from "./list-order-files"
 import checkOrderDocumentsStatus from "./check-order-documents-status"
+import getOrdersForCurrentUser from "./get-orders-for-current-user"
 
 export {
 	createOrderFromSimulation,
@@ -19,5 +20,6 @@ export {
 	generateOrderPdf,
 	uploadOrderFiles,
 	listOrderFiles,
-	checkOrderDocumentsStatus
+	checkOrderDocumentsStatus,
+	getOrdersForCurrentUser
 }
