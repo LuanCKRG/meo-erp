@@ -32,7 +32,7 @@ const AppSidebar = async () => {
 	return (
 		<Sidebar collapsible="icon" variant="inset">
 			<SidebarHeader>
-				<Image alt="MEO Leasing" src="/logo.png" width={300} height={200} />
+				<Image alt="MEO Leasing" src="/new-logo.png" width={300} height={200} />
 			</SidebarHeader>
 			<Separator className="data-[orientation=horizontal]:h-0.5" />
 			<AppSidebarContent userPermissions={[...userPermissions]} />
