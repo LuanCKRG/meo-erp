@@ -224,7 +224,7 @@ export const AppSidebarContent = ({ userPermissions }: { userPermissions: string
 													<Collapsible asChild defaultOpen className="group/collapsible">
 														<SidebarMenuItem data-swapy-item={itemKey} className="relative">
 															<div
-																className="drag-handle absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground"
+																className="drag-handle absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:hidden"
 																data-swapy-handle
 															>
 																<GripVertical className="w-3 h-3" />
@@ -260,7 +260,7 @@ export const AppSidebarContent = ({ userPermissions }: { userPermissions: string
 												<div key={itemKey} data-swapy-slot={slotKey} className="relative group">
 													<SidebarMenuItem data-swapy-item={itemKey} className="relative">
 														<div
-															className="drag-handle absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground"
+															className="drag-handle absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:hidden"
 															data-swapy-handle
 														>
 															<GripVertical className="w-3 h-3" />
