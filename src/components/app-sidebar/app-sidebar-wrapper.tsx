@@ -15,11 +15,13 @@ import {
 	SidebarMenuItem,
 	SidebarMenuSub,
 	SidebarMenuSubButton,
-	SidebarMenuSubItem
+	SidebarMenuSubItem,
+	useSidebar
 } from "@/components/ui/sidebar"
 import type { NavItem, NavSection } from "./nav-items"
 import { useEffect, useRef, useState, useCallback } from "react"
 import { navItems } from "@/components/app-sidebar/nav-items"
+import { usePathname } from "next/navigation"
 
 // Utility para trabalhar com localStorage no Next.js
 const useLocalStorage = (key: string, defaultValue: any) => {
@@ -68,6 +70,8 @@ const useLocalStorage = (key: string, defaultValue: any) => {
 }
 
 export const AppSidebarContent = ({ userPermissions }: { userPermissions: string[] }) => {
+	const { state: sidebarState } = useSidebar()
+	const pathname = usePathname()
 	const swapyRef = useRef<Swapy | null>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
 
@@ -194,66 +198,31 @@ export const AppSidebarContent = ({ userPermissions }: { userPermissions: string
 
 	return (
 		<SidebarContent ref={containerRef}>
-			{items.map(
-				(nav) =>
-					nav && (
-						<Collapsible key={nav.id} defaultOpen data-collapsible>
-							<SidebarGroup>
-								<SidebarGroupLabel asChild>
-									<CollapsibleTrigger>
-										{nav.title}
-										<ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-									</CollapsibleTrigger>
-								</SidebarGroupLabel>
+			{items.map((nav) => {
+				if (!nav) return null
 
-								<CollapsibleContent>
-									<SidebarGroupContent>
-										<SidebarMenu>
-											{nav.items.map(({ icon: Icon, ...item }, index) => {
-												const itemKey = `${nav.id}-${item.title}`
-												const slotKey = `${nav.id}-${item.title}-${index}`
+				return (
+					<Collapsible key={nav.id} defaultOpen data-collapsible>
+						<SidebarGroup>
+							<SidebarGroupLabel asChild>
+								<CollapsibleTrigger>
+									{nav.title}
+									<ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+								</CollapsibleTrigger>
+							</SidebarGroupLabel>
 
-												return item.subItems && item.subItems.length > 0 ? (
-													// Renderiza como um menu expansível se tiver sub-itens
-													<div key={itemKey} data-swapy-slot={slotKey} className="relative group">
-														<Collapsible asChild defaultOpen className="group/collapsible">
-															<SidebarMenuItem data-swapy-item={itemKey} className="relative">
-																{/* Drag Handle */}
-																<div
-																	className="drag-handle absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground"
-																	data-swapy-handle
-																>
-																	<GripVertical className="w-3 h-3" />
-																</div>
+							<CollapsibleContent>
+								<SidebarGroupContent>
+									<SidebarMenu>
+										{nav.items.map(({ icon: Icon, ...item }, index) => {
+											const itemKey = `${nav.id}-${item.title}`
+											const slotKey = `${nav.id}-${item.title}-${index}`
+											const isActive = pathname === item.url || (item.subItems && item.subItems.some((sub) => pathname.startsWith(sub.url)))
 
-																<CollapsibleTrigger asChild>
-																	<SidebarMenuButton tooltip={item.title} className="pl-6">
-																		<Icon />
-																		<span>{item.title}</span>
-																		<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-																	</SidebarMenuButton>
-																</CollapsibleTrigger>
-																<CollapsibleContent>
-																	<SidebarMenuSub>
-																		{item.subItems.map((subItem, subIndex) => (
-																			<SidebarMenuSubItem key={`${subItem.title}-${subIndex}`}>
-																				<SidebarMenuSubButton asChild>
-																					<Link href={subItem.url}>
-																						<span>{subItem.title}</span>
-																					</Link>
-																				</SidebarMenuSubButton>
-																			</SidebarMenuSubItem>
-																		))}
-																	</SidebarMenuSub>
-																</CollapsibleContent>
-															</SidebarMenuItem>
-														</Collapsible>
-													</div>
-												) : (
-													// Renderiza como um link simples
-													<div key={itemKey} data-swapy-slot={slotKey} className="relative group">
+											return item.subItems && item.subItems.length > 0 ? (
+												<div key={itemKey} data-swapy-slot={slotKey} className="relative group">
+													<Collapsible asChild defaultOpen className="group/collapsible">
 														<SidebarMenuItem data-swapy-item={itemKey} className="relative">
-															{/* Drag Handle */}
 															<div
 																className="drag-handle absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground"
 																data-swapy-handle
@@ -261,23 +230,59 @@ export const AppSidebarContent = ({ userPermissions }: { userPermissions: string
 																<GripVertical className="w-3 h-3" />
 															</div>
 
-															<SidebarMenuButton asChild className="pl-6">
-																<Link href={item.url}>
-																	<Icon />
-																	<span>{item.title}</span>
-																</Link>
-															</SidebarMenuButton>
+															<Link href={item.url} passHref>
+																<CollapsibleTrigger asChild>
+																	<SidebarMenuButton tooltip={item.title} className="pl-6" isActive={isActive}>
+																		<Icon />
+																		<span>{item.title}</span>
+																		<ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+																	</SidebarMenuButton>
+																</CollapsibleTrigger>
+															</Link>
+
+															<CollapsibleContent>
+																<SidebarMenuSub>
+																	{item.subItems.map((subItem, subIndex) => (
+																		<SidebarMenuSubItem key={`${subItem.title}-${subIndex}`}>
+																			<SidebarMenuSubButton asChild>
+																				<Link href={subItem.url}>
+																					<span>{subItem.title}</span>
+																				</Link>
+																			</SidebarMenuSubButton>
+																		</SidebarMenuSubItem>
+																	))}
+																</SidebarMenuSub>
+															</CollapsibleContent>
 														</SidebarMenuItem>
-													</div>
-												)
-											})}
-										</SidebarMenu>
-									</SidebarGroupContent>
-								</CollapsibleContent>
-							</SidebarGroup>
-						</Collapsible>
-					)
-			)}
+													</Collapsible>
+												</div>
+											) : (
+												<div key={itemKey} data-swapy-slot={slotKey} className="relative group">
+													<SidebarMenuItem data-swapy-item={itemKey} className="relative">
+														<div
+															className="drag-handle absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-4 h-4 flex items-center justify-center text-muted-foreground hover:text-foreground"
+															data-swapy-handle
+														>
+															<GripVertical className="w-3 h-3" />
+														</div>
+
+														<SidebarMenuButton asChild className="pl-6" isActive={isActive}>
+															<Link href={item.url}>
+																<Icon />
+																<span>{item.title}</span>
+															</Link>
+														</SidebarMenuButton>
+													</SidebarMenuItem>
+												</div>
+											)
+										})}
+									</SidebarMenu>
+								</SidebarGroupContent>
+							</CollapsibleContent>
+						</SidebarGroup>
+					</Collapsible>
+				)
+			})}
 		</SidebarContent>
 	)
 }
