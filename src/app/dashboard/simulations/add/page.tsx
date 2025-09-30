@@ -6,6 +6,7 @@ import { useEffect } from "react"
 
 import { getCurrentUser } from "@/actions/auth"
 import { getCurrentPartnerDetails } from "@/actions/partners"
+import getPartnerByUserId from "@/actions/partners/get-partner-by-user-id" // Import da action
 import { getSellerByUserId } from "@/actions/sellers"
 import { NewSimulationForm } from "@/components/forms/new-simulation/new-simulation-form"
 import { SimulationSelector } from "@/components/forms/new-simulation/simulation-selector"
@@ -36,6 +37,23 @@ function SimulationPageContent() {
 		enabled: isPartner
 	})
 
+	// Nova query: Busca o partner completo pelo user.id
+	const {
+		data: partnerQuery,
+		isLoading: isLoadingPartnerData,
+		error: partnerDataError
+	} = useQuery({
+		queryKey: ["partnerByUserId", user?.id],
+		queryFn: () => {
+			if (!user?.id) {
+				return Promise.resolve(null)
+			}
+			return getPartnerByUserId(user.id)
+		},
+		enabled: isPartner && !!user?.id
+	})
+	const partnerData = partnerQuery?.success ? partnerQuery.data : null
+
 	// Busca dados do seller pelo user.id quando o usuário for um seller
 	const {
 		data: sellerQuery,
@@ -57,12 +75,12 @@ function SimulationPageContent() {
 
 	// Preenche o contexto automaticamente APENAS se o usuário for um parceiro
 	useEffect(() => {
-		if (isPartner && user?.id && partnerDetails?.sellerId && user.name) {
-			setPartnerId(user.id)
+		if (isPartner && partnerData && partnerDetails?.sellerId && user?.name) {
+			setPartnerId(partnerData.id) // Agora usa o partner.id correto
 			setSellerId(partnerDetails.sellerId)
 			setPartnerName(user.name) // Parceiro logado é o parceiro da simulação
 		}
-	}, [isPartner, user, partnerDetails, setPartnerId, setSellerId, setPartnerName])
+	}, [isPartner, partnerData, partnerDetails, user?.name, setPartnerId, setSellerId, setPartnerName])
 
 	// Auto-preenche o sellerId se o usuário for um seller
 	useEffect(() => {
@@ -72,8 +90,9 @@ function SimulationPageContent() {
 		}
 	}, [isSeller, sellerDetails, setSellerId, setSellerName])
 
-	const isLoading = isLoadingUser || (isPartner && isLoadingPartner) || (isSeller && isLoadingSeller)
-	const error = userError || (isPartner && partnerError) || (sellerQuery && !sellerQuery.success)
+	const isLoading = isLoadingUser || (isPartner && (isLoadingPartner || isLoadingPartnerData)) || (isSeller && isLoadingSeller)
+
+	const error = userError || (isPartner && (partnerError || partnerDataError)) || (sellerQuery && !sellerQuery.success)
 
 	if (isLoading) {
 		return (
