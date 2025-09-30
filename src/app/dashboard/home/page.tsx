@@ -1,9 +1,11 @@
-const DashboardHomePage = () => {
+import { BannerCarousel } from "@/components/banner-carousel"
+
+const DashboardPage = () => {
 	return (
 		<div>
-			<h1>Em construção</h1>
+			<BannerCarousel />
 		</div>
 	)
 }
 
-export default DashboardHomePage
+export default DashboardPage
