@@ -90,3 +90,9 @@ reports:view,"Can view reports."
 sellers:manage,"Can manage sellers."
 sellers:view,"Can view the sellers list."
 simulations:create,"Can create new simulations."
+
+
+--- 
+
+## Problems
+- [] /dashboard e /dashboard/home estão duplicados
