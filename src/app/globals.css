@@ -188,21 +188,29 @@
 
 
 .alternative-buttons button:nth-child(odd) { /* ímpares */
-   @apply bg-primary-foreground text-primary
+   @apply bg-[#53565a] text-white
 }
 
 .alternative-buttons button:nth-child(even) { /* pares */
-   @apply bg-primary text-primary-foreground
+   @apply bg-[#53565a] text-white
 }
 
-.alternative-buttons button:last-child { /* Último */
+/* .alternative-buttons button:last-child { Último */
+   /* @apply bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 */
+/* } */
+
+.alternative-buttons button.delete-button { /* Último */
    @apply bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60
 }
 
+.alternative-buttons button.create-order-button { /* Último */
+   @apply bg-emerald-400 text-emerald-900
+}
+
 .alternative-buttons-no-trash button:nth-child(odd) { /* ímpares */
-   @apply bg-primary-foreground text-primary
+   @apply bg-[#53565a] text-white
 }
 
 .alternative-buttons-no-trash button:nth-child(even) { /* pares */
-   @apply bg-primary text-primary-foreground
+   @apply bg-[#53565a] text-white
 }

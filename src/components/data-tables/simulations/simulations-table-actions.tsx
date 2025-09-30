@@ -264,7 +264,7 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 					<>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant="ghost" size="icon" onClick={handleCreateOrder} disabled={isCreateOrderPending}>
+								<Button className="create-order-button" variant="ghost" size="icon" onClick={handleCreateOrder} disabled={isCreateOrderPending}>
 									{isCreateOrderPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
 									<span className="sr-only">Criar Pedido</span>
 								</Button>
@@ -274,7 +274,7 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
+								<Button className="delete-button" variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
 									{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
 									<span className="sr-only">Deletar</span>
 								</Button>

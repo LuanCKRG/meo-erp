@@ -9,6 +9,7 @@ import getCurrentPartnerDetails from "@/actions/partners/get-current-partner-det
 import getPartnersBySellerId from "@/actions/partners/get-partner-by-seller-id"
 import getAllPartnersWithSeller from "./get-all-partners-with-sellers"
 import getPartnersForCurrentUser from "./get-partners-for-current-user"
+import getPartnerByUserId from "./get-partner-by-user-id"
 
 export {
 	getAllPartners,
@@ -21,5 +22,6 @@ export {
 	getCurrentPartnerDetails,
 	getPartnersBySellerId,
 	getAllPartnersWithSeller,
-	getPartnersForCurrentUser
+	getPartnersForCurrentUser,
+	getPartnerByUserId
 }

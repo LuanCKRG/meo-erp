@@ -237,7 +237,7 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
+						<Button className="delete-button" variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
 							{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
 							<span className="sr-only">Deletar</span>
 						</Button>

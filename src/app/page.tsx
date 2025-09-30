@@ -18,7 +18,7 @@ const HomePage = () => {
 
 			{/* Conteúdo original */}
 			<div className="w-full max-w-sm md:max-w-md relative z-10">
-				<Image src="/logo-azul-branco.png" alt="MEO Leasing" width={300} height={200} className="w-full" />
+				<Image src="/logo-azul-branco.png" alt="MEO Leasing" width={300} height={150} className="mx-auto" />
 				<AuthFormTabs />
 				<div className="text-white mt-6 text-center text-xs text-balance">
 					<p>

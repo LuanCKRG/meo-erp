@@ -169,7 +169,7 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button variant="ghost" size="icon" onClick={() => setIsApproveDialogOpen(true)} disabled={isPending}>
-									{isPending ? <Loader2 className="h-4 w-4 animate-spin text-green-500" /> : <CheckCircle className="h-4 w-4 text-green-500" />}
+									{isPending ? <Loader2 className="size-6 animate-spin text-green-500" /> : <CheckCircle className="size-6 text-green-500" />}
 									<span className="sr-only">Aprovar</span>
 								</Button>
 							</TooltipTrigger>
@@ -178,7 +178,7 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button variant="ghost" size="icon" onClick={handleReject} disabled={isPending}>
-									{isPending ? <Loader2 className="h-4 w-4 animate-spin text-destructive" /> : <XCircle className="h-4 w-4 text-destructive" />}
+									{isPending ? <Loader2 className="size-6 animate-spin text-destructive" /> : <XCircle className="size-6 text-destructive" />}
 									<span className="sr-only">Rejeitar</span>
 								</Button>
 							</TooltipTrigger>

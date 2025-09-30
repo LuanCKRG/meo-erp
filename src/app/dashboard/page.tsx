@@ -1,7 +1,9 @@
+import { BannerCarousel } from "@/components/banner-carousel"
+
 const DashboardPage = () => {
 	return (
 		<div>
-			<h1>Oii</h1>
+			<BannerCarousel />
 		</div>
 	)
 }
