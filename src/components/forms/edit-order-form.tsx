@@ -11,7 +11,7 @@ import { toast } from "sonner"
 import { getOrderById, updateOrder } from "@/actions/orders"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { useSimulation } from "@/contexts/simulation-context"
-import { maskCep, maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
+import { formatNumberFromDatabase, maskCep, maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
 import { cn } from "@/lib/utils"
 import { SimulationStep1 } from "./new-simulation/step-1-project-data"
 import { SimulationStep2 } from "./new-simulation/step-2-client-data"
@@ -242,8 +242,8 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 	const { customer, ...order } = queryData.data
 
 	const initialData: ExtendedOrderData = {
-		systemPower: maskNumber(order.system_power?.toString() || "0", 9),
-		currentConsumption: maskNumber(order.current_consumption?.toString() || "0", 9),
+		systemPower: formatNumberFromDatabase(order.system_power),
+		currentConsumption: formatNumberFromDatabase(order.current_consumption),
 		energyProvider: order.energy_provider,
 		structureType: order.structure_type,
 		connectionVoltage: order.connection_voltage,
@@ -257,7 +257,7 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		cnpj: maskCnpj(customer.cnpj),
 		legalName: customer.company_name,
 		incorporationDate: customer.incorporation_date ? customer.incorporation_date.split("-").reverse().join("/") : "",
-		annualRevenue: maskNumber(customer.annual_revenue?.toString() || "0", 15),
+		annualRevenue: formatNumberFromDatabase(customer.annual_revenue),
 		contactName: customer.contact_name,
 		contactPhone: maskPhone(customer.contact_phone),
 		contactEmail: customer.contact_email,
@@ -268,9 +268,9 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		neighborhood: customer.neighborhood,
 		city: customer.city,
 		state: customer.state,
-		equipmentValue: maskNumber(order.equipment_value?.toString() || "0", 14),
-		laborValue: maskNumber(order.labor_value?.toString() || "0", 14),
-		otherCosts: maskNumber(order.other_costs?.toString() || "0", 14),
+		equipmentValue: formatNumberFromDatabase(order.equipment_value),
+		laborValue: formatNumberFromDatabase(order.labor_value),
+		otherCosts: formatNumberFromDatabase(order.other_costs),
 		// Os campos de arquivo são iniciados como undefined para edição
 		rgCnhSocios: undefined,
 		balancoDRE2022: undefined,
