@@ -79,12 +79,16 @@ function EditOrderContent({
 	orderId,
 	customerId,
 	onFinished,
-	initialData
+	initialData,
+	serviceFee,
+	interestRate
 }: {
 	orderId: string
 	customerId: string
 	onFinished: () => void
 	initialData: ExtendedOrderData
+	serviceFee: number
+	interestRate: number
 }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
 	const queryClient = useQueryClient()
@@ -189,7 +193,9 @@ function EditOrderContent({
 							{currentStep === 1 && <SimulationStep1 onNext={nextStep} />}
 							{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
 							{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
-							{currentStep === 4 && <SimulationStep4 onNext={nextStep} onBack={backStep} />}
+							{currentStep === 4 && (
+								<SimulationStep4 onNext={nextStep} onBack={backStep} initialServiceFee={serviceFee} isEditing={true} initialInterestRate={interestRate} />
+							)}
 							{currentStep === 5 && <SimulationStep5 onSubmit={form.handleSubmit(handleSubmitEntireForm)} onBack={backStep} />}
 						</motion.div>
 					</AnimatePresence>
@@ -277,5 +283,14 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		contaDeEnergia: undefined
 	}
 
-	return <EditOrderContent orderId={orderId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
+	return (
+		<EditOrderContent
+			orderId={orderId}
+			customerId={customer.id}
+			onFinished={onFinished}
+			initialData={initialData}
+			serviceFee={order.service_fee}
+			interestRate={order.interest_rate}
+		/>
+	)
 }
