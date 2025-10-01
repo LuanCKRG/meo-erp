@@ -27,7 +27,13 @@ export function BannerCarousel() {
 					{banners.map((banner, index) => (
 						<CarouselItem key={banner}>
 							<div className="relative w-full h-[200px] md:h-[300px] lg:h-[400px]">
-								<Image src={banner} alt={`Banner ${index + 1}`} fill className="object-contain" priority={index === 0} />
+								<Image
+									src={banner}
+									alt={`Banner ${index + 1}`}
+									fill
+									className="object-contain md:object-fill xl:object-contain  rounded-xl border-primary"
+									priority={index === 0}
+								/>
 							</div>
 						</CarouselItem>
 					))}
