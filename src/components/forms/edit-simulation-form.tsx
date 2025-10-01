@@ -11,7 +11,7 @@ import { toast } from "sonner"
 
 import { getSimulationById, updateSimulation } from "@/actions/simulations"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { maskCep, maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
+import { formatNumberFromDatabase, maskCep, maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
 import { cn } from "@/lib/utils"
 import { SimulationStep1 } from "./new-simulation/step-1-project-data"
 import { SimulationStep2 } from "./new-simulation/step-2-client-data"
@@ -229,8 +229,8 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 	const { customer, ...simulation } = queryData.data
 
 	const initialData: ExtendedSimulationData = {
-		systemPower: maskNumber(simulation.system_power?.toString() || "0", 9),
-		currentConsumption: maskNumber(simulation.current_consumption?.toString() || "0", 9),
+		systemPower: formatNumberFromDatabase(simulation.system_power),
+		currentConsumption: formatNumberFromDatabase(simulation.current_consumption),
 		energyProvider: simulation.energy_provider,
 		structureType: simulation.structure_type,
 		connectionVoltage: simulation.connection_voltage,
@@ -244,7 +244,7 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 		cnpj: maskCnpj(customer.cnpj),
 		legalName: customer.company_name,
 		incorporationDate: customer.incorporation_date ? customer.incorporation_date.split("-").reverse().join("/") : "",
-		annualRevenue: maskNumber(customer.annual_revenue?.toString() || "0", 15),
+		annualRevenue: formatNumberFromDatabase(customer.annual_revenue),
 		contactName: customer.contact_name,
 		contactPhone: maskPhone(customer.contact_phone),
 		contactEmail: customer.contact_email,
@@ -255,9 +255,9 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 		neighborhood: customer.neighborhood,
 		city: customer.city,
 		state: customer.state,
-		equipmentValue: maskNumber(simulation.equipment_value?.toString() || "0", 14),
-		laborValue: maskNumber(simulation.labor_value?.toString() || "0", 14),
-		otherCosts: maskNumber(simulation.other_costs?.toString() || "0", 14),
+		equipmentValue: formatNumberFromDatabase(simulation.equipment_value),
+		laborValue: formatNumberFromDatabase(simulation.labor_value),
+		otherCosts: formatNumberFromDatabase(simulation.other_costs),
 		rgCnhSocios: undefined,
 		balancoDRE2022: undefined,
 		balancoDRE2023: undefined,

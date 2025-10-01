@@ -1,3 +1,4 @@
+// masks.ts
 function maskCnpj(value: string) {
 	return value
 		.replace(/\D/g, "")
@@ -43,25 +44,12 @@ function maskDate(value: string) {
 		.replace(/(\d{4})\d+?$/, "$1")
 }
 
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-	style: "currency",
-	currency: "BRL",
-	minimumFractionDigits: 2
-})
-
 const numberFormatter = new Intl.NumberFormat("pt-BR", {
 	minimumFractionDigits: 2,
 	maximumFractionDigits: 2
 })
 
-function formatAsCurrency(value: string) {
-	const numberValue = parseFloat(value.replace(/\D/g, "")) / 100
-
-	if (Number.isNaN(numberValue)) return ""
-
-	return currencyFormatter.format(numberValue).replace("R$", "").trim()
-}
-
+// Para input do usuário (digita e vai formatando)
 const maskNumber = (value: string, maxLength: number = 9) => {
 	let justDigits = value.replace(/\D/g, "")
 
@@ -76,4 +64,22 @@ const maskNumber = (value: string, maxLength: number = 9) => {
 	return numberFormatter.format(numberValue)
 }
 
-export { maskCnpj, maskPhone, maskCep, maskCpf, maskDate, formatAsCurrency, maskNumber }
+// NOVA: Para exibir valores do banco (que já tem casas decimais)
+const formatNumberFromDatabase = (value: number | null | undefined): string => {
+	if (value === null || value === undefined) return "0,00"
+
+	return numberFormatter.format(value)
+}
+
+// NOVA: Para converter string formatada para number (banco NUMERIC)
+const parseFormattedNumber = (value: string | undefined | null): number => {
+	if (!value) return 0
+
+	// Remove pontos de milhar e substitui vírgula por ponto
+	const sanitizedValue = value.replace(/\./g, "").replace(",", ".")
+	const numberValue = parseFloat(sanitizedValue)
+
+	return Number.isNaN(numberValue) ? 0 : numberValue
+}
+
+export { maskCnpj, maskPhone, maskCep, maskCpf, maskDate, maskNumber, formatNumberFromDatabase, parseFormattedNumber }
