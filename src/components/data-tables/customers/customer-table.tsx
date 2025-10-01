@@ -18,6 +18,7 @@ import { DataTable } from "@/components/ui/data-table"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options"
 import { usePersistedTableState } from "@/hooks/use-persisted-table-state"
+import getCustomersForCurrentUser from "@/actions/customers/get-customers-for-current-user"
 
 const CUSTOMER_TABLE_STORAGE_KEY = "customer-table-state"
 
@@ -31,7 +32,7 @@ export const CustomerTable = () => {
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["customers"],
-		queryFn: getAllCustomers
+		queryFn: getCustomersForCurrentUser
 	})
 
 	const table = useReactTable({
