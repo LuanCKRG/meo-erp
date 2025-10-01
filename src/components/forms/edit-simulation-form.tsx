@@ -79,12 +79,16 @@ function EditSimulationContent({
 	simulationId,
 	customerId,
 	onFinished,
-	initialData
+	initialData,
+	serviceFee,
+	interestRate
 }: {
 	simulationId: string
 	customerId: string
 	onFinished: () => void
 	initialData: ExtendedSimulationData
+	serviceFee: number
+	interestRate: number
 }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
 	const queryClient = useQueryClient()
@@ -158,6 +162,7 @@ function EditSimulationContent({
 			loading: "Atualizando simulação...",
 			success: (res) => {
 				if (res.success) {
+					queryClient.invalidateQueries({ queryKey: ["simulations"] })
 					queryClient.invalidateQueries({ queryKey: ["simulation-details", simulationId] })
 					onFinished()
 					return "Simulação atualizada com sucesso!"
@@ -190,7 +195,9 @@ function EditSimulationContent({
 							{currentStep === 1 && <SimulationStep1 onNext={nextStep} />}
 							{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
 							{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
-							{currentStep === 4 && <SimulationStep4 onNext={nextStep} onBack={backStep} />}
+							{currentStep === 4 && (
+								<SimulationStep4 onNext={nextStep} onBack={backStep} initialServiceFee={serviceFee} isEditing={true} initialInterestRate={interestRate} />
+							)}
 							{currentStep === 5 && <SimulationStep5 onSubmit={form.handleSubmit(handleSubmitEntireForm)} onBack={backStep} />}
 						</motion.div>
 					</AnimatePresence>
@@ -227,6 +234,7 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 	}
 
 	const { customer, ...simulation } = queryData.data
+	console.log(simulation)
 
 	const initialData: ExtendedSimulationData = {
 		systemPower: formatNumberFromDatabase(simulation.system_power),
@@ -269,5 +277,14 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 		contaDeEnergia: undefined
 	}
 
-	return <EditSimulationContent simulationId={simulationId} customerId={customer.id} onFinished={onFinished} initialData={initialData} />
+	return (
+		<EditSimulationContent
+			simulationId={simulationId}
+			customerId={customer.id}
+			onFinished={onFinished}
+			initialData={initialData}
+			serviceFee={simulation.service_fee}
+			interestRate={simulation.interest_rate}
+		/>
+	)
 }

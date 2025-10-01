@@ -26,23 +26,15 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 	}
 
 	if (user.role === "seller") {
-    	const { data: seller, error: sellerError } = await supabase
-			.from("sellers")
-			.select("id")
-			.eq("user_id", user.id)
-			.single()
+		const { data: seller, error: sellerError } = await supabase.from("sellers").select("id").eq("user_id", user.id).single()
 
 		if (sellerError || !seller) {
 			console.error("Vendedor não encontrado para o usuário atual:", sellerError)
 			return []
 		}
 
-
 		// SOLUÇÃO 1: Buscar primeiro os customer_ids do vendedor
-		const { data: customerIds, error: customerError } = await supabase
-			.from("customers")
-			.select("id")
-			.eq("internal_manager", seller.id)
+		const { data: customerIds, error: customerError } = await supabase.from("customers").select("id").eq("internal_manager", seller.id)
 
 		if (customerError) {
 			console.error("Erro ao buscar clientes do vendedor:", customerError)
@@ -53,8 +45,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 			return []
 		}
 
-
-		const customerIdArray = customerIds.map(c => c.id)
+		const customerIdArray = customerIds.map((c) => c.id)
 
 		const { data, error } = await supabase
 			.from("simulations")
@@ -76,7 +67,8 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 					state,
 					partners ( contact_name )
 				),
-				sellers ( name )
+				sellers ( name ),
+				service_fee
 				`
 			)
 			.in("customer_id", customerIdArray) // Usar .in() com os IDs dos clientes
@@ -87,10 +79,10 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 			return []
 		}
 
-
 		const finalMappedData: SimulationWithRelations[] = data.map((sim) => {
-			const total_value = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
-			
+			const subtotal = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
+			const total_value = subtotal + subtotal * (sim.service_fee / 100)
+
 			const customerData = Array.isArray(sim.customers) ? sim.customers[0] : sim.customers
 			const partnerName = Array.isArray(customerData?.partners) ? customerData.partners[0]?.contact_name : customerData?.partners?.contact_name
 
@@ -112,26 +104,18 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 		})
 
 		return finalMappedData
-  }
+	}
 
 	if (user.role === "partner") {
-    const { data: partner, error: partnerError } = await supabase
-			.from("partners")
-			.select("id")
-			.eq("user_id", user.id)
-			.single()
+		const { data: partner, error: partnerError } = await supabase.from("partners").select("id").eq("user_id", user.id).single()
 
 		if (partnerError || !partner) {
 			console.error("Parceiro não encontrado para o usuário atual:", partnerError)
 			return []
 		}
 
-
 		// SOLUÇÃO 1: Buscar primeiro os customer_ids do parceiro
-		const { data: customerIds, error: customerError } = await supabase
-			.from("customers")
-			.select("id")
-			.eq("partner_id", partner.id)
+		const { data: customerIds, error: customerError } = await supabase.from("customers").select("id").eq("partner_id", partner.id)
 
 		if (customerError) {
 			console.error("Erro ao buscar clientes do parceiro:", customerError)
@@ -142,8 +126,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 			return []
 		}
 
-
-		const customerIdArray = customerIds.map(c => c.id)
+		const customerIdArray = customerIds.map((c) => c.id)
 
 		const { data, error } = await supabase
 			.from("simulations")
@@ -165,7 +148,8 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 					state,
 					partners ( contact_name )
 				),
-				sellers ( name )
+				sellers ( name ),
+				service_fee
 				`
 			)
 			.in("customer_id", customerIdArray) // Usar .in() com os IDs dos clientes
@@ -176,9 +160,9 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 			return []
 		}
 
-
 		const finalMappedData: SimulationWithRelations[] = data.map((sim) => {
-			const total_value = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
+			const subtotal = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
+			const total_value = subtotal + subtotal * (sim.service_fee / 100)
 
 			const customerData = Array.isArray(sim.customers) ? sim.customers[0] : sim.customers
 			const partnerName = Array.isArray(customerData?.partners) ? customerData.partners[0]?.contact_name : customerData?.partners?.contact_name

@@ -29,7 +29,8 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
         ),
         sellers (
           name
-        )
+        ),
+				service_fee
       `
 			)
 			.order("created_at", { ascending: false })
@@ -44,7 +45,8 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
 			if (!sim.customers) {
 				return null // Se não houver cliente, não podemos processar esta simulação
 			}
-			const total_value = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
+			const subtotal = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
+			const total_value = subtotal + subtotal * (sim.service_fee / 100)
 			const partner = Array.isArray(sim.customers.partners) ? sim.customers.partners[0] : sim.customers.partners
 
 			return {

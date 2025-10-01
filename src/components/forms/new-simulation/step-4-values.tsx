@@ -30,12 +30,26 @@ const parseCurrency = (value: string | undefined): number => {
 
 const installmentTerms = [12, 24, 36, 48, 60, 72]
 
-interface Step4Props {
+// Tipagem melhorada para os props
+type Step4PropsCreate = {
 	onNext: () => void
 	onBack: () => void
+	isEditing?: false | null | undefined
+	initialServiceFee?: never
+	initialInterestRate?: never
 }
 
-const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
+type Step4PropsEdit = {
+	onNext: () => void
+	onBack: () => void
+	isEditing: true
+	initialServiceFee: number
+	initialInterestRate: number
+}
+
+type Step4Props = Step4PropsCreate | Step4PropsEdit
+
+const SimulationStep4 = ({ onNext, onBack, initialServiceFee, isEditing, initialInterestRate }: Step4Props) => {
 	const form = useFormContext()
 
 	const { data: rates, isLoading: isLoadingRates } = useQuery({
@@ -57,7 +71,9 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		// Valores padrão em caso de erro
 		retry: 3,
-		retryDelay: 1000
+		retryDelay: 1000,
+		// Não buscar rates se estiver no modo edição (já temos initialServiceFee)
+		enabled: !isEditing
 	})
 
 	const watchedStringValues = form.watch(["equipmentValue", "laborValue", "otherCosts"])
@@ -65,9 +81,10 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 	const [equipment, labor, others] = watchedStringValues.map(parseCurrency)
 	const subtotal = (equipment || 0) + (labor || 0) + (others || 0)
 
-	// Usando valores padrão caso não tenha carregado ainda ou houve erro
-	const serviceFee = rates?.service_fee ?? 0.35 // 35% padrão
-	const interestRate = rates?.interest_rate ?? 0.021 // 2.1% padrão
+	// Lógica para determinar qual serviceFee usar
+	const serviceFee = isEditing ? initialServiceFee / 100 : (rates?.service_fee ?? 0.35) // 35% padrão se não estiver editando e não tiver carregado
+
+	const interestRate = isEditing ? initialInterestRate / 100 : (rates?.interest_rate ?? 0.021) // 2.1% padrão
 
 	const servicesValue = subtotal * serviceFee
 	const formattedServicesValue = formatCurrency(servicesValue)
@@ -163,7 +180,7 @@ const SimulationStep4 = ({ onNext, onBack }: Step4Props) => {
 							<CardDescription>Cálculo em tempo real baseado nos valores fornecidos.</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							{isLoadingRates ? (
+							{!isEditing && isLoadingRates ? (
 								<div className="space-y-4">
 									<Skeleton className="h-16 w-full" />
 									<Separator />
