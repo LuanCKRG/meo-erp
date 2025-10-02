@@ -23,7 +23,8 @@ const availableStatuses: { value: OrderStatus; label: string }[] = [
 	{ value: "rejected", label: "Reprovado" },
 	{ value: "contract_signing", label: "Assinatura Contrato" },
 	{ value: "completed", label: "Finalizado" },
-	{ value: "canceled", label: "Cancelado" }
+	{ value: "canceled", label: "Cancelado" },
+	{ value: "pre_approved", label: "Pré-Aprovado" }
 ]
 
 interface UpdateOrderStatusDialogProps {

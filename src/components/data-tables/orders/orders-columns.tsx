@@ -31,7 +31,8 @@ const statusTranslations: Record<OrderStatus, string> = {
 	rejected: "Reprovado",
 	contract_signing: "Assinatura Contrato",
 	completed: "Finalizado",
-	canceled: "Cancelado"
+	canceled: "Cancelado",
+	pre_approved: "Pré-Aprovado"
 }
 
 const statusVariant: Record<OrderStatus, "default" | "secondary" | "destructive" | "outline"> = {
@@ -46,7 +47,8 @@ const statusVariant: Record<OrderStatus, "default" | "secondary" | "destructive"
 	rejected: "destructive",
 	contract_signing: "default",
 	completed: "default",
-	canceled: "destructive"
+	canceled: "destructive",
+	pre_approved: "default"
 }
 
 const statusColor: Record<OrderStatus, string> = {
@@ -61,7 +63,8 @@ const statusColor: Record<OrderStatus, string> = {
 	rejected: "bg-red-500 hover:bg-red-600",
 	contract_signing: "bg-teal-500 text-white",
 	completed: "bg-green-700 hover:bg-green-800 text-white",
-	canceled: "bg-gray-500 hover:bg-gray-600"
+	canceled: "bg-gray-500 hover:bg-gray-600",
+	pre_approved: "bg-green-500/20 text-green-700 border-green-500/30"
 }
 
 export const columns: ColumnDef<OrderWithRelations>[] = [
