@@ -82,6 +82,8 @@ export const RateForm = ({ rateId, isEditingUniqueOrder, orderId }: RateFormProp
 							queryClient.invalidateQueries({ queryKey: ["rate", rateId, "orders"] })
 							// Invalida também as queries do step-4 para atualizar os cálculos
 							queryClient.invalidateQueries({ queryKey: ["rates", "interest_rate", "service_fee", "orders"] })
+							queryClient.invalidateQueries({ queryKey: ["order-details", orderId] })
+							queryClient.invalidateQueries({ queryKey: ["orders"] })
 							return "Taxa salva com sucesso!"
 						}
 						throw new Error(res.message)
