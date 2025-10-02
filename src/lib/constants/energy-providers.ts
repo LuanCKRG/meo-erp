@@ -1,4 +1,5 @@
 const energyProviders: string[] = [
+	"000",
 	"AMAZONAS ENERGIA",
 	"CEA EQUATORIAL",
 	"CEDRAP",
