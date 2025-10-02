@@ -48,17 +48,11 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			return { success: false, message: simulationDetails.message || "Não foi possível encontrar a simulação." }
 		}
 
-		const { customer, created_at, equipment_value, labor_value, other_costs, system_power, current_consumption } = simulationDetails.data
+		const { customer, created_at, equipment_value, labor_value, other_costs, system_power, current_consumption, interest_rate, service_fee } =
+			simulationDetails.data
 
-		// Busca as taxas atuais do banco de dados.
-		const [interestRateRes, serviceFeeRes] = await Promise.all([getRate("interest_rate"), getRate("service_fee")])
-
-		if (!interestRateRes.success || !serviceFeeRes.success) {
-			throw new Error("Não foi possível carregar as taxas de juros e serviços para a simulação.")
-		}
-
-		const interestRate = interestRateRes.data / 100 // 0.021
-		const serviceFee = serviceFeeRes.data / 100 // 0.035
+		const interestRate = interest_rate / 100 // 2.1 / 100 = 0.021
+		const serviceFee = service_fee
 
 		// 2. Carregar o template PDF e a fonte do Base64
 		const templateBytes = Buffer.from(PDF_TEMPLATE_SIMULATION_BASE64, "base64")
