@@ -15,7 +15,8 @@ const PERMISSIONS = [
 	"simulations:create",
 	"simulations:view",
 	"orders:view",
-	"orders:status"
+	"orders:status",
+	"orders:rates:manage"
 ] as const
 
 export default PERMISSIONS

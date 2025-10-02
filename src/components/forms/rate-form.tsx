@@ -5,18 +5,28 @@ import { Loader2, Save } from "lucide-react"
 import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 
-import { getRate, updateRate } from "@/actions/settings"
+import { getRate, getRateUnique, updateRate, updateRateUnique } from "@/actions/settings"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { maskNumber } from "@/lib/masks"
 
-interface RateFormProps {
+type RateFormGlobalProps = {
 	rateId: "interest_rate" | "service_fee"
+	isEditingUniqueOrder?: false | null | undefined
+	orderId?: never
 }
 
-export const RateForm = ({ rateId }: RateFormProps) => {
+type RateFormUniqueProps = {
+	rateId: "interest_rate" | "service_fee"
+	isEditingUniqueOrder: true
+	orderId: string
+}
+
+type RateFormProps = RateFormGlobalProps | RateFormUniqueProps
+
+export const RateForm = ({ rateId, isEditingUniqueOrder, orderId }: RateFormProps) => {
 	const [value, setValue] = useState("")
 	const [isPending, startTransition] = useTransition()
 	const queryClient = useQueryClient()
@@ -26,8 +36,14 @@ export const RateForm = ({ rateId }: RateFormProps) => {
 		isLoading,
 		isError
 	} = useQuery({
-		queryKey: ["rate", rateId],
-		queryFn: () => getRate(rateId)
+		queryKey: isEditingUniqueOrder ? ["rate", rateId, "unique", orderId] : ["rate", rateId, "global"],
+		queryFn: async () => {
+			if (isEditingUniqueOrder && orderId) {
+				return getRateUnique(rateId, orderId)
+			}
+			return getRate(rateId)
+		},
+		enabled: true
 	})
 
 	useEffect(() => {
@@ -57,21 +73,39 @@ export const RateForm = ({ rateId }: RateFormProps) => {
 			return
 		}
 
-		startTransition(() => {
-			toast.promise(updateRate({ rateId, value: numericValue }), {
-				loading: "Salvando alterações...",
-				success: (res) => {
-					if (res.success) {
-						queryClient.invalidateQueries({ queryKey: ["rate", rateId] })
-						// Invalida também as queries do step-4 para atualizar os cálculos
-						queryClient.invalidateQueries({ queryKey: ["rates", "interest_rate", "service_fee"] })
-						return "Taxa salva com sucesso!"
-					}
-					throw new Error(res.message)
-				},
-				error: (err) => err.message
+		if (isEditingUniqueOrder) {
+			startTransition(() => {
+				toast.promise(updateRateUnique({ rateId, value: numericValue, orderId }), {
+					loading: "Salvando alterações...",
+					success: (res) => {
+						if (res.success) {
+							queryClient.invalidateQueries({ queryKey: ["rate", rateId] })
+							// Invalida também as queries do step-4 para atualizar os cálculos
+							queryClient.invalidateQueries({ queryKey: ["rates", "interest_rate", "service_fee"] })
+							return "Taxa salva com sucesso!"
+						}
+						throw new Error(res.message)
+					},
+					error: (err) => err.message
+				})
 			})
-		})
+		} else {
+			startTransition(() => {
+				toast.promise(updateRate({ rateId, value: numericValue }), {
+					loading: "Salvando alterações...",
+					success: (res) => {
+						if (res.success) {
+							queryClient.invalidateQueries({ queryKey: ["rate", rateId] })
+							// Invalida também as queries do step-4 para atualizar os cálculos
+							queryClient.invalidateQueries({ queryKey: ["rates", "interest_rate", "service_fee"] })
+							return "Taxa salva com sucesso!"
+						}
+						throw new Error(res.message)
+					},
+					error: (err) => err.message
+				})
+			})
+		}
 	}
 
 	if (isLoading) {

@@ -36,7 +36,8 @@ const permissionTranslations: Record<PermissionId, string> = {
 	"simulations:create": "Criar Novas Simulações",
 	"simulations:view": "Ver Simulações Criadas",
 	"orders:view": "Ver Pedidos",
-	"orders:status": "Alterar Status"
+	"orders:status": "Alterar Status",
+	"orders:rates:manage": "Gerenciar Taxas"
 }
 
 const resourceTitleTranslations: Record<string, string> = {

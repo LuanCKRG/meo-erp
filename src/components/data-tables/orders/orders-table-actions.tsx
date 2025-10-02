@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Download, Edit, Eye, FileDown, Loader2, RefreshCw, Trash2 } from "lucide-react"
+import { DollarSign, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
@@ -24,12 +24,14 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { OrderWithRelations } from "@/lib/definitions/orders"
 import { hasPermission } from "@/actions/auth"
+import { EditRatesDialog } from "@/components/dialogs/edit-rates-dialog"
 
 type DocumentFieldName = (typeof documentFields)[number]["name"]
 
 export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => {
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 	const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
+	const [isManageRatesDialogOpen, setIsManageRatesDialogOpen] = useState(false)
 	const [isViewSheetOpen, setIsViewSheetOpen] = useState(false)
 	const [isDeletePending, startDeleteTransition] = useTransition()
 	const [isPdfPending, startPdfTransition] = useTransition()
@@ -42,6 +44,11 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 	const { data: canManageStatus } = useQuery({
 		queryKey: ["permission", "orders:status"],
 		queryFn: () => hasPermission("orders:status")
+	})
+
+	const { data: canManageRates } = useQuery({
+		queryKey: ["permission", "orders:rates:manage"],
+		queryFn: () => hasPermission("orders:rates:manage")
 	})
 
 	const { data: availableFiles, isLoading: isLoadingFiles } = useQuery({
@@ -151,6 +158,18 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 					<TooltipContent>Editar Pedido</TooltipContent>
 				</Tooltip>
 
+				{canManageRates && (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button variant="ghost" size="icon" onClick={() => setIsManageRatesDialogOpen(true)}>
+								<DollarSign className="h-4 w-4" />
+								<span className="sr-only">Alterar taxas</span>
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>Alterar taxas</TooltipContent>
+					</Tooltip>
+				)}
+
 				{canManageStatus && (
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -246,6 +265,7 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 				</Tooltip>
 			</div>
 
+			<EditRatesDialog orderId={order.id} open={isManageRatesDialogOpen} onOpenChange={setIsManageRatesDialogOpen} />
 			<EditOrderDialog orderId={order.id} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
 			<UpdateOrderStatusDialog order={order} open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen} />
 			<ViewOrderSheet orderId={order.id} open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen} />
