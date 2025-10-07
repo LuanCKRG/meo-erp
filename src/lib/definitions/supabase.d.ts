@@ -22,11 +22,11 @@ export type Database = {
 					created_by_user_id: string
 					id: string
 					incorporation_date: string | null
-					internal_manager: string | null
+					internal_manager: string
 					kdi: number
 					neighborhood: string
 					number: string
-					partner_id: string | null
+					partner_id: string
 					postal_code: string
 					state: string
 					street: string
@@ -45,11 +45,11 @@ export type Database = {
 					created_by_user_id?: string
 					id?: string
 					incorporation_date?: string | null
-					internal_manager?: string | null
+					internal_manager: string
 					kdi?: number
 					neighborhood: string
 					number: string
-					partner_id?: string | null
+					partner_id: string
 					postal_code: string
 					state: string
 					street: string
@@ -68,11 +68,11 @@ export type Database = {
 					created_by_user_id?: string
 					id?: string
 					incorporation_date?: string | null
-					internal_manager?: string | null
+					internal_manager?: string
 					kdi?: number
 					neighborhood?: string
 					number?: string
-					partner_id?: string | null
+					partner_id?: string
 					postal_code?: string
 					state?: string
 					street?: string
@@ -733,6 +733,10 @@ export type Database = {
 			[_ in never]: never
 		}
 		Functions: {
+			delete_user_with_auth: {
+				Args: { target_user_id: string }
+				Returns: Json
+			}
 			get_user_permissions_detailed: {
 				Args: { p_user_id: string }
 				Returns: {
