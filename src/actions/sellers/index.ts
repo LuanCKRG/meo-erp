@@ -1,4 +1,5 @@
 import approveSeller from "@/actions/sellers/approve-seller"
+import deleteSeller from "@/actions/sellers/delete-seller"
 import getAllSellers from "@/actions/sellers/get-all"
 import getAllApprovedSellers from "@/actions/sellers/get-all-approved"
 import registerSeller from "@/actions/sellers/register-seller"
@@ -17,5 +18,6 @@ export {
 	getAllApprovedSellers,
 	setSellerActiveStatus,
 	getSellerByUserId,
-	getSellersForCurrentUser
+	getSellersForCurrentUser,
+	deleteSeller
 }
