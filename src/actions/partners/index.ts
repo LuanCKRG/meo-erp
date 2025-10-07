@@ -1,4 +1,5 @@
 import approvePartner from "@/actions/partners/approve-partner"
+import deletePartner from "@/actions/partners/delete-partner"
 import getAllPartners from "@/actions/partners/get-all-partners"
 import getPartnerByCNPJ from "@/actions/partners/get-by-cnpj"
 import registerPartner from "@/actions/partners/register-partner"
@@ -23,5 +24,6 @@ export {
 	getPartnersBySellerId,
 	getAllPartnersWithSeller,
 	getPartnersForCurrentUser,
-	getPartnerByUserId
+	getPartnerByUserId,
+	deletePartner
 }
