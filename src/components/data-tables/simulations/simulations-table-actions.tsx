@@ -57,8 +57,7 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 		startDeleteTransition(() => {
 			toast.promise(
 				deleteSimulation({
-					simulationId: simulation.id,
-					customerId: simulation.customerId
+					simulationId: simulation.id
 				}),
 				{
 					loading: "Deletando simulação...",

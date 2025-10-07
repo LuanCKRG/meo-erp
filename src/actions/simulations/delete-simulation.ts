@@ -8,12 +8,11 @@ import type { ActionResponse } from "@/types/action-response"
 
 interface DeleteSimulationParams {
 	simulationId: string
-	customerId: string
 }
 
-async function deleteSimulation({ simulationId, customerId }: DeleteSimulationParams): Promise<ActionResponse<null>> {
-	if (!simulationId || !customerId) {
-		return { success: false, message: "ID da Simulação ou do Cliente não fornecido." }
+async function deleteSimulation({ simulationId }: DeleteSimulationParams): Promise<ActionResponse<null>> {
+	if (!simulationId) {
+		return { success: false, message: "ID da Simulação não fornecido." }
 	}
 
 	const supabase = await createClient()
@@ -29,26 +28,12 @@ async function deleteSimulation({ simulationId, customerId }: DeleteSimulationPa
 			throw simulationError
 		}
 
-		// 2. Deletar o cliente associado
-		const { error: customerError } = await supabase.from("customers").delete().eq("id", customerId)
-
-		if (customerError) {
-			console.error("Erro ao deletar cliente associado (Supabase):", customerError)
-			// A simulação foi deletada, mas o cliente não. Isso é um estado inconsistente.
-			// Informamos o usuário sobre isso. Em um sistema mais complexo, isso poderia disparar um alerta.
-			return {
-				success: true,
-				data: null,
-				message: "Simulação deletada, mas houve um problema ao remover o cliente associado. Contate o suporte."
-			}
-		}
-
 		revalidatePath("/dashboard/simulations")
 
 		return {
 			success: true,
 			data: null,
-			message: "Simulação e cliente associado foram deletados com sucesso."
+			message: "Simulação foi deletada com sucesso."
 		}
 	} catch (error) {
 		console.error("Erro inesperado em deleteSimulation:", error)
