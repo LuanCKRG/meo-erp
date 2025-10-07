@@ -22,11 +22,11 @@ export type Database = {
 					created_by_user_id: string
 					id: string
 					incorporation_date: string | null
-					internal_manager: string
+					internal_manager: string | null
 					kdi: number
 					neighborhood: string
 					number: string
-					partner_id: string
+					partner_id: string | null
 					postal_code: string
 					state: string
 					street: string
@@ -45,11 +45,11 @@ export type Database = {
 					created_by_user_id?: string
 					id?: string
 					incorporation_date?: string | null
-					internal_manager: string
+					internal_manager?: string | null
 					kdi?: number
 					neighborhood: string
 					number: string
-					partner_id: string
+					partner_id?: string | null
 					postal_code: string
 					state: string
 					street: string
@@ -68,11 +68,11 @@ export type Database = {
 					created_by_user_id?: string
 					id?: string
 					incorporation_date?: string | null
-					internal_manager?: string
+					internal_manager?: string | null
 					kdi?: number
 					neighborhood?: string
 					number?: string
-					partner_id?: string
+					partner_id?: string | null
 					postal_code?: string
 					state?: string
 					street?: string
@@ -190,7 +190,7 @@ export type Database = {
 				Row: {
 					connection_voltage: string
 					created_at: string
-					created_by_user_id: string
+					created_by_user_id: string | null
 					current_consumption: number
 					customer_id: string
 					energy_provider: string
@@ -214,7 +214,7 @@ export type Database = {
 				Insert: {
 					connection_voltage: string
 					created_at?: string
-					created_by_user_id?: string
+					created_by_user_id?: string | null
 					current_consumption: number
 					customer_id: string
 					energy_provider: string
@@ -238,7 +238,7 @@ export type Database = {
 				Update: {
 					connection_voltage?: string
 					created_at?: string
-					created_by_user_id?: string
+					created_by_user_id?: string | null
 					current_consumption?: number
 					customer_id?: string
 					energy_provider?: string
