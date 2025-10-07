@@ -69,6 +69,10 @@ async function createOrderFromSimulation(simulationId: string): Promise<ActionRe
 
 		newOrderId = newOrder.id
 
+		// 3.5 Deletar a simulação original após criar o pedido
+		const { error: deleteSimError } = await supabaseAdmin.from("simulations").delete().eq("id", simulationId)
+		if (deleteSimError) throw deleteSimError
+
 		// 4. Listar arquivos do bucket da simulação
 		const { data: files, error: listError } = await supabaseAdmin.storage.from(BUCKET_NAME).list(simulationId)
 
