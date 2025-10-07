@@ -33,8 +33,6 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 			return []
 		}
 
-		console.log("Seller ID encontrado:", seller.id)
-
 		// Buscar primeiro os customer_ids do vendedor
 		const { data: customerIds, error: customerError } = await supabase.from("customers").select("id").eq("internal_manager", seller.id)
 
@@ -44,14 +42,8 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 		}
 
 		if (!customerIds || customerIds.length === 0) {
-			console.log("Nenhum cliente encontrado para o vendedor")
 			return []
 		}
-
-		console.log(
-			"Customer IDs encontrados para o vendedor:",
-			customerIds.map((c) => c.id)
-		)
 
 		const customerIdArray = customerIds.map((c) => c.id)
 
@@ -88,8 +80,6 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 			return []
 		}
 
-		console.log("Pedidos encontrados para o vendedor:", data?.length || 0)
-
 		const finalMappedData: OrderWithRelations[] = data
 			.filter((order) => order.customers) // Filtra orders sem customers
 			.map((order) => {
@@ -125,8 +115,6 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 			return []
 		}
 
-		console.log("Partner ID encontrado:", partner.id)
-
 		// Buscar primeiro os customer_ids do parceiro
 		const { data: customerIds, error: customerError } = await supabase.from("customers").select("id").eq("partner_id", partner.id)
 
@@ -136,14 +124,8 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 		}
 
 		if (!customerIds || customerIds.length === 0) {
-			console.log("Nenhum cliente encontrado para o parceiro")
 			return []
 		}
-
-		console.log(
-			"Customer IDs encontrados para o parceiro:",
-			customerIds.map((c) => c.id)
-		)
 
 		const customerIdArray = customerIds.map((c) => c.id)
 
@@ -179,8 +161,6 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 			console.error("Erro ao buscar pedidos para o parceiro:", error)
 			return []
 		}
-
-		console.log("Pedidos encontrados para o parceiro:", data?.length || 0)
 
 		const finalMappedData: OrderWithRelations[] = data
 			.filter((order) => order.customers) // Filtra orders sem customers

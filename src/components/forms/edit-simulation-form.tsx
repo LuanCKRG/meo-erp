@@ -234,7 +234,6 @@ export function EditSimulationForm({ simulationId, onFinished }: { simulationId:
 	}
 
 	const { customer, ...simulation } = queryData.data
-	console.log(simulation)
 
 	const initialData: ExtendedSimulationData = {
 		systemPower: formatNumberFromDatabase(simulation.system_power),

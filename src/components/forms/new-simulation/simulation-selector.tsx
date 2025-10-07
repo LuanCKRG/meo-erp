@@ -34,10 +34,6 @@ export function SimulationSelector({ userRole }: SimulationSelectorProps) {
 		enabled: userRole === "seller" && !!sellerId
 	})
 
-	useEffect(() => {
-		console.log(sellerPartners)
-	}, [sellerPartners])
-
 	const handlePartnerChangeForAdmin = (partnerId: string) => {
 		const selectedPartner = allPartnersWithSeller.find((p) => p.id === partnerId)
 		if (selectedPartner) {

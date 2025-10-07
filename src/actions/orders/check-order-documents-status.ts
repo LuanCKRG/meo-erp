@@ -36,10 +36,6 @@ async function checkOrderDocumentsStatus(orderId: string): Promise<ActionRespons
 
 		// Compara os arquivos enviados com a lista de todos os documentos possíveis
 		const documentStatus: DocumentStatus[] = documentFields.map((field) => {
-			console.log({
-				"field.name": field.name,
-				uploadedFileNames: uploadedFileNames
-			})
 			return {
 				name: field.name,
 				label: field.label.replace(" *", ""),
