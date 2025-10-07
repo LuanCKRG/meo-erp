@@ -54,7 +54,7 @@ export const CustomerTableActions = ({ customer }: { customer: CustomerWithRelat
 							<span className="sr-only">Deletar</span>
 						</Button>
 					</TooltipTrigger>
-					<TooltipContent className="tooltip-content bg-destructive fill-destructive text-white">Deletar Simulação</TooltipContent>
+					<TooltipContent className="tooltip-content bg-destructive fill-destructive text-white">Deletar Cliente</TooltipContent>
 				</Tooltip>
 			</div>
 
