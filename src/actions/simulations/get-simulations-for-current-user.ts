@@ -65,7 +65,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 					company_name,
 					city,
 					state,
-					partners ( contact_name )
+					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
 				service_fee
@@ -84,7 +84,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 			const total_value = subtotal + subtotal * (sim.service_fee / 100)
 
 			const customerData = Array.isArray(sim.customers) ? sim.customers[0] : sim.customers
-			const partnerName = Array.isArray(customerData?.partners) ? customerData.partners[0]?.contact_name : customerData?.partners?.contact_name
+			const partner = Array.isArray(sim.customers.partners) ? sim.customers.partners[0] : sim.customers.partners
 
 			return {
 				id: sim.id,
@@ -99,7 +99,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 				status: sim.status,
 				created_at: sim.created_at,
 				internal_manager: sim.sellers?.name || null,
-				partner_name: partnerName || null
+				partner_name: partner?.legal_business_name || null
 			}
 		})
 
@@ -146,7 +146,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 					company_name,
 					city,
 					state,
-					partners ( contact_name )
+					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
 				service_fee
@@ -165,7 +165,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 			const total_value = subtotal + subtotal * (sim.service_fee / 100)
 
 			const customerData = Array.isArray(sim.customers) ? sim.customers[0] : sim.customers
-			const partnerName = Array.isArray(customerData?.partners) ? customerData.partners[0]?.contact_name : customerData?.partners?.contact_name
+			const partner = Array.isArray(sim.customers.partners) ? sim.customers.partners[0] : sim.customers.partners
 
 			return {
 				id: sim.id,
@@ -180,7 +180,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 				status: sim.status,
 				created_at: sim.created_at,
 				internal_manager: sim.sellers?.name || null,
-				partner_name: partnerName || null
+				partner_name: partner?.legal_business_name || null
 			}
 		})
 

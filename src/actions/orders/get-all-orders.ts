@@ -25,7 +25,7 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
           company_name,
           city,
           state,
-          partners ( contact_name )
+          partners ( contact_name, legal_business_name )
         ),
         sellers (
           name
@@ -57,7 +57,7 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
 				company_name: order.customers.company_name || "N/A",
 				city: order.customers.city || "N/A",
 				state: order.customers.state || "N/A",
-				partner_name: partner?.contact_name || "N/A",
+				partner_name: partner?.legal_business_name || "N/A",
 				internal_manager: order.sellers?.name || null,
 				system_power: order.system_power,
 				total_value,

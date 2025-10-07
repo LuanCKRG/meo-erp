@@ -25,7 +25,7 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
           company_name,
           city,
           state,
-          partners ( contact_name )
+          partners ( contact_name, legal_business_name )
         ),
         sellers (
           name
@@ -57,7 +57,7 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
 				company_name: sim.customers.company_name || "N/A",
 				city: sim.customers.city || "N/A",
 				state: sim.customers.state || "N/A",
-				partner_name: partner?.contact_name || "N/A",
+				partner_name: partner?.legal_business_name || "N/A",
 				internal_manager: sim.sellers?.name || null, // Adiciona o nome do gestor interno
 				system_power: sim.system_power,
 				total_value,
