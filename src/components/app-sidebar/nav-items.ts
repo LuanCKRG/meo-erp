@@ -50,19 +50,7 @@ const navItems: NavSection[] = [
 				title: "Simulações",
 				url: "/dashboard/simulations",
 				icon: Activity,
-				permission: "simulations:create",
-				subItems: [
-					{
-						title: "Ver Todas",
-						url: "/dashboard/simulations",
-						permission: "simulations:view"
-					},
-					{
-						title: "Nova Simulação",
-						url: "/dashboard/simulations/add",
-						permission: "simulations:create"
-					}
-				]
+				permission: "simulations:view"
 			},
 			{
 				title: "Pedidos",
