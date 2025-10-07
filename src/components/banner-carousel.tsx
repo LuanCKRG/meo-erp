@@ -31,7 +31,7 @@ export function BannerCarousel() {
 									src={banner}
 									alt={`Banner ${index + 1}`}
 									fill
-									className="object-contain md:object-fill xl:object-contain  rounded-xl border-primary"
+									className="object-contain md:object-fill xl:object-contain rounded-xl border-primary"
 									priority={index === 0}
 								/>
 							</div>
