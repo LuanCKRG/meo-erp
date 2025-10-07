@@ -1,11 +1,11 @@
 "use client"
 
 import { useQueryClient } from "@tanstack/react-query"
-import { CheckCircle, Loader2, Pencil, ToggleLeft, ToggleRight, XCircle } from "lucide-react"
+import { CheckCircle, Loader2, Pencil, ToggleLeft, ToggleRight, Trash2, XCircle } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
-import { approveSeller, rejectSeller, setSellerActiveStatus } from "@/actions/sellers"
+import { approveSeller, deleteSeller, rejectSeller, setSellerActiveStatus } from "@/actions/sellers"
 import { EditSellerDialog } from "@/components/dialogs/edit-seller-dialog"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -15,6 +15,7 @@ const SellerActions = ({ seller }: { seller: Seller }) => {
 	const queryClient = useQueryClient()
 	const [isPending, startTransition] = useTransition()
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+	const [isDeletePending, startDeleteTransition] = useTransition()
 
 	function handleApprovalAction(action: "approve" | "reject") {
 		startTransition(async () => {
@@ -42,10 +43,27 @@ const SellerActions = ({ seller }: { seller: Seller }) => {
 		})
 	}
 
+	function handleDelete() {
+		startDeleteTransition(async () => {
+			try {
+				const result = await deleteSeller({ sellerId: seller.id, userId: seller.user_id })
+
+				if (result.success) {
+					queryClient.invalidateQueries({ queryKey: ["sellers"] })
+					toast.success(result.message)
+				} else {
+					toast.error(result.message)
+				}
+			} catch (err) {
+				toast.error(err instanceof Error ? err.message : "Erro desconhecido")
+			}
+		})
+	}
+
 	return (
 		<>
 			<div className="flex items-center justify-center">
-				<div className="contents alternative-buttons-no-trash space-x-1">
+				<div className="contents alternative-buttons space-x-1">
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)}>
@@ -78,6 +96,16 @@ const SellerActions = ({ seller }: { seller: Seller }) => {
 								<TooltipContent>Reativar</TooltipContent>
 							</Tooltip>
 						))}
+
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button className="delete-button" variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
+								{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+								<span className="sr-only">Deletar</span>
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent className="tooltip-content bg-destructive fill-destructive text-white">Deletar Vendedor</TooltipContent>
+					</Tooltip>
 				</div>
 
 				{seller.status === "pending" && (
