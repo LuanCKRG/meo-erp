@@ -1,11 +1,11 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { CheckCircle, Eye, Loader2, MoreHorizontal, Pencil, ToggleLeft, ToggleRight, XCircle } from "lucide-react"
+import { CheckCircle, Eye, Loader2, MoreHorizontal, Pencil, ToggleLeft, ToggleRight, Trash2, XCircle } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
-import { approvePartner, rejectPartner, setPartnerActiveStatus } from "@/actions/partners"
+import { approvePartner, deletePartner, rejectPartner, setPartnerActiveStatus } from "@/actions/partners"
 import { ApprovePartnerDialog } from "@/components/dialogs/approve-partner-dialog"
 import { EditPartnerDialog } from "@/components/dialogs/edit-partner-dialog"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,7 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 	const [isPending, startTransition] = useTransition()
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 	const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false)
+	const [isDeletePending, startDeleteTransition] = useTransition()
 
 	const { data: canManage } = useQuery({
 		queryKey: ["permission", "partners:manage"],
@@ -51,6 +52,23 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 		})
 	}
 
+	function handleDelete() {
+		startDeleteTransition(async () => {
+			try {
+				const result = await deletePartner({ partnerId: partner.id, userId: partner.user_id })
+
+				if (result.success) {
+					queryClient.invalidateQueries({ queryKey: ["partners"] })
+					toast.success(result.message)
+				} else {
+					toast.error(result.message)
+				}
+			} catch (err) {
+				toast.error(err instanceof Error ? err.message : "Erro desconhecido")
+			}
+		})
+	}
+
 	if (!canManage) {
 		return null
 	}
@@ -58,7 +76,7 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 	return (
 		<>
 			<div className="flex items-center justify-center space-x-1">
-				<div className="contents space-x-1 alternative-buttons-no-trash">
+				<div className="contents space-x-1 alternative-buttons">
 					<Popover>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -162,6 +180,16 @@ const PartnerActions = ({ partner }: { partner: Partner }) => {
 								<TooltipContent>Reativar</TooltipContent>
 							</Tooltip>
 						))}
+
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button className="delete-button" variant="ghost" size="icon" onClick={handleDelete} disabled={isDeletePending}>
+								{isDeletePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+								<span className="sr-only">Deletar</span>
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent className="tooltip-content bg-destructive fill-destructive text-white">Deletar Parceiro</TooltipContent>
+					</Tooltip>
 				</div>
 
 				{partner.status === "pending" && (
