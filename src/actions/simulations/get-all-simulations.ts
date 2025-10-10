@@ -30,7 +30,8 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
         sellers (
           name
         ),
-				service_fee
+				service_fee,
+				created_by:created_by_user_id ( name )
       `
 			)
 			.order("created_at", { ascending: false })
@@ -62,7 +63,8 @@ async function getAllSimulations(): Promise<SimulationWithRelations[]> {
 				system_power: sim.system_power,
 				total_value,
 				status: sim.status, // Adiciona o status
-				created_at: sim.created_at
+				created_at: sim.created_at,
+				created_by_user: sim.created_by.name || "N/A"
 			}
 		})
 

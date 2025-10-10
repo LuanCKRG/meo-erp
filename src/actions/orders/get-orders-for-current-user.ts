@@ -69,7 +69,8 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
-				service_fee
+				service_fee,
+				created_by:created_by_user_id ( name )
 				`
 			)
 			.in("customer_id", customerIdArray)
@@ -100,7 +101,8 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 					system_power: order.system_power,
 					total_value,
 					status: order.status,
-					created_at: order.created_at
+					created_at: order.created_at,
+					created_by_user: order.created_by?.name || "N/A"
 				}
 			})
 
@@ -151,7 +153,8 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
-				service_fee
+				service_fee,
+				created_by:created_by_user_id ( name )
 				`
 			)
 			.in("customer_id", customerIdArray)
@@ -182,7 +185,8 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 					system_power: order.system_power,
 					total_value,
 					status: order.status,
-					created_at: order.created_at
+					created_at: order.created_at,
+					created_by_user: order.created_by?.name || "N/A"
 				}
 			})
 

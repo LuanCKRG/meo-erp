@@ -68,7 +68,8 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
-				service_fee
+				service_fee,
+				created_by:created_by_user_id ( name )
 				`
 			)
 			.in("customer_id", customerIdArray) // Usar .in() com os IDs dos clientes
@@ -99,7 +100,8 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 				status: sim.status,
 				created_at: sim.created_at,
 				internal_manager: sim.sellers?.name || null,
-				partner_name: partner?.legal_business_name || null
+				partner_name: partner?.legal_business_name || null,
+				created_by_user: sim.created_by.name || "N/A"
 			}
 		})
 
@@ -149,7 +151,8 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
-				service_fee
+				service_fee,
+				created_by:created_by_user_id ( name )
 				`
 			)
 			.in("customer_id", customerIdArray) // Usar .in() com os IDs dos clientes
@@ -180,7 +183,8 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 				status: sim.status,
 				created_at: sim.created_at,
 				internal_manager: sim.sellers?.name || null,
-				partner_name: partner?.legal_business_name || null
+				partner_name: partner?.legal_business_name || null,
+				created_by_user: sim.created_by.name || "N/A"
 			}
 		})
 

@@ -30,7 +30,8 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
         sellers (
           name
         ),
-				service_fee
+				service_fee,
+				created_by:created_by_user_id ( name )
       `
 			)
 			.order("created_at", { ascending: false })
@@ -62,7 +63,8 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
 				system_power: order.system_power,
 				total_value,
 				status: order.status,
-				created_at: order.created_at
+				created_at: order.created_at,
+				created_by_user: order.created_by?.name || "N/A"
 			}
 		})
 
