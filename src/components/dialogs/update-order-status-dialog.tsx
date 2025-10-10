@@ -24,7 +24,8 @@ const availableStatuses: { value: OrderStatus; label: string }[] = [
 	{ value: "contract_signing", label: "Assinatura Contrato" },
 	{ value: "completed", label: "Finalizado" },
 	{ value: "canceled", label: "Cancelado" },
-	{ value: "pre_approved", label: "Pré-Aprovado" }
+	{ value: "pre_approved", label: "Pré-Aprovado" },
+	{ value: "frozen", label: "Congelado" }
 ]
 
 interface UpdateOrderStatusDialogProps {
