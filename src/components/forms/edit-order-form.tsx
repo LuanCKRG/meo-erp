@@ -280,7 +280,10 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 		comprovanteEndereco: undefined,
 		irpfSocios: undefined,
 		fotosOperacao: undefined,
-		contaDeEnergia: undefined
+		contaDeEnergia: undefined,
+		balancoDRE2025: undefined,
+		contratoSocial: undefined,
+		proposta: undefined
 	}
 
 	return (

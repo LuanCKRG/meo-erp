@@ -18,6 +18,9 @@ type DocumentField = keyof Pick<
 	| "irpfSocios"
 	| "fotosOperacao"
 	| "contaDeEnergia"
+	| "proposta"
+	| "balancoDRE2025"
+	| "contratoSocial"
 >
 
 const documentFields: DocumentField[] = [
@@ -29,7 +32,10 @@ const documentFields: DocumentField[] = [
 	"comprovanteEndereco",
 	"irpfSocios",
 	"fotosOperacao",
-	"contaDeEnergia"
+	"contaDeEnergia",
+	"proposta",
+	"balancoDRE2025",
+	"contratoSocial"
 ]
 
 // Updated to return the count of uploaded files

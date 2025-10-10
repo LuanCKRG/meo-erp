@@ -89,7 +89,10 @@ export const simulationStep5Schema = z.object({
 	comprovanteEndereco: optionalFileSchema,
 	irpfSocios: optionalFileSchema,
 	fotosOperacao: optionalFileSchema,
-	contaDeEnergia: optionalFileSchema
+	contaDeEnergia: optionalFileSchema,
+	proposta: optionalFileSchema,
+	balancoDRE2025: optionalFileSchema,
+	contratoSocial: optionalFileSchema
 })
 
 // Schema do Passo 5 para EDIÇÃO, com campos de arquivo opcionais
@@ -102,7 +105,10 @@ export const editSimulationStep5Schema = z.object({
 	comprovanteEndereco: optionalFileSchema,
 	irpfSocios: optionalFileSchema,
 	fotosOperacao: optionalFileSchema,
-	contaDeEnergia: optionalFileSchema
+	contaDeEnergia: optionalFileSchema,
+	proposta: optionalFileSchema,
+	balancoDRE2025: optionalFileSchema,
+	contratoSocial: optionalFileSchema
 })
 
 // Tipos de dados para cada passo

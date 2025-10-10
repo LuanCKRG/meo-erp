@@ -126,6 +126,9 @@ export function NewSimulationForm({
 			irpfSocios: undefined,
 			fotosOperacao: undefined,
 			contaDeEnergia: undefined,
+			balancoDRE2025: undefined,
+			contratoSocial: undefined,
+			proposta: undefined,
 			...initialData
 		},
 		mode: "onChange"
