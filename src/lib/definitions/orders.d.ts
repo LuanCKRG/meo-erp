@@ -18,4 +18,5 @@ export type OrderWithRelations = {
 	total_value: number
 	status: OrderStatus
 	created_at: string
+	created_by_user: string
 }

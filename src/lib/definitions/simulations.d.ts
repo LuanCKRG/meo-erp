@@ -19,4 +19,5 @@ export type SimulationWithRelations = {
 	total_value: number
 	status: SimulationStatus
 	created_at: string
+	created_by_user: string
 }
