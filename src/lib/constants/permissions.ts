@@ -14,6 +14,7 @@ const PERMISSIONS = [
 	"sellers:view",
 	"simulations:create",
 	"simulations:view",
+	"simulations:rates:manage",
 	"orders:view",
 	"orders:status",
 	"orders:rates:manage"
