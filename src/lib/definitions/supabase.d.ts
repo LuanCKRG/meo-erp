@@ -761,6 +761,7 @@ export type Database = {
 				| "canceled"
 				| "docs_analysis"
 				| "pre_approved"
+				| "frozen"
 			enum_partners_status: "pending" | "approved" | "rejected"
 			enum_simulation_status: "initial_contact" | "under_review" | "in_negotiation" | "won" | "lost"
 			user_role: "partner" | "seller" | "admin"
@@ -892,7 +893,8 @@ export const Constants = {
 				"completed",
 				"canceled",
 				"docs_analysis",
-				"pre_approved"
+				"pre_approved",
+				"frozen"
 			],
 			enum_partners_status: ["pending", "approved", "rejected"],
 			enum_simulation_status: ["initial_contact", "under_review", "in_negotiation", "won", "lost"],
