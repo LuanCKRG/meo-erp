@@ -2,7 +2,7 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Check, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Send, Trash2 } from "lucide-react"
+import { Check, DollarSign, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Send, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import type { SimulationWithRelations } from "@/lib/definitions/simulations"
+import { EditSimulationRatesDialog } from "@/components/dialogs/edit-simulation-rates-dialog"
 
 type DocumentFieldName = (typeof documentFields)[number]["name"]
 
@@ -32,6 +33,7 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 	const [isViewSheetOpen, setIsViewSheetOpen] = useState(false)
 	const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
+	const [isManageRatesDialogOpen, setIsManageRatesDialogOpen] = useState(false)
 	const [isDeletePending, startDeleteTransition] = useTransition()
 	const [isCreateOrderPending, startCreateOrderTransition] = useTransition()
 	const [isPdfPending, startPdfTransition] = useTransition()
@@ -44,6 +46,11 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 	const { data: canCreateSimulations } = useQuery({
 		queryKey: ["permission", "simulations:create"],
 		queryFn: () => hasPermission("simulations:create")
+	})
+
+	const { data: canManageRates } = useQuery({
+		queryKey: ["permission", "simulations:rates:manage"],
+		queryFn: () => hasPermission("simulations:rates:manage")
 	})
 
 	const { data: availableFiles, isLoading: isLoadingFiles } = useQuery({
@@ -187,6 +194,18 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 					</>
 				)}
 
+				{canManageRates && (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button variant="ghost" size="icon" onClick={() => setIsManageRatesDialogOpen(true)}>
+								<DollarSign className="h-4 w-4" />
+								<span className="sr-only">Alterar taxas</span>
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>Alterar taxas</TooltipContent>
+					</Tooltip>
+				)}
+
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button variant="ghost" size="icon" onClick={handleDownloadPdf} disabled={isPdfPending}>
@@ -284,6 +303,7 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 				)}
 			</div>
 
+			<EditSimulationRatesDialog simulationId={simulation.id} open={isManageRatesDialogOpen} onOpenChange={setIsManageRatesDialogOpen} />
 			<EditSimulationDialog simulationId={simulation.id} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
 			<ViewSimulationSheet simulationId={simulation.id} open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen} />
 			<UpdateStatusDialog simulation={simulation} open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen} />
