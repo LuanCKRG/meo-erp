@@ -127,6 +127,11 @@ export const columns: ColumnDef<SimulationWithRelations>[] = [
 		}
 	},
 	{
+		accessorKey: "created_by_user",
+		header: "Criado por",
+		cell: ({ row }) => row.original.created_by_user || "-"
+	},
+	{
 		accessorKey: "created_at",
 		header: ({ column }) => (
 			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>

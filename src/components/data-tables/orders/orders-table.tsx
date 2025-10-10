@@ -67,6 +67,7 @@ export const OrdersTable = () => {
 		system_power: "Potência (kWp)",
 		total_value: "Valor",
 		status: "Status",
+		created_by_user: "Criado por",
 		created_at: "Data",
 		actions: "Ações"
 	}
