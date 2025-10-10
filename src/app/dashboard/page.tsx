@@ -1,10 +1,8 @@
-import Image from "next/image"
+import { Globe } from "lucide-react"
 
 import { getCurrentUser } from "@/actions/auth"
 import { BannerCarousel } from "@/components/banner-carousel"
-import { Button } from "@/components/ui/button"
 import { getFirstAndLastName } from "@/lib/utils"
-import { Globe, Linkedin } from "lucide-react"
 
 const DashboardPage = async () => {
 	const userData = await getCurrentUser()
@@ -47,9 +45,9 @@ const DashboardPage = async () => {
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
 							className="size-10 text-black group-hover:text-foreground transition-colors duration-500"
 						>
 							<title>Linkedin</title>
