@@ -13,6 +13,7 @@ type DocumentFieldName = (typeof documentFields)[number]["name"]
 interface DownloadFilesParams {
 	simulationId: string
 	documentNames: DocumentFieldName[]
+	customerId: string
 }
 
 type DownloadFilesResponse = {
@@ -21,7 +22,7 @@ type DownloadFilesResponse = {
 	contentType: string
 }
 
-async function downloadSimulationFiles({ simulationId, documentNames }: DownloadFilesParams): Promise<ActionResponse<DownloadFilesResponse>> {
+async function downloadSimulationFiles({ simulationId, documentNames, customerId }: DownloadFilesParams): Promise<ActionResponse<DownloadFilesResponse>> {
 	if (!simulationId) {
 		return { success: false, message: "ID da simulação não fornecido." }
 	}
@@ -32,8 +33,12 @@ async function downloadSimulationFiles({ simulationId, documentNames }: Download
 	const supabase = createAdminClient()
 
 	try {
-		// Caso de arquivo único
+		const { data, error } = await supabase.from("customers").select("company_name").eq("id", customerId).single()
+
+		if (error) throw error
+
 		if (documentNames.length === 1) {
+			// Caso de arquivo único
 			const docName = documentNames[0]
 			const filePath = `${simulationId}/${docName}`
 
@@ -51,7 +56,7 @@ async function downloadSimulationFiles({ simulationId, documentNames }: Download
 				success: true,
 				message: "Arquivo pronto para download.",
 				data: {
-					fileName: `${docName}.pdf`,
+					fileName: data?.company_name ? `${data.company_name.toLocaleLowerCase().replace(/ /g, "_")}_${docName}.pdf` : `${docName}.pdf`,
 					fileBase64,
 					contentType: "application/pdf"
 				}
@@ -78,12 +83,13 @@ async function downloadSimulationFiles({ simulationId, documentNames }: Download
 		}
 
 		const zipBase64 = await zip.generateAsync({ type: "base64" })
-
 		return {
 			success: true,
 			message: "Arquivos compactados com sucesso.",
 			data: {
-				fileName: `documentos_simulacao_${simulationId}.zip`,
+				fileName: data?.company_name
+					? `documentos_${data.company_name.toLocaleLowerCase().replace(/ /g, "_")}.zip`
+					: `documentos_simulacao_${simulationId}.zip`,
 				fileBase64: zipBase64,
 				contentType: "application/zip"
 			}

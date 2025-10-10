@@ -109,7 +109,8 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 			toast.promise(
 				downloadSimulationFiles({
 					simulationId: order.id, // Reutilizando a action de simulação, pois o ID é o mesmo
-					documentNames: Array.from(selectedDocs)
+					documentNames: Array.from(selectedDocs),
+					customerId: order.customerId
 				}),
 				{
 					loading: "Preparando arquivos para download...",

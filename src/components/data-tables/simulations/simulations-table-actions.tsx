@@ -131,7 +131,8 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 			toast.promise(
 				downloadSimulationFiles({
 					simulationId: simulation.id,
-					documentNames: Array.from(selectedDocs)
+					documentNames: Array.from(selectedDocs),
+					customerId: simulation.customerId
 				}),
 				{
 					loading: "Preparando arquivos para download...",
