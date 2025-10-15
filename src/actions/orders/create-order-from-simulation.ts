@@ -2,7 +2,6 @@
 
 import { PostgrestError } from "@supabase/supabase-js"
 
-import { getRate } from "@/actions/settings"
 import type { OrderInsert } from "@/lib/definitions/orders"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
@@ -26,13 +25,6 @@ async function createOrderFromSimulation(simulationId: string): Promise<ActionRe
 			return { success: false, message: "Não foi possível encontrar a simulação de origem." }
 		}
 
-		// Busca as taxas atuais do banco de dados.
-		const [interestRateRes, serviceFeeRes] = await Promise.all([getRate("interest_rate"), getRate("service_fee")])
-
-		if (!interestRateRes.success || !serviceFeeRes.success) {
-			throw new Error("Não foi possível carregar as taxas de juros e serviços para a simulação.")
-		}
-
 		// 2. Preparar os dados para a nova tabela 'orders'
 		const orderData: OrderInsert = {
 			connection_voltage: simulation.connection_voltage,
@@ -52,8 +44,12 @@ async function createOrderFromSimulation(simulationId: string): Promise<ActionRe
 			system_power: simulation.system_power,
 			notes: simulation.notes,
 			// Mantém as taxas que foram usadas na simulação original
-			interest_rate: simulation.interest_rate,
-			service_fee: simulation.service_fee
+			interest_rate_36: simulation.interest_rate_36,
+			interest_rate_48: simulation.interest_rate_48,
+			interest_rate_60: simulation.interest_rate_60,
+			service_fee_36: simulation.service_fee_36,
+			service_fee_48: simulation.service_fee_48,
+			service_fee_60: simulation.service_fee_60
 		}
 
 		// 3. Inserir na tabela 'orders'

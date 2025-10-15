@@ -5,16 +5,16 @@ import { Loader2, Save } from "lucide-react"
 import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
 
-import { getRate, getRateUnique, getRateUniqueFromSimulationId, updateRate, updateRateUnique } from "@/actions/settings"
+import { getRateUniqueFromSimulationId } from "@/actions/settings"
+import updateSimulationRate from "@/actions/simulations/update-simulation-rate"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { maskNumber } from "@/lib/masks"
-import updateSimulationRate from "@/actions/simulations/update-simulation-rate"
 
 type RateProps = {
-	rateId: "interest_rate" | "service_fee"
+	rateId: "service_fee_36" | "service_fee_48" | "service_fee_60" | "interest_rate_36" | "interest_rate_48" | "interest_rate_60"
 	simulationId: string
 }
 

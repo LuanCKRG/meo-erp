@@ -94,9 +94,23 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 		}
 
 		// Busca as taxas atuais do banco de dados.
-		const [interestRateRes, serviceFeeRes] = await Promise.all([getRate("interest_rate"), getRate("service_fee")])
+		const [interestRate36Res, interestRate48Res, interestRate60Res, serviceFee36Res, serviceFee48Res, serviceFee60Res] = await Promise.all([
+			getRate("interest_rate_36"),
+			getRate("interest_rate_48"),
+			getRate("interest_rate_60"),
+			getRate("service_fee_36"),
+			getRate("service_fee_48"),
+			getRate("service_fee_60")
+		])
 
-		if (!interestRateRes.success || !serviceFeeRes.success) {
+		if (
+			!interestRate36Res.success ||
+			!interestRate48Res.success ||
+			!interestRate60Res.success ||
+			!serviceFee36Res.success ||
+			!serviceFee48Res.success ||
+			!serviceFee60Res.success
+		) {
 			throw new Error("Não foi possível carregar as taxas de juros e serviços para a simulação.")
 		}
 
@@ -117,8 +131,12 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 			created_by_user_id: user.id,
 			seller_id: context.sellerId,
 			notes: data.notes,
-			interest_rate: interestRateRes.data,
-			service_fee: serviceFeeRes.data
+			interest_rate_36: interestRate36Res.data,
+			interest_rate_48: interestRate48Res.data,
+			interest_rate_60: interestRate60Res.data,
+			service_fee_36: serviceFee36Res.data,
+			service_fee_48: serviceFee48Res.data,
+			service_fee_60: serviceFee60Res.data
 		}
 
 		const { data: simulationResult, error: simulationError } = await supabaseAdmin.from("simulations").insert(simulationData).select("id, kdi").single()

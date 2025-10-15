@@ -1,8 +1,8 @@
 "use client"
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { SimulationRateForm } from "../forms/simulation-rate-form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 
 interface EditSimulationDialogProps {
 	simulationId: string
@@ -28,8 +28,10 @@ export function EditSimulationRatesDialog({ simulationId, open, onOpenChange }: 
 								<CardTitle>Taxa de Juros</CardTitle>
 								<CardDescription>Defina a taxa de juros padrão a ser usada nos cálculos de parcelamento.</CardDescription>
 							</CardHeader>
-							<CardContent>
-								<SimulationRateForm simulationId={simulationId} rateId="interest_rate" />
+							<CardContent className="space-y-6">
+								<SimulationRateForm simulationId={simulationId} rateId="interest_rate_36" />
+								<SimulationRateForm simulationId={simulationId} rateId="interest_rate_48" />
+								<SimulationRateForm simulationId={simulationId} rateId="interest_rate_60" />
 							</CardContent>
 						</Card>
 						<Card>
@@ -37,8 +39,10 @@ export function EditSimulationRatesDialog({ simulationId, open, onOpenChange }: 
 								<CardTitle>Taxa de Serviços</CardTitle>
 								<CardDescription>Defina a taxa de serviços a ser aplicada sobre o subtotal do projeto.</CardDescription>
 							</CardHeader>
-							<CardContent>
-								<SimulationRateForm simulationId={simulationId} rateId="service_fee" />
+							<CardContent className="space-y-6">
+								<SimulationRateForm simulationId={simulationId} rateId="service_fee_36" />
+								<SimulationRateForm simulationId={simulationId} rateId="service_fee_48" />
+								<SimulationRateForm simulationId={simulationId} rateId="service_fee_60" />
 							</CardContent>
 						</Card>
 					</div>

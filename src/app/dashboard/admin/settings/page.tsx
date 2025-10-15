@@ -15,8 +15,10 @@ const AdminSettingsPage = () => {
 						<CardTitle>Taxa de Juros</CardTitle>
 						<CardDescription>Defina a taxa de juros padrão a ser usada nos cálculos de parcelamento.</CardDescription>
 					</CardHeader>
-					<CardContent>
-						<RateForm rateId="interest_rate" />
+					<CardContent className="space-y-6">
+						<RateForm rateId="interest_rate_36" />
+						<RateForm rateId="interest_rate_48" />
+						<RateForm rateId="interest_rate_60" />
 					</CardContent>
 				</Card>
 				<Card>
@@ -24,8 +26,10 @@ const AdminSettingsPage = () => {
 						<CardTitle>Taxa de Serviços</CardTitle>
 						<CardDescription>Defina a taxa de serviços a ser aplicada sobre o subtotal do projeto.</CardDescription>
 					</CardHeader>
-					<CardContent>
-						<RateForm rateId="service_fee" />
+					<CardContent className="space-y-6">
+						<RateForm rateId="service_fee_36" />
+						<RateForm rateId="service_fee_48" />
+						<RateForm rateId="service_fee_60" />
 					</CardContent>
 				</Card>
 			</div>

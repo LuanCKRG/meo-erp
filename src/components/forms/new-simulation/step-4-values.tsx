@@ -35,44 +35,76 @@ type Step4PropsCreate = {
 	onNext: () => void
 	onBack: () => void
 	isEditing?: false | null | undefined
-	initialServiceFee?: never
-	initialInterestRate?: never
+	initialServiceFee36?: never
+	initialServiceFee48?: never
+	initialServiceFee60?: never
+	initialInterestRate36?: never
+	initialInterestRate48?: never
+	initialInterestRate60?: never
 }
 
 type Step4PropsEdit = {
 	onNext: () => void
 	onBack: () => void
 	isEditing: true
-	initialServiceFee: number
-	initialInterestRate: number
+	initialServiceFee36: number
+	initialServiceFee48: number
+	initialServiceFee60: number
+	initialInterestRate36: number
+	initialInterestRate48: number
+	initialInterestRate60: number
 }
 
 type Step4Props = Step4PropsCreate | Step4PropsEdit
 
-const SimulationStep4 = ({ onNext, onBack, initialServiceFee, isEditing, initialInterestRate }: Step4Props) => {
+const SimulationStep4 = ({
+	onNext,
+	onBack,
+	initialServiceFee36,
+	initialServiceFee48,
+	initialServiceFee60,
+	isEditing,
+	initialInterestRate36,
+	initialInterestRate48,
+	initialInterestRate60
+}: Step4Props) => {
 	const form = useFormContext()
 
 	const { data: rates, isLoading: isLoadingRates } = useQuery({
-		queryKey: ["rates", "interest_rate", "service_fee"],
+		queryKey: ["rates", "interest_rate_36", "interest_rate_48", "interest_rate_60", "service_fee_36", "service_fee_48", "service_fee_60"],
 		queryFn: async () => {
-			const [interest, service] = await Promise.all([getRate("interest_rate"), getRate("service_fee")])
+			const [interestRate36Res, interestRate48Res, interestRate60Res, serviceFee36Res, serviceFee48Res, serviceFee60Res] = await Promise.all([
+				getRate("interest_rate_36"),
+				getRate("interest_rate_48"),
+				getRate("interest_rate_60"),
+				getRate("service_fee_36"),
+				getRate("service_fee_48"),
+				getRate("service_fee_60")
+			])
 
-			// Validação para garantir que os dados foram carregados corretamente
-			if (!interest.success || !service.success) {
-				throw new Error("Erro ao carregar taxas do banco de dados")
+			if (
+				!interestRate36Res.success ||
+				!interestRate48Res.success ||
+				!interestRate60Res.success ||
+				!serviceFee36Res.success ||
+				!serviceFee48Res.success ||
+				!serviceFee60Res.success
+			) {
+				throw new Error("Não foi possível carregar as taxas de juros e serviços para a simulação.")
 			}
 
 			return {
-				// Dividindo por 100 apenas uma vez aqui, já que vem como % do banco
-				interest_rate: interest.data / 100,
-				service_fee: service.data / 100
+				interest_rate_36: interestRate36Res.data / 100,
+				interest_rate_48: interestRate48Res.data / 100,
+				interest_rate_60: interestRate60Res.data / 100,
+				service_fee_36: serviceFee36Res.data / 100,
+				service_fee_48: serviceFee48Res.data / 100,
+				service_fee_60: serviceFee60Res.data / 100
 			}
 		},
 		staleTime: 5 * 60 * 1000, // 5 minutes
-		// Valores padrão em caso de erro
 		retry: 3,
 		retryDelay: 1000,
-		// Não buscar rates se estiver no modo edição (já temos initialServiceFee)
 		enabled: !isEditing
 	})
 
@@ -82,15 +114,29 @@ const SimulationStep4 = ({ onNext, onBack, initialServiceFee, isEditing, initial
 	const subtotal = (equipment || 0) + (labor || 0) + (others || 0)
 
 	// Lógica para determinar qual serviceFee usar
-	const serviceFee = isEditing ? initialServiceFee / 100 : (rates?.service_fee ?? 0.35) // 35% padrão se não estiver editando e não tiver carregado
+	const serviceFee36 = isEditing ? initialServiceFee36 / 100 : (rates?.service_fee_36 ?? 0.35)
+	const serviceFee48 = isEditing ? initialServiceFee48 / 100 : (rates?.service_fee_48 ?? 0.35)
+	const serviceFee60 = isEditing ? initialServiceFee60 / 100 : (rates?.service_fee_60 ?? 0.35)
 
-	const interestRate = isEditing ? initialInterestRate / 100 : (rates?.interest_rate ?? 0.021) // 2.1% padrão
+	const interestRate36 = isEditing ? initialInterestRate36 / 100 : (rates?.interest_rate_36 ?? 0.021)
+	const interestRate48 = isEditing ? initialInterestRate48 / 100 : (rates?.interest_rate_48 ?? 0.021)
+	const interestRate60 = isEditing ? initialInterestRate60 / 100 : (rates?.interest_rate_60 ?? 0.021)
 
-	const servicesValue = subtotal * serviceFee
-	const formattedServicesValue = formatCurrency(servicesValue)
+	const servicesValue36 = subtotal * serviceFee36
+	const servicesValue48 = subtotal * serviceFee48
+	const servicesValue60 = subtotal * serviceFee60
 
-	const totalInvestment = subtotal + servicesValue
-	const formattedTotalInvestment = formatCurrency(totalInvestment)
+	const formattedServicesValue36 = formatCurrency(servicesValue36)
+	const formattedServicesValue48 = formatCurrency(servicesValue48)
+	const formattedServicesValue60 = formatCurrency(servicesValue60)
+
+	const totalInvestment36 = subtotal + servicesValue36
+	const totalInvestment48 = subtotal + servicesValue48
+	const totalInvestment60 = subtotal + servicesValue60
+
+	const formattedTotalInvestment36 = formatCurrency(totalInvestment36)
+	const formattedTotalInvestment48 = formatCurrency(totalInvestment48)
+	const formattedTotalInvestment60 = formatCurrency(totalInvestment60)
 
 	return (
 		<form className="space-y-6">
@@ -146,15 +192,39 @@ const SimulationStep4 = ({ onNext, onBack, initialServiceFee, isEditing, initial
 						)}
 					/>
 
-					<FormItem>
-						<FormLabel>Serviços</FormLabel>
-						<FormControl>
-							<div className="relative">
-								<DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-								<Input type="text" className="pl-9" value={formattedServicesValue} disabled />
-							</div>
-						</FormControl>
-					</FormItem>
+					<div className="space-y-4">
+						<h4 className="font-medium">Valores de Serviços por Prazo</h4>
+
+						<FormItem>
+							<FormLabel>Serviços (36 meses)</FormLabel>
+							<FormControl>
+								<div className="relative">
+									<DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+									<Input type="text" className="pl-9" value={formattedServicesValue36} disabled />
+								</div>
+							</FormControl>
+						</FormItem>
+
+						<FormItem>
+							<FormLabel>Serviços (48 meses)</FormLabel>
+							<FormControl>
+								<div className="relative">
+									<DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+									<Input type="text" className="pl-9" value={formattedServicesValue48} disabled />
+								</div>
+							</FormControl>
+						</FormItem>
+
+						<FormItem>
+							<FormLabel>Serviços (60 meses)</FormLabel>
+							<FormControl>
+								<div className="relative">
+									<DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+									<Input type="text" className="pl-9" value={formattedServicesValue60} disabled />
+								</div>
+							</FormControl>
+						</FormItem>
+					</div>
 
 					<FormField
 						control={form.control}
@@ -173,10 +243,10 @@ const SimulationStep4 = ({ onNext, onBack, initialServiceFee, isEditing, initial
 						)}
 					/>
 				</div>
-				<div className="w-full">
-					<Card className="sticky top-20 shadow-md">
+				<div className="w-full space-y-4">
+					<Card className="shadow-md">
 						<CardHeader>
-							<CardTitle>Resumo do Investimento</CardTitle>
+							<CardTitle>Resumo do Investimento (36 meses)</CardTitle>
 							<CardDescription>Cálculo em tempo real baseado nos valores fornecidos.</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
@@ -198,16 +268,112 @@ const SimulationStep4 = ({ onNext, onBack, initialServiceFee, isEditing, initial
 								<>
 									<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
 										<span className="text-sm text-muted-foreground">Total do Investimento</span>
-										<span className="font-bold text-fluid-2xl">{formattedTotalInvestment}</span>
+										<span className="font-bold text-fluid-2xl">{formattedTotalInvestment36}</span>
 									</div>
 									<Separator />
 									<h4 className="font-medium">Parcelamento</h4>
 									<div className="space-y-2">
 										{installmentTerms.map((term, index) => {
 											const installment = calculateInstallmentPayment({
-												rate: interestRate,
+												rate: interestRate36,
 												numberOfPeriods: term,
-												presentValue: totalInvestment
+												presentValue: totalInvestment36
+											})
+											return (
+												<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
+													<span className="text-muted-foreground">{term}x de</span>
+													<span className="font-semibold">{formatCurrency(installment)}</span>
+												</div>
+											)
+										})}
+									</div>
+								</>
+							)}
+						</CardContent>
+					</Card>
+
+					<Card className="shadow-md">
+						<CardHeader>
+							<CardTitle>Resumo do Investimento (48 meses)</CardTitle>
+							<CardDescription>Cálculo em tempo real baseado nos valores fornecidos.</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							{!isEditing && isLoadingRates ? (
+								<div className="space-y-4">
+									<Skeleton className="h-16 w-full" />
+									<Separator />
+									<Skeleton className="h-5 w-24" />
+									<div className="space-y-2">
+										{[...Array(6)].map((_, i) => (
+											<div key={i} className="flex justify-between">
+												<Skeleton className="h-4 w-16" />
+												<Skeleton className="h-4 w-24" />
+											</div>
+										))}
+									</div>
+								</div>
+							) : (
+								<>
+									<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
+										<span className="text-sm text-muted-foreground">Total do Investimento</span>
+										<span className="font-bold text-fluid-2xl">{formattedTotalInvestment48}</span>
+									</div>
+									<Separator />
+									<h4 className="font-medium">Parcelamento</h4>
+									<div className="space-y-2">
+										{installmentTerms.map((term, index) => {
+											const installment = calculateInstallmentPayment({
+												rate: interestRate48,
+												numberOfPeriods: term,
+												presentValue: totalInvestment48
+											})
+											return (
+												<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
+													<span className="text-muted-foreground">{term}x de</span>
+													<span className="font-semibold">{formatCurrency(installment)}</span>
+												</div>
+											)
+										})}
+									</div>
+								</>
+							)}
+						</CardContent>
+					</Card>
+
+					<Card className="shadow-md">
+						<CardHeader>
+							<CardTitle>Resumo do Investimento (60 meses)</CardTitle>
+							<CardDescription>Cálculo em tempo real baseado nos valores fornecidos.</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							{!isEditing && isLoadingRates ? (
+								<div className="space-y-4">
+									<Skeleton className="h-16 w-full" />
+									<Separator />
+									<Skeleton className="h-5 w-24" />
+									<div className="space-y-2">
+										{[...Array(6)].map((_, i) => (
+											<div key={i} className="flex justify-between">
+												<Skeleton className="h-4 w-16" />
+												<Skeleton className="h-4 w-24" />
+											</div>
+										))}
+									</div>
+								</div>
+							) : (
+								<>
+									<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
+										<span className="text-sm text-muted-foreground">Total do Investimento</span>
+										<span className="font-bold text-fluid-2xl">{formattedTotalInvestment60}</span>
+									</div>
+									<Separator />
+									<h4 className="font-medium">Parcelamento</h4>
+									<div className="space-y-2">
+										{installmentTerms.map((term, index) => {
+											const installment = calculateInstallmentPayment({
+												rate: interestRate60,
+												numberOfPeriods: term,
+												presentValue: totalInvestment60
 											})
 											return (
 												<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">

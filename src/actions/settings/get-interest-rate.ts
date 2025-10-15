@@ -3,7 +3,9 @@
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { ActionResponse } from "@/types/action-response"
 
-async function getRate(rateId: "interest_rate" | "service_fee"): Promise<ActionResponse<number>> {
+async function getRate(
+	rateId: "service_fee_36" | "service_fee_48" | "service_fee_60" | "interest_rate_36" | "interest_rate_48" | "interest_rate_60"
+): Promise<ActionResponse<number>> {
 	try {
 		const supabase = createAdminClient()
 		const { data, error } = await supabase.from("rates").select("value").eq("id", rateId).single()

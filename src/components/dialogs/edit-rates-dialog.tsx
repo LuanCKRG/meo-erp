@@ -1,10 +1,8 @@
 "use client"
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { EditOrderForm } from "@/components/forms/edit-order-form"
-import { SimulationProvider } from "@/contexts/simulation-context"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { RateForm } from "../forms/rate-form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 
 interface EditOrderDialogProps {
 	orderId: string
@@ -30,8 +28,10 @@ export function EditRatesDialog({ orderId, open, onOpenChange }: EditOrderDialog
 								<CardTitle>Taxa de Juros</CardTitle>
 								<CardDescription>Defina a taxa de juros padrão a ser usada nos cálculos de parcelamento.</CardDescription>
 							</CardHeader>
-							<CardContent>
-								<RateForm isEditingUniqueOrder orderId={orderId} rateId="interest_rate" />
+							<CardContent className="space-y-6">
+								<RateForm isEditingUniqueOrder orderId={orderId} rateId="interest_rate_36" />
+								<RateForm isEditingUniqueOrder orderId={orderId} rateId="interest_rate_48" />
+								<RateForm isEditingUniqueOrder orderId={orderId} rateId="interest_rate_60" />
 							</CardContent>
 						</Card>
 						<Card>
@@ -39,8 +39,10 @@ export function EditRatesDialog({ orderId, open, onOpenChange }: EditOrderDialog
 								<CardTitle>Taxa de Serviços</CardTitle>
 								<CardDescription>Defina a taxa de serviços a ser aplicada sobre o subtotal do projeto.</CardDescription>
 							</CardHeader>
-							<CardContent>
-								<RateForm isEditingUniqueOrder orderId={orderId} rateId="service_fee" />
+							<CardContent className="space-y-6">
+								<RateForm isEditingUniqueOrder orderId={orderId} rateId="service_fee_36" />
+								<RateForm isEditingUniqueOrder orderId={orderId} rateId="service_fee_48" />
+								<RateForm isEditingUniqueOrder orderId={orderId} rateId="service_fee_60" />
 							</CardContent>
 						</Card>
 					</div>

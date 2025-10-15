@@ -2,15 +2,15 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Check, DollarSign, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Send, Trash2 } from "lucide-react"
+import { DollarSign, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Send, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { hasPermission } from "@/actions/auth"
 import { createOrderFromSimulation } from "@/actions/orders"
 import { deleteSimulation, downloadSimulationFiles, generateSimulationPdf, listSimulationFiles } from "@/actions/simulations"
-import { documentFields } from "@/lib/constants"
 import { EditSimulationDialog } from "@/components/dialogs/edit-simulation-dialog"
+import { EditSimulationRatesDialog } from "@/components/dialogs/edit-simulation-rates-dialog"
 import { UpdateStatusDialog } from "@/components/dialogs/update-status-dialog"
 import { ViewSimulationSheet } from "@/components/dialogs/view-simulation-sheet"
 import { Button } from "@/components/ui/button"
@@ -24,8 +24,8 @@ import {
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { documentFields } from "@/lib/constants"
 import type { SimulationWithRelations } from "@/lib/definitions/simulations"
-import { EditSimulationRatesDialog } from "@/components/dialogs/edit-simulation-rates-dialog"
 
 type DocumentFieldName = (typeof documentFields)[number]["name"]
 

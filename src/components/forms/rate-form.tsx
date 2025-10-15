@@ -13,18 +13,27 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { maskNumber } from "@/lib/masks"
 
 type RateFormGlobalProps = {
-	rateId: "interest_rate" | "service_fee"
+	rateId: "service_fee_36" | "service_fee_48" | "service_fee_60" | "interest_rate_36" | "interest_rate_48" | "interest_rate_60"
 	isEditingUniqueOrder?: false | null | undefined
 	orderId?: never
 }
 
 type RateFormUniqueProps = {
-	rateId: "interest_rate" | "service_fee"
+	rateId: "service_fee_36" | "service_fee_48" | "service_fee_60" | "interest_rate_36" | "interest_rate_48" | "interest_rate_60"
 	isEditingUniqueOrder: true
 	orderId: string
 }
 
 type RateFormProps = RateFormGlobalProps | RateFormUniqueProps
+
+const rateTitle = {
+	service_fee_36: "36 Meses",
+	service_fee_48: "48 Meses",
+	service_fee_60: "60 Meses",
+	interest_rate_36: "36 Meses",
+	interest_rate_48: "48 Meses",
+	interest_rate_60: "60 Meses"
+}
 
 export const RateForm = ({ rateId, isEditingUniqueOrder, orderId }: RateFormProps) => {
 	const [value, setValue] = useState("")
@@ -121,7 +130,7 @@ export const RateForm = ({ rateId, isEditingUniqueOrder, orderId }: RateFormProp
 	return (
 		<form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm">
 			<div className="space-y-2">
-				<Label htmlFor={rateId}>Taxa (%)</Label>
+				<Label htmlFor={rateId}>{rateTitle[rateId]} (%)</Label>
 				<div className="relative">
 					<Input id={rateId} type="text" inputMode="decimal" placeholder="0,00" value={value} onChange={handleChange} />
 					<span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span>
