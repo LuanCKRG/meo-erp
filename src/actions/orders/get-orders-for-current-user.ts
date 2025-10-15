@@ -69,7 +69,7 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
-				service_fee,
+				service_fee_60,
 				created_by:created_by_user_id ( name )
 				`
 			)
@@ -85,7 +85,7 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 			.filter((order) => order.customers) // Filtra orders sem customers
 			.map((order) => {
 				const subtotal = (order.equipment_value || 0) + (order.labor_value || 0) + (order.other_costs || 0)
-				const total_value = subtotal + subtotal * (order.service_fee / 100)
+				const total_value = subtotal + subtotal * (order.service_fee_60 / 100)
 				const partner = Array.isArray(order.customers.partners) ? order.customers.partners[0] : order.customers.partners
 
 				return {
@@ -153,7 +153,7 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
-				service_fee,
+				service_fee_60,
 				created_by:created_by_user_id ( name )
 				`
 			)
@@ -169,7 +169,7 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 			.filter((order) => order.customers) // Filtra orders sem customers
 			.map((order) => {
 				const subtotal = (order.equipment_value || 0) + (order.labor_value || 0) + (order.other_costs || 0)
-				const total_value = subtotal + subtotal * (order.service_fee / 100)
+				const total_value = subtotal + subtotal * (order.service_fee_60 / 100)
 				const partner = Array.isArray(order.customers.partners) ? order.customers.partners[0] : order.customers.partners
 
 				return {

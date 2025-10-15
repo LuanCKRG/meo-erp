@@ -30,7 +30,7 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
         sellers (
           name
         ),
-				service_fee,
+				service_fee_60,
 				created_by:created_by_user_id ( name )
       `
 			)
@@ -47,7 +47,7 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
 				return null
 			}
 			const subtotal = (order.equipment_value || 0) + (order.labor_value || 0) + (order.other_costs || 0)
-			const total_value = subtotal + subtotal * (order.service_fee / 100)
+			const total_value = subtotal + subtotal * (order.service_fee_60 / 100)
 			const partner = Array.isArray(order.customers.partners) ? order.customers.partners[0] : order.customers.partners
 
 			return {

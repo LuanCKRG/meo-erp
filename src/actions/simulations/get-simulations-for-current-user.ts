@@ -68,7 +68,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
-				service_fee,
+				service_fee_60,
 				created_by:created_by_user_id ( name )
 				`
 			)
@@ -82,7 +82,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 
 		const finalMappedData: SimulationWithRelations[] = data.map((sim) => {
 			const subtotal = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
-			const total_value = subtotal + subtotal * (sim.service_fee / 100)
+			const total_value = subtotal + subtotal * (sim.service_fee_60 / 100)
 
 			const customerData = Array.isArray(sim.customers) ? sim.customers[0] : sim.customers
 			const partner = Array.isArray(sim.customers.partners) ? sim.customers.partners[0] : sim.customers.partners
@@ -151,7 +151,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 					partners ( contact_name, legal_business_name )
 				),
 				sellers ( name ),
-				service_fee,
+				service_fee_60,
 				created_by:created_by_user_id ( name )
 				`
 			)
@@ -165,7 +165,7 @@ async function getSimulationsForCurrentUser(): Promise<SimulationWithRelations[]
 
 		const finalMappedData: SimulationWithRelations[] = data.map((sim) => {
 			const subtotal = (sim.equipment_value || 0) + (sim.labor_value || 0) + (sim.other_costs || 0)
-			const total_value = subtotal + subtotal * (sim.service_fee / 100)
+			const total_value = subtotal + subtotal * (sim.service_fee_60 / 100)
 
 			const customerData = Array.isArray(sim.customers) ? sim.customers[0] : sim.customers
 			const partner = Array.isArray(sim.customers.partners) ? sim.customers.partners[0] : sim.customers.partners

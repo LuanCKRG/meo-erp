@@ -11,7 +11,7 @@ import { toast } from "sonner"
 import { getOrderById, updateOrder } from "@/actions/orders"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { useSimulation } from "@/contexts/simulation-context"
-import { formatNumberFromDatabase, maskCep, maskCnpj, maskDate, maskNumber, maskPhone } from "@/lib/masks"
+import { formatNumberFromDatabase, maskCep, maskCnpj, maskPhone } from "@/lib/masks"
 import { cn } from "@/lib/utils"
 import { SimulationStep1 } from "./new-simulation/step-1-project-data"
 import { SimulationStep2 } from "./new-simulation/step-2-client-data"
@@ -80,15 +80,23 @@ function EditOrderContent({
 	customerId,
 	onFinished,
 	initialData,
-	serviceFee,
-	interestRate
+	initialServiceFee36,
+	initialServiceFee48,
+	initialServiceFee60,
+	initialInterestRate36,
+	initialInterestRate48,
+	initialInterestRate60
 }: {
 	orderId: string
 	customerId: string
 	onFinished: () => void
 	initialData: ExtendedOrderData
-	serviceFee: number
-	interestRate: number
+	initialServiceFee36: number
+	initialServiceFee48: number
+	initialServiceFee60: number
+	initialInterestRate36: number
+	initialInterestRate48: number
+	initialInterestRate60: number
 }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
 	const queryClient = useQueryClient()
@@ -194,7 +202,17 @@ function EditOrderContent({
 							{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
 							{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
 							{currentStep === 4 && (
-								<SimulationStep4 onNext={nextStep} onBack={backStep} initialServiceFee={serviceFee} isEditing={true} initialInterestRate={interestRate} />
+								<SimulationStep4
+									onNext={nextStep}
+									onBack={backStep}
+									initialInterestRate36={initialInterestRate36}
+									initialInterestRate48={initialInterestRate48}
+									initialInterestRate60={initialInterestRate60}
+									initialServiceFee36={initialServiceFee36}
+									initialServiceFee48={initialServiceFee48}
+									initialServiceFee60={initialServiceFee60}
+									isEditing={true}
+								/>
 							)}
 							{currentStep === 5 && <SimulationStep5 onSubmit={form.handleSubmit(handleSubmitEntireForm)} onBack={backStep} />}
 						</motion.div>
@@ -292,8 +310,12 @@ export function EditOrderForm({ orderId, onFinished }: { orderId: string; onFini
 			customerId={customer.id}
 			onFinished={onFinished}
 			initialData={initialData}
-			serviceFee={order.service_fee}
-			interestRate={order.interest_rate}
+			initialInterestRate36={order.interest_rate_36}
+			initialInterestRate48={order.interest_rate_48}
+			initialInterestRate60={order.interest_rate_60}
+			initialServiceFee36={order.service_fee_36}
+			initialServiceFee48={order.service_fee_48}
+			initialServiceFee60={order.service_fee_60}
 		/>
 	)
 }
