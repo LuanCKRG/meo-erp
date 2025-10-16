@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { maskNumber } from "@/lib/masks"
@@ -243,145 +242,136 @@ const SimulationStep4 = ({
 						)}
 					/>
 				</div>
-				<div className="w-full space-y-4">
-					<Card className="shadow-md">
-						<CardHeader>
-							<CardTitle>Resumo do Investimento (36 meses)</CardTitle>
-							<CardDescription>Cálculo em tempo real baseado nos valores fornecidos.</CardDescription>
+				<div className="w-full space-y-6">
+					<Card className="shadow-lg border-2 hover:shadow-xl transition-shadow">
+						<CardHeader className="pb-4">
+							<div className="flex items-center justify-between">
+								<CardTitle className="text-xl">Plano 36 meses</CardTitle>
+								<div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">Curto Prazo</div>
+							</div>
+							<CardDescription>Taxa de juros e serviços aplicados para 36 meses</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-4">
+						<CardContent className="space-y-6">
 							{!isEditing && isLoadingRates ? (
 								<div className="space-y-4">
-									<Skeleton className="h-16 w-full" />
-									<Separator />
-									<Skeleton className="h-5 w-24" />
-									<div className="space-y-2">
-										{[...Array(6)].map((_, i) => (
-											<div key={i} className="flex justify-between">
-												<Skeleton className="h-4 w-16" />
-												<Skeleton className="h-4 w-24" />
-											</div>
-										))}
-									</div>
+									<Skeleton className="h-24 w-full rounded-xl" />
+									<Skeleton className="h-20 w-full rounded-lg" />
 								</div>
 							) : (
 								<>
-									<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
-										<span className="text-sm text-muted-foreground">Total do Investimento</span>
-										<span className="font-bold text-fluid-2xl">{formattedTotalInvestment36}</span>
+									<div className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-6 border-2 border-primary/20">
+										<span className="text-sm font-medium text-muted-foreground mb-1">Total do Investimento</span>
+										<span className="font-bold text-4xl text-primary">{formattedTotalInvestment36}</span>
 									</div>
-									<Separator />
-									<h4 className="font-medium">Parcelamento</h4>
-									<div className="space-y-2">
-										{installmentTerms.map((term, index) => {
-											const installment = calculateInstallmentPayment({
-												rate: interestRate36,
-												numberOfPeriods: term,
-												presentValue: totalInvestment36
-											})
-											return (
-												<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
-													<span className="text-muted-foreground">{term}x de</span>
-													<span className="font-semibold">{formatCurrency(installment)}</span>
-												</div>
-											)
-										})}
+									<div className="rounded-lg bg-muted/50 p-5 border">
+										<div className="flex items-center justify-between mb-3">
+											<h4 className="font-semibold text-base">Parcelamento</h4>
+										</div>
+										{installmentTerms
+											.filter((term) => term === 36)
+											.map((term, index) => {
+												const installment = calculateInstallmentPayment({
+													rate: interestRate36,
+													numberOfPeriods: term,
+													presentValue: totalInvestment36
+												})
+												return (
+													<div key={`${term}-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-background border">
+														<span className="text-sm font-medium text-muted-foreground">{term} parcelas de</span>
+														<span className="font-bold text-lg">{formatCurrency(installment)}</span>
+													</div>
+												)
+											})}
 									</div>
 								</>
 							)}
 						</CardContent>
 					</Card>
 
-					<Card className="shadow-md">
-						<CardHeader>
-							<CardTitle>Resumo do Investimento (48 meses)</CardTitle>
-							<CardDescription>Cálculo em tempo real baseado nos valores fornecidos.</CardDescription>
+					<Card className="shadow-lg border-2 hover:shadow-xl transition-shadow">
+						<CardHeader className="pb-4">
+							<div className="flex items-center justify-between">
+								<CardTitle className="text-xl">Plano 48 meses</CardTitle>
+								<div className="px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-semibold">Médio Prazo</div>
+							</div>
+							<CardDescription>Taxa de juros e serviços aplicados para 48 meses</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-4">
+						<CardContent className="space-y-6">
 							{!isEditing && isLoadingRates ? (
 								<div className="space-y-4">
-									<Skeleton className="h-16 w-full" />
-									<Separator />
-									<Skeleton className="h-5 w-24" />
-									<div className="space-y-2">
-										{[...Array(6)].map((_, i) => (
-											<div key={i} className="flex justify-between">
-												<Skeleton className="h-4 w-16" />
-												<Skeleton className="h-4 w-24" />
-											</div>
-										))}
-									</div>
+									<Skeleton className="h-24 w-full rounded-xl" />
+									<Skeleton className="h-20 w-full rounded-lg" />
 								</div>
 							) : (
 								<>
-									<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
-										<span className="text-sm text-muted-foreground">Total do Investimento</span>
-										<span className="font-bold text-fluid-2xl">{formattedTotalInvestment48}</span>
+									<div className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 p-6 border-2 border-blue-500/20">
+										<span className="text-sm font-medium text-muted-foreground mb-1">Total do Investimento</span>
+										<span className="font-bold text-4xl text-blue-600 dark:text-blue-400">{formattedTotalInvestment48}</span>
 									</div>
-									<Separator />
-									<h4 className="font-medium">Parcelamento</h4>
-									<div className="space-y-2">
-										{installmentTerms.map((term, index) => {
-											const installment = calculateInstallmentPayment({
-												rate: interestRate48,
-												numberOfPeriods: term,
-												presentValue: totalInvestment48
-											})
-											return (
-												<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
-													<span className="text-muted-foreground">{term}x de</span>
-													<span className="font-semibold">{formatCurrency(installment)}</span>
-												</div>
-											)
-										})}
+									<div className="rounded-lg bg-muted/50 p-5 border">
+										<div className="flex items-center justify-between mb-3">
+											<h4 className="font-semibold text-base">Parcelamento</h4>
+										</div>
+										{installmentTerms
+											.filter((term) => term === 48)
+											.map((term, index) => {
+												const installment = calculateInstallmentPayment({
+													rate: interestRate48,
+													numberOfPeriods: term,
+													presentValue: totalInvestment48
+												})
+												return (
+													<div key={`${term}-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-background border">
+														<span className="text-sm font-medium text-muted-foreground">{term} parcelas de</span>
+														<span className="font-bold text-lg">{formatCurrency(installment)}</span>
+													</div>
+												)
+											})}
 									</div>
 								</>
 							)}
 						</CardContent>
 					</Card>
 
-					<Card className="shadow-md">
-						<CardHeader>
-							<CardTitle>Resumo do Investimento (60 meses)</CardTitle>
-							<CardDescription>Cálculo em tempo real baseado nos valores fornecidos.</CardDescription>
+					<Card className="shadow-lg border-2 hover:shadow-xl transition-shadow">
+						<CardHeader className="pb-4">
+							<div className="flex items-center justify-between">
+								<CardTitle className="text-xl">Plano 60 meses</CardTitle>
+								<div className="px-3 py-1 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full text-xs font-semibold">Longo Prazo</div>
+							</div>
+							<CardDescription>Taxa de juros e serviços aplicados para 60 meses</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-4">
+						<CardContent className="space-y-6">
 							{!isEditing && isLoadingRates ? (
 								<div className="space-y-4">
-									<Skeleton className="h-16 w-full" />
-									<Separator />
-									<Skeleton className="h-5 w-24" />
-									<div className="space-y-2">
-										{[...Array(6)].map((_, i) => (
-											<div key={i} className="flex justify-between">
-												<Skeleton className="h-4 w-16" />
-												<Skeleton className="h-4 w-24" />
-											</div>
-										))}
-									</div>
+									<Skeleton className="h-24 w-full rounded-xl" />
+									<Skeleton className="h-20 w-full rounded-lg" />
 								</div>
 							) : (
 								<>
-									<div className="flex flex-col items-start rounded-lg border bg-muted p-4">
-										<span className="text-sm text-muted-foreground">Total do Investimento</span>
-										<span className="font-bold text-fluid-2xl">{formattedTotalInvestment60}</span>
+									<div className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/5 p-6 border-2 border-green-500/20">
+										<span className="text-sm font-medium text-muted-foreground mb-1">Total do Investimento</span>
+										<span className="font-bold text-4xl text-green-600 dark:text-green-400">{formattedTotalInvestment60}</span>
 									</div>
-									<Separator />
-									<h4 className="font-medium">Parcelamento</h4>
-									<div className="space-y-2">
-										{installmentTerms.map((term, index) => {
-											const installment = calculateInstallmentPayment({
-												rate: interestRate60,
-												numberOfPeriods: term,
-												presentValue: totalInvestment60
-											})
-											return (
-												<div key={`${term}-${index}`} className="flex items-center justify-between text-sm">
-													<span className="text-muted-foreground">{term}x de</span>
-													<span className="font-semibold">{formatCurrency(installment)}</span>
-												</div>
-											)
-										})}
+									<div className="rounded-lg bg-muted/50 p-5 border">
+										<div className="flex items-center justify-between mb-3">
+											<h4 className="font-semibold text-base">Parcelamento</h4>
+										</div>
+										{installmentTerms
+											.filter((term) => term === 60)
+											.map((term, index) => {
+												const installment = calculateInstallmentPayment({
+													rate: interestRate60,
+													numberOfPeriods: term,
+													presentValue: totalInvestment60
+												})
+												return (
+													<div key={`${term}-${index}`} className="flex items-center justify-between p-3 rounded-lg bg-background border">
+														<span className="text-sm font-medium text-muted-foreground">{term} parcelas de</span>
+														<span className="font-bold text-lg">{formatCurrency(installment)}</span>
+													</div>
+												)
+											})}
 									</div>
 								</>
 							)}
