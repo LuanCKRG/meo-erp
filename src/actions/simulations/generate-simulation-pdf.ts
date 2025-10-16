@@ -59,16 +59,21 @@ function calculateDynamicFontSize({
 	return minFontSize
 }
 
+function centerTextAtX({ text, font, fontSize, centerX }: { text: string; font: PDFFont; fontSize: number; centerX: number }): number {
+	const textWidth = font.widthOfTextAtSize(text, fontSize)
+	return centerX - textWidth / 2
+}
+
 async function generateSimulationPdf(simulationId: string): Promise<ActionResponse<{ pdfBase64: string }>> {
 	if (!simulationId) {
-		return { success: false, message: "ID do pedido não fornecido." }
+		return { success: false, message: "ID da simulação não fornecido." }
 	}
 
 	try {
 		// 1. Buscar os dados do pedido e do cliente
-		const simulationDetails = await getSimulationById(simulationId)
-		if (!simulationDetails.success || !simulationDetails.data) {
-			return { success: false, message: simulationDetails.message || "Não foi possível encontrar o pedido." }
+		const orderDetails = await getSimulationById(simulationId)
+		if (!orderDetails.success || !orderDetails.data) {
+			return { success: false, message: orderDetails.message || "Não foi possível encontrar a simulação." }
 		}
 
 		const {
@@ -82,7 +87,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			interest_rate_36,
 			interest_rate_48,
 			interest_rate_60
-		} = simulationDetails.data
+		} = orderDetails.data
 
 		// 2. Carregar o template PDF e a fonte do Base64
 		const templateBytes = Buffer.from(PDF_TEMPLATE_SIMULATION_BASE64, "base64")
@@ -97,7 +102,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		const montserratFont = await pdfDoc.embedFont(montserratFontBytes, { subset: true })
 		// const montserratSemiBoldFont = await pdfDoc.embedFont(montserratSemiBoldFontBytes, { subset: true })
 		const textColor = rgb(83 / 255, 86 / 255, 90 / 255) // Cor #53565A
-		const fontSize = 10
+		const fontSize = 8
 
 		// 3. Obter dimensões da página
 		const firstPage = pdfDoc.getPages()[0]
@@ -111,10 +116,8 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		// CNPJ formatado
 		const formattedCnpj = formatCnpj(customer.cnpj)
 
-		// Razão Social truncada
-		const maxCompanyNameWidth = 164
-		const companyNameFontSize = 12
-		const truncatedCompanyName = truncateTextByWidth(customer.company_name, montserratFont, companyNameFontSize, maxCompanyNameWidth)
+		// Razão Social
+		const companyName = customer.company_name
 
 		// Data atual
 		const currentDate = formatDate(new Date().toISOString())
@@ -171,10 +174,10 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 		})
 
 		// Razão Social ou Cliente
-		firstPage.drawText(truncatedCompanyName, {
+		firstPage.drawText(companyName, {
 			x: leftAlign,
 			y: height - 130,
-			size: companyNameFontSize,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
@@ -188,7 +191,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			font: montserratFont
 		})
 
-		// Valor Solicitado
+		// Valor Solicitado (Header)
 		firstPage.drawText(formattedRequestedValue, {
 			x: leftAlign,
 			y: height - 184,
@@ -197,155 +200,170 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			font: montserratFont
 		})
 
+		// Valor Solicitado (Tabela)
+		const requestedValueX = 226
+
 		firstPage.drawText(formattedRequestedValue, {
-			x: 282,
+			x: centerTextAtX({
+				text: formattedRequestedValue,
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: requestedValueX
+			}),
 			y: height - 487,
-			size: formattedRequestedValueSize,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		firstPage.drawText(formattedRequestedValue, {
-			x: 282,
+			x: centerTextAtX({
+				text: formattedRequestedValue,
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: requestedValueX
+			}),
 			y: height - 507,
-			size: formattedRequestedValueSize,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		firstPage.drawText(formattedRequestedValue, {
-			x: 282,
+			x: centerTextAtX({
+				text: formattedRequestedValue,
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: requestedValueX
+			}),
 			y: height - 527,
-			size: formattedRequestedValueSize,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		// Total Serviços
+		const totalServicesX = 322
+
 		firstPage.drawText(formatCurrency(totalServices["36"]), {
-			x: 336,
-			y: height - 487,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(totalServices["36"]),
-				maxWidth: 48,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: totalServicesX
 			}),
+			y: height - 487,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		firstPage.drawText(formatCurrency(totalServices["48"]), {
-			x: 336,
-			y: height - 507,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(totalServices["48"]),
-				maxWidth: 48,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: totalServicesX
 			}),
+			y: height - 507,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		firstPage.drawText(formatCurrency(totalServices["60"]), {
-			x: 336,
-			y: height - 527,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(totalServices["60"]),
-				maxWidth: 48,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: totalServicesX
 			}),
+			y: height - 527,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		// Valor Financiado
+		const amountFinancedX = 428
+
 		firstPage.drawText(formatCurrency(totalServices["36"] + requestedValue), {
-			x: 390,
-			y: height - 487,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(totalServices["36"] + requestedValue),
-				maxWidth: 48,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: amountFinancedX
 			}),
+			y: height - 487,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		firstPage.drawText(formatCurrency(totalServices["48"] + requestedValue), {
-			x: 390,
-			y: height - 507,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(totalServices["48"] + requestedValue),
-				maxWidth: 48,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: amountFinancedX
 			}),
+			y: height - 507,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		firstPage.drawText(formatCurrency(totalServices["60"] + requestedValue), {
-			x: 390,
-			y: height - 527,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(totalServices["60"] + requestedValue),
-				maxWidth: 48,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: amountFinancedX
 			}),
+			y: height - 527,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		// Parcelas
+		const installmentsX = 520
+
 		firstPage.drawText(formatCurrency(installments["36"]), {
-			x: 444,
-			y: height - 487,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(installments["36"]),
-				maxWidth: 40,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: installmentsX
 			}),
+			y: height - 487,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		firstPage.drawText(formatCurrency(installments["48"]), {
-			x: 444,
-			y: height - 507,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(installments["48"]),
-				maxWidth: 40,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: installmentsX
 			}),
+			y: height - 507,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
 
 		firstPage.drawText(formatCurrency(installments["60"]), {
-			x: 444,
-			y: height - 527,
-			size: calculateDynamicFontSize({
-				font: montserratFont,
+			x: centerTextAtX({
 				text: formatCurrency(installments["60"]),
-				maxWidth: 40,
-				maxFontSize: 12,
-				minFontSize: 6
+				font: montserratFont,
+				fontSize: fontSize,
+				centerX: installmentsX
 			}),
+			y: height - 527,
+			size: fontSize,
 			color: textColor,
 			font: montserratFont
 		})
@@ -360,7 +378,7 @@ async function generateSimulationPdf(simulationId: string): Promise<ActionRespon
 			data: { pdfBase64 }
 		}
 	} catch (error) {
-		console.error("Erro ao gerar PDF do pedido:", error)
+		console.error("Erro ao gerar PDF da simulação:", error)
 		const errorMessage = error instanceof Error ? error.message : "Ocorreu um erro desconhecido."
 		return {
 			success: false,
