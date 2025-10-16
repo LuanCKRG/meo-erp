@@ -17,48 +17,6 @@ function formatCurrency(value: number | null | undefined): string {
 	}).format(value)
 }
 
-function truncateTextByWidth(text: string, font: PDFFont, fontSize: number, maxWidth: number) {
-	let truncatedText = text
-	let textWidth = font.widthOfTextAtSize(truncatedText, fontSize)
-
-	// Se o texto já cabe, retorna o texto original
-	if (textWidth <= maxWidth) {
-		return text
-	}
-
-	// Vai removendo caracteres do final até caber na largura máxima
-	while (textWidth > maxWidth && truncatedText.length > 0) {
-		truncatedText = truncatedText.slice(0, -1)
-		textWidth = font.widthOfTextAtSize(truncatedText, fontSize)
-	}
-
-	return truncatedText
-}
-
-function calculateDynamicFontSize({
-	text,
-	font,
-	maxWidth,
-	maxFontSize,
-	minFontSize = 6
-}: {
-	text: string
-	font: PDFFont
-	maxWidth: number
-	maxFontSize: number
-	minFontSize: number
-}) {
-	let fontSize = maxFontSize
-	while (fontSize >= minFontSize) {
-		const textWidth = font.widthOfTextAtSize(text, fontSize)
-		if (textWidth <= maxWidth) {
-			return fontSize
-		}
-		fontSize -= 0.5
-	}
-	return minFontSize
-}
-
 function centerTextAtX({ text, font, fontSize, centerX }: { text: string; font: PDFFont; fontSize: number; centerX: number }): number {
 	const textWidth = font.widthOfTextAtSize(text, fontSize)
 	return centerX - textWidth / 2
@@ -125,13 +83,6 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// Valor Solicitado
 		const requestedValue = (equipment_value || 0) + (labor_value || 0) + (other_costs || 0)
 		const formattedRequestedValue = formatCurrency(requestedValue)
-		const formattedRequestedValueSize = calculateDynamicFontSize({
-			font: montserratFont,
-			text: formattedRequestedValue,
-			maxWidth: 48,
-			maxFontSize: 12,
-			minFontSize: 6
-		})
 
 		// Taxas de Serviços
 		const serviceFee = {
