@@ -56,7 +56,7 @@ const statusVariant: Record<OrderStatus, "default" | "secondary" | "destructive"
 const statusColor: Record<OrderStatus, string> = {
 	analysis_pending: "bg-yellow-500/20 text-yellow-700 border-yellow-500/30",
 	pre_analysis: "bg-blue-500/20 text-blue-700 border-blue-500/30",
-	confirmation_pending: "bg-purple-500/20 text-purple-700 border-purple-500/30",
+	confirmation_pending: "bg-sky-500/20 text-purple-700 border-purple-500/30",
 	credit_analysis: "bg-blue-600/80 text-white",
 	documents_pending: "bg-yellow-600/80 text-white",
 	docs_analysis: "bg-purple-600/20 text-purple-800 border-purple-500/30",
