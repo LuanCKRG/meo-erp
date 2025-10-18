@@ -65,7 +65,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		// 3. Obter dimensões da página
 		const firstPage = pdfDoc.getPages()[0]
 		const { height } = firstPage.getSize()
-		const leftAlign = 138
+		const leftAlign = 133
 
 		// ========================================
 		// BLOCO DE PREPARAÇÃO: Cálculos e Formatações
@@ -152,7 +152,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		})
 
 		// Valor Solicitado (Tabela)
-		const requestedValueX = 226
+		const requestedValueX = 228
 
 		firstPage.drawText(formattedRequestedValue, {
 			x: centerTextAtX({
@@ -194,7 +194,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		})
 
 		// Total Serviços
-		const totalServicesX = 322
+		const totalServicesX = 324
 
 		firstPage.drawText(formatCurrency(totalServices["36"]), {
 			x: centerTextAtX({
@@ -236,7 +236,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		})
 
 		// Valor Financiado
-		const amountFinancedX = 428
+		const amountFinancedX = 430
 
 		firstPage.drawText(formatCurrency(totalServices["36"] + requestedValue), {
 			x: centerTextAtX({
@@ -278,7 +278,7 @@ async function generateOrderPdf(orderId: string): Promise<ActionResponse<{ pdfBa
 		})
 
 		// Parcelas
-		const installmentsX = 520
+		const installmentsX = 524
 
 		firstPage.drawText(formatCurrency(installments["36"]), {
 			x: centerTextAtX({
