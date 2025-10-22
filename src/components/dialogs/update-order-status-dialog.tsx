@@ -25,6 +25,7 @@ const availableStatuses: { value: OrderStatus; label: string }[] = [
 	{ value: "completed", label: "Finalizado" },
 	{ value: "canceled", label: "Cancelado" },
 	{ value: "pre_approved", label: "Pré-Aprovado" },
+	{ value: "pre_approved_orange", label: "Pré-Aprovado(Laranja)" },
 	{ value: "frozen", label: "Congelado" }
 ]
 
