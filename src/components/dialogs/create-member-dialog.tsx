@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createMemberSchema, type CreateMemberSchema } from "@/lib/validations/create-group-member"
+import { type CreateMemberSchema, createMemberSchema } from "@/lib/validations/create-group-member"
 
 type CreateMemberDialogProps = {
 	groupId: string
@@ -53,11 +53,7 @@ export const CreateMemberDialog = ({ groupId }: CreateMemberDialogProps) => {
 			}
 			return response.data
 		},
-		retry: false,
-		onError: (error) => {
-			const message = error instanceof Error ? error.message : "Erro ao carregar usuarios"
-			toast.error(message)
-		}
+		retry: false
 	})
 
 	const resetForm = () =>
@@ -116,11 +112,7 @@ export const CreateMemberDialog = ({ groupId }: CreateMemberDialogProps) => {
 								<FormItem>
 									<FormLabel>Usuario</FormLabel>
 									<FormControl>
-										<Select
-											onValueChange={field.onChange}
-											value={field.value || undefined}
-											disabled={isPending || isLoadingUsers}
-										>
+										<Select onValueChange={field.onChange} value={field.value || undefined} disabled={isPending || isLoadingUsers}>
 											<SelectTrigger>
 												<SelectValue placeholder={isLoadingUsers ? "Carregando usuarios..." : "Selecione um usuario"} />
 											</SelectTrigger>
