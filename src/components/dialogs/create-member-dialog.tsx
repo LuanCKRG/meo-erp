@@ -124,8 +124,8 @@ export const CreateMemberDialog = ({ groupId }: CreateMemberDialogProps) => {
 												) : users && users.length > 0 ? (
 													users.map((user) => (
 														<SelectItem key={user.id} value={user.id}>
-															<div className="flex flex-col">
-																<span className="font-medium">{user.name}</span>
+															<div className="flex gap-2">
+																<span className="font-medium">{user.name} -</span>
 																<span className="text-xs text-muted-foreground">{user.email}</span>
 															</div>
 														</SelectItem>

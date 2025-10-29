@@ -3,8 +3,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Save } from "lucide-react"
 import { useEffect, useMemo, useTransition } from "react"
+import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-
 import { getUserPermissionsDetailed, updateUserPermissions } from "@/actions/users"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -12,7 +12,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Skeleton } from "@/components/ui/skeleton"
 import { PERMISSIONS, type PermissionId } from "@/lib/constants"
 import type { User } from "@/lib/definitions/users"
-import { useForm } from "react-hook-form"
 
 interface EditUserPermissionsFormProps {
 	user: User
@@ -38,7 +37,8 @@ const permissionTranslations: Record<PermissionId, string> = {
 	"simulations:rates:manage": "Gerenciar Taxas",
 	"orders:view": "Ver Pedidos",
 	"orders:status": "Alterar Status",
-	"orders:rates:manage": "Gerenciar Taxas"
+	"orders:rates:manage": "Gerenciar Taxas",
+	"customers:view": "Visualizar Clientes"
 }
 
 const resourceTitleTranslations: Record<string, string> = {
@@ -47,7 +47,8 @@ const resourceTitleTranslations: Record<string, string> = {
 	sellers: "Vendedores",
 	reports: "Relatórios",
 	simulations: "Simulações",
-	orders: "Pedidos"
+	orders: "Pedidos",
+	customers: "Clientes"
 }
 
 const groupPermissions = (permissions: readonly PermissionId[]) => {

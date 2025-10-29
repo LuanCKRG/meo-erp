@@ -1,7 +1,7 @@
 import { GroupsTabs } from "@/components/group-tabs"
 
-export default async function GroupDetailPage({ params }: { params: { groupId: string } }) {
-	const { groupId } = params
+export default async function GroupDetailPage({ params }: { params: Promise<{ groupId: string }> }) {
+	const { groupId } = await params
 
 	return (
 		<div className="space-y-6">
