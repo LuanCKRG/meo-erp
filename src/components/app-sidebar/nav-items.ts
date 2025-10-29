@@ -1,5 +1,5 @@
-import { Activity, Briefcase, Handshake, Home, Package, Settings, Users, Building, FileText } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import { Activity, Briefcase, Building, FileText, Handshake, Home, Package, Settings, User, Users } from "lucide-react"
 
 interface SubNavItem {
 	title: string
@@ -68,7 +68,8 @@ const navItems: NavSection[] = [
 			{ title: "Admin Dashboard", url: "/dashboard/admin", icon: Home, permission: "admin:dashboard:view" },
 			{ title: "Gerenciar Dados", url: "/dashboard/admin/data", icon: Package, permission: "admin:data:manage" },
 			{ title: "Configurações", url: "/dashboard/admin/settings", icon: Settings, permission: "admin:settings:manage" },
-			{ title: "Usuários", url: "/dashboard/admin/users", icon: Users, permission: "admin:users:view" }
+			{ title: "Usuários", url: "/dashboard/admin/users", icon: User, permission: "admin:users:view" },
+			{ title: "Grupos", url: "/dashboard/admin/groups", icon: Users, permission: "admin:users:view" }
 		]
 	}
 ]

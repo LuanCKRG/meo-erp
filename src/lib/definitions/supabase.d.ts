@@ -186,6 +186,109 @@ export type Database = {
 					}
 				]
 			}
+			group_members: {
+				Row: {
+					group_id: string
+					joined_at: string
+					role: string | null
+					user_id: string
+				}
+				Insert: {
+					group_id: string
+					joined_at?: string
+					role?: string | null
+					user_id: string
+				}
+				Update: {
+					group_id?: string
+					joined_at?: string
+					role?: string | null
+					user_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "group_members_group_id_fkey"
+						columns: ["group_id"]
+						isOneToOne: false
+						referencedRelation: "groups"
+						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "group_members_user_id_fkey"
+						columns: ["user_id"]
+						isOneToOne: false
+						referencedRelation: "users"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			group_rules: {
+				Row: {
+					created_at: string
+					entity: string
+					group_id: string | null
+					id: string
+					rule_type: string
+					target_id: string
+				}
+				Insert: {
+					created_at?: string
+					entity: string
+					group_id?: string | null
+					id?: string
+					rule_type: string
+					target_id: string
+				}
+				Update: {
+					created_at?: string
+					entity?: string
+					group_id?: string | null
+					id?: string
+					rule_type?: string
+					target_id?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "group_rules_group_id_fkey"
+						columns: ["group_id"]
+						isOneToOne: false
+						referencedRelation: "groups"
+						referencedColumns: ["id"]
+					}
+				]
+			}
+			groups: {
+				Row: {
+					created_at: string
+					created_by_user_id: string | null
+					description: string | null
+					id: string
+					name: string
+				}
+				Insert: {
+					created_at?: string
+					created_by_user_id?: string | null
+					description?: string | null
+					id?: string
+					name: string
+				}
+				Update: {
+					created_at?: string
+					created_by_user_id?: string | null
+					description?: string | null
+					id?: string
+					name?: string
+				}
+				Relationships: [
+					{
+						foreignKeyName: "groups_created_by_user_id_fkey"
+						columns: ["created_by_user_id"]
+						isOneToOne: false
+						referencedRelation: "users"
+						referencedColumns: ["id"]
+					}
+				]
+			}
 			orders: {
 				Row: {
 					connection_voltage: string

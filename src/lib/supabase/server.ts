@@ -7,7 +7,7 @@ async function createClient() {
 	const cookieStore = await cookies()
 
 	const supabaseUrl = process.env.SUPABASE_URL
-	const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+	const supabaseServiceRoleKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 	if (!supabaseUrl || !supabaseServiceRoleKey) {
 		throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variable")

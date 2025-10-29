@@ -8,9 +8,10 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow, Table as UITabl
 interface DataTableProps<TData> {
 	table: Table<TData>
 	toolbar?: React.ReactNode
+	emptyStateMessage?: string
 }
 
-export function DataTable<TData>({ table, toolbar }: DataTableProps<TData>) {
+export function DataTable<TData>({ table, toolbar, emptyStateMessage = "Nenhum resultado." }: DataTableProps<TData>) {
 	return (
 		<div className="w-full space-y-4">
 			{toolbar}
@@ -41,7 +42,7 @@ export function DataTable<TData>({ table, toolbar }: DataTableProps<TData>) {
 						) : (
 							<TableRow>
 								<TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
-									Nenhum resultado.
+									{emptyStateMessage}
 								</TableCell>
 							</TableRow>
 						)}

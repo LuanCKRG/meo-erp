@@ -9,7 +9,8 @@
     "lint:biome": "biome check src",
     "fix:biome": "biome check --write src",
     "add": "npx shadcn@latest add",
-    "gen-types": "npx supabase gen types typescript --project-id ztadakijxdleljqjslfh --schema public > src/lib/definitions/supabase.d.ts"
+    "gen-types": "npx supabase gen types typescript --project-id ztadakijxdleljqjslfh --schema public > src/lib/definitions/supabase.d.ts",
+    "db:push": "npx supabase db push"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

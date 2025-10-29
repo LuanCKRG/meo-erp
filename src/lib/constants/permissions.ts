@@ -7,14 +7,21 @@ const PERMISSIONS = [
 	"admin:users:manage",
 	"admin:users:view",
 	"admin:permissions:manage",
+
+	"customers:view",
+
 	"partners:manage",
 	"partners:view",
+
 	"reports:view",
+
 	"sellers:manage",
 	"sellers:view",
+
 	"simulations:create",
 	"simulations:view",
 	"simulations:rates:manage",
+
 	"orders:view",
 	"orders:status",
 	"orders:rates:manage"
