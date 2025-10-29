@@ -9,35 +9,12 @@ import { formatDate } from "@/lib/utils"
 import { RulesTableActions } from "./rules-table-actions"
 import type { GroupRuleRow } from "./types"
 
-const entityLabelMap: Record<GroupRuleRow["entity"], string> = {
-	partners: "Parceiros",
-	sellers: "Vendedores",
-	customers: "Clientes",
-	simulations: "Simulacoes"
-}
-
 const ruleTypeLabelMap: Record<GroupRuleRow["rule_type"], string> = {
 	include: "Incluir",
 	exclude: "Excluir"
 }
 
 export const rulesColumns: ColumnDef<GroupRuleRow>[] = [
-	{
-		accessorKey: "entity",
-		header: ({ column }) => (
-			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-				Entidade
-				<ArrowUpDown className="ml-2 h-4 w-4" />
-			</Button>
-		),
-		cell: ({ row }) => {
-			const entity = row.getValue("entity") as GroupRuleRow["entity"]
-			return <span className="font-medium">{entityLabelMap[entity] ?? entity}</span>
-		},
-		filterFn: (row, id, value) => {
-			return Array.isArray(value) ? value.includes(row.getValue(id)) : true
-		}
-	},
 	{
 		accessorKey: "rule_type",
 		header: ({ column }) => (
@@ -55,14 +32,14 @@ export const rulesColumns: ColumnDef<GroupRuleRow>[] = [
 		}
 	},
 	{
-		accessorKey: "target_id",
+		accessorKey: "partnerName",
 		header: ({ column }) => (
 			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-				Target ID
+				Parceiro
 				<ArrowUpDown className="ml-2 h-4 w-4" />
 			</Button>
 		),
-		cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.getValue("target_id") as string}</span>,
+		cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.getValue("partnerName") as string}</span>,
 		filterFn: (row, id, value) => {
 			const search = String(value ?? "").toLowerCase()
 			if (!search) {

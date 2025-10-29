@@ -1,4 +1,4 @@
-import type { GroupRuleEntity, GroupRuleType } from "@/lib/definitions/groups"
+import type { GroupRuleType } from "@/lib/definitions/groups"
 
 export type GroupMemberRow = {
 	user_id: string
@@ -10,9 +10,9 @@ export type GroupMemberRow = {
 
 export type GroupRuleRow = {
 	id: string
-	entity: GroupRuleEntity
 	rule_type: GroupRuleType
-	target_id: string
 	created_at: string
 	groupId: string
+	partnerId: string | null
+	partnerName: string
 }

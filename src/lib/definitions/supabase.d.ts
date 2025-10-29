@@ -254,6 +254,13 @@ export type Database = {
 						isOneToOne: false
 						referencedRelation: "groups"
 						referencedColumns: ["id"]
+					},
+					{
+						foreignKeyName: "group_rules_target_id_fkey"
+						columns: ["target_id"]
+						isOneToOne: false
+						referencedRelation: "partners"
+						referencedColumns: ["id"]
 					}
 				]
 			}

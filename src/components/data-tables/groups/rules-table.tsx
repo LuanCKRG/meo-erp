@@ -43,8 +43,12 @@ export const RulesTable = ({ groupId }: RulesTableProps) => {
 			}
 
 			return response.data.map((rule) => ({
-				...rule,
-				groupId
+				id: rule.id,
+				rule_type: rule.rule_type,
+				created_at: rule.created_at,
+				groupId,
+				partnerId: rule.partner?.id ?? null,
+				partnerName: rule.partner?.legal_business_name ?? "-"
 			}))
 		},
 		enabled: Boolean(groupId),
@@ -73,9 +77,8 @@ export const RulesTable = ({ groupId }: RulesTableProps) => {
 	})
 
 	const columnNameMap: Record<string, string> = {
-		entity: "Entidade",
 		rule_type: "Tipo",
-		target_id: "Target ID",
+		partnerName: "Parceiro",
 		created_at: "Criado em",
 		actions: "Acoes"
 	}
