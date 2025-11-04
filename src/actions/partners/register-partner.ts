@@ -3,7 +3,7 @@
 import { PostgrestError } from "@supabase/supabase-js"
 
 import { createUser } from "@/actions/auth"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import type { RegisterPartnerData } from "@/lib/validations/partner"
 import type { ActionResponse } from "@/types/action-response"
 
@@ -15,7 +15,7 @@ const partnerRegistrationErrorMessages: Record<string, string> = {
 }
 
 async function registerPartner(data: RegisterPartnerData): Promise<ActionResponse<{ partnerId: string }>> {
-	const supabase = await createClient()
+	const supabase = createAdminClient()
 	let newAuthUserId: string | null = null
 
 	try {
