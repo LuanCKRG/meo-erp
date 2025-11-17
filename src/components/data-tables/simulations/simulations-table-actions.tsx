@@ -2,13 +2,14 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { DollarSign, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Send, Trash2 } from "lucide-react"
+import { Copy, DollarSign, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Send, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 
 import { hasPermission } from "@/actions/auth"
 import { createOrderFromSimulation } from "@/actions/orders"
 import { deleteSimulation, downloadSimulationFiles, generateSimulationPdf, listSimulationFiles } from "@/actions/simulations"
+import { duplicateSimulation } from "@/actions/simulations/duplicate-simulation"
 import { EditSimulationDialog } from "@/components/dialogs/edit-simulation-dialog"
 import { EditSimulationRatesDialog } from "@/components/dialogs/edit-simulation-rates-dialog"
 import { UpdateStatusDialog } from "@/components/dialogs/update-status-dialog"
@@ -38,6 +39,7 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 	const [isCreateOrderPending, startCreateOrderTransition] = useTransition()
 	const [isPdfPending, startPdfTransition] = useTransition()
 	const [isDownloadPending, startDownloadTransition] = useTransition()
+	const [isDuplicatePending, startDuplicateTransition] = useTransition()
 	const [isDownloadDropdownOpen, setIsDownloadDropdownOpen] = useState(false)
 	const [selectedDocs, setSelectedDocs] = useState<Set<DocumentFieldName>>(new Set())
 
@@ -108,7 +110,14 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 					}
 					const link = document.createElement("a")
 					link.href = `data:application/pdf;base64,${result.data.pdfBase64}`
-					link.download = `proposta-simulacao-${simulation.kdi}.pdf`
+					const safeCompanyName = simulation.company_name
+						.trim()
+						.toLowerCase()
+						.normalize("NFD") // separa acentos
+						.replace(/[\u0300-\u036f]/g, "") // remove acentos
+						.replace(/\s+/g, "_") // espaços -> _
+						.replace(/[^a-z0-9_]/g, "") // remove tudo que não for letra, número ou "_"
+					link.download = `proposta-simulacao-${safeCompanyName || "cliente"}.pdf`
 					document.body.appendChild(link)
 					link.click()
 					document.body.removeChild(link)
@@ -153,6 +162,26 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 					error: (err: Error) => err.message
 				}
 			)
+		})
+	}
+
+	const handleDuplicateSimulation = () => {
+		startDuplicateTransition(() => {
+			toast.promise(duplicateSimulation(simulation.id), {
+				loading: "Duplicando simulação...",
+				success: (res) => {
+					if (res.success) {
+						// Recarrega a lista de simulações para aparecer a nova
+						queryClient.invalidateQueries({ queryKey: ["simulations"] })
+						return res.message || "Simulação duplicada com sucesso!"
+					}
+
+					throw new Error(res.message)
+				},
+				error: (err: Error) => {
+					return err.message || "Ocorreu um erro ao duplicar a simulação."
+				}
+			})
 		})
 	}
 
@@ -281,6 +310,17 @@ export const SimulationsTableActions = ({ simulation }: { simulation: Simulation
 
 				{canCreateSimulations && (
 					<>
+						{/* 👇 NOVO: duplicar simulação */}
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button className="duplicate-simulation-button" variant="ghost" size="icon" onClick={handleDuplicateSimulation} disabled={isDuplicatePending}>
+									{isDuplicatePending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />}
+									<span className="sr-only">Duplicar Simulação</span>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Duplicar Simulação</TooltipContent>
+						</Tooltip>
+
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button className="create-order-button" variant="ghost" size="icon" onClick={handleCreateOrder} disabled={isCreateOrderPending}>
