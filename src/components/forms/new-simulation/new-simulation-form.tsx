@@ -17,8 +17,8 @@ import { SimulationStep3 } from "./step-3-installation"
 import { SimulationStep4 } from "./step-4-values"
 import { SimulationStep5 } from "./step-5-documents"
 import {
-	type SimulationData,
 	newSimulationSchema,
+	type SimulationData,
 	simulationStep1Schema,
 	simulationStep2Schema,
 	simulationStep3Schema,
@@ -83,6 +83,7 @@ export function NewSimulationForm({
 	isDisabled?: boolean
 }) {
 	const [currentStep, setCurrentStep] = React.useState(1)
+	const [createOrderFromSimulation, setCreateOrderFromSimulation] = React.useState<boolean>(true)
 	const { partnerId, sellerId, clearContext } = useSimulation()
 
 	const form = useForm<ExtendedSimulationData>({
@@ -201,7 +202,7 @@ export function NewSimulationForm({
 			sellerId
 		}
 
-		toast.promise(createSimulation(result.data, simulationContext), {
+		toast.promise(createSimulation(result.data, simulationContext, createOrderFromSimulation), {
 			loading: "Salvando simulação...",
 			success: (res) => {
 				if (res.success) {
@@ -246,7 +247,15 @@ export function NewSimulationForm({
 								{currentStep === 2 && <SimulationStep2 onNext={nextStep} onBack={backStep} />}
 								{currentStep === 3 && <SimulationStep3 onNext={nextStep} onBack={backStep} />}
 								{currentStep === 4 && <SimulationStep4 onNext={nextStep} onBack={backStep} />}
-								{currentStep === 5 && <SimulationStep5 onSubmit={handleSubmitEntireForm} onBack={backStep} />}
+								{currentStep === 5 && (
+									<SimulationStep5
+										onSubmit={handleSubmitEntireForm}
+										onBack={backStep}
+										createOrderFromSimulation={createOrderFromSimulation}
+										showInputs={true}
+										onToggleCreateOrderFromSimulation={(value) => setCreateOrderFromSimulation(value)}
+									/>
+								)}
 							</motion.div>
 						</AnimatePresence>
 					</CardContent>

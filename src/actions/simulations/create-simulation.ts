@@ -12,6 +12,7 @@ import type { SimulationInsert } from "@/lib/definitions/simulations"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
 import type { ActionResponse } from "@/types/action-response"
+import { createOrderFromSimulation } from "../orders"
 
 const parseCurrencyStringToNumber = (value: string | undefined | null): number => {
 	if (!value) return 0
@@ -26,7 +27,7 @@ interface SimulationContext {
 }
 
 // A action agora também aceita os dados dos arquivos.
-async function createSimulation(data: SimulationData, context: SimulationContext): Promise<ActionResponse<{ kdi: number }>> {
+async function createSimulation(data: SimulationData, context: SimulationContext, createOrderDirectly?: boolean): Promise<ActionResponse<{ kdi: number }>> {
 	// Cliente padrão (usuário) para obter a sessão
 	const supabase = await createClient()
 	// Cliente com privilégios de admin para operações no DB
@@ -151,6 +152,25 @@ async function createSimulation(data: SimulationData, context: SimulationContext
 		const uploadResponse = await uploadSimulationFiles(simulationId, data)
 		if (!uploadResponse.success) {
 			throw new Error(`Falha no upload de arquivos: ${uploadResponse.message}`)
+		}
+
+		if (createOrderDirectly) {
+			const { message, success } = await createOrderFromSimulation(simulationId)
+
+			if (!success) {
+				return {
+					success: false,
+					message: `Simulação criada, mas falha ao criar pedido: ${message}`
+				}
+			}
+
+			return {
+				success: true,
+				message: "Simulação criada com sucesso!",
+				data: {
+					kdi: simulationResult.kdi
+				}
+			}
 		}
 
 		return {

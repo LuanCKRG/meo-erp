@@ -3,8 +3,8 @@
 
 import { ArrowLeft, Send } from "lucide-react"
 import { useFormContext } from "react-hook-form"
-
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { FileInput } from "@/components/ui/file-input"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { documentFields } from "@/lib/constants"
@@ -12,9 +12,12 @@ import { documentFields } from "@/lib/constants"
 interface Step5Props {
 	onSubmit: () => void
 	onBack: () => void
+	createOrderFromSimulation?: boolean
+	onToggleCreateOrderFromSimulation?: (value: boolean) => void
+	showInputs?: boolean
 }
 
-export function SimulationStep5({ onSubmit, onBack }: Step5Props) {
+export function SimulationStep5({ onSubmit, onBack, createOrderFromSimulation = false, onToggleCreateOrderFromSimulation, showInputs }: Step5Props) {
 	const form = useFormContext()
 
 	return (
@@ -38,6 +41,29 @@ export function SimulationStep5({ onSubmit, onBack }: Step5Props) {
 					/>
 				))}
 			</div>
+
+			{showInputs && (
+				<div className="pt-2">
+					<div className="flex items-start space-x-3">
+						<Checkbox
+							id="create-order-from-simulation"
+							checked={createOrderFromSimulation}
+							onCheckedChange={(checked) => {
+								if (onToggleCreateOrderFromSimulation) onToggleCreateOrderFromSimulation(!!checked)
+							}}
+						/>
+						<div className="space-y-1">
+							<label
+								htmlFor="create-order-from-simulation"
+								className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+							>
+								Criar pedido a partir desta simulação
+							</label>
+							<p className="text-sm text-muted-foreground">Se marcado, ao salvar a simulação o sistema também criará um pedido vinculado.</p>
+						</div>
+					</div>
+				</div>
+			)}
 
 			<div className="flex justify-between pt-8">
 				<Button type="button" variant="outline" onClick={onBack}>
