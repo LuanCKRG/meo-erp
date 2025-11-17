@@ -4,8 +4,8 @@ import { getCurrentUser } from "@/actions/auth"
 import { getSellerByUserId } from "@/actions/sellers"
 import type { CustomerWithRelations } from "@/lib/definitions/customers"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { getAllCustomers } from "."
 import { getPartnerByUserId } from "../partners"
+import { getAllCustomers } from "."
 
 /**
  * Busca parceiros com base na função do usuário logado.
@@ -45,6 +45,8 @@ async function getCustomersForCurrentUser(): Promise<CustomerWithRelations[]> {
         kdi,
         company_name,
         cnpj,
+				city,
+				state,
         partners (
           contact_name
         ),
@@ -71,7 +73,9 @@ async function getCustomersForCurrentUser(): Promise<CustomerWithRelations[]> {
 					company_name: customer.company_name,
 					cnpj: customer.cnpj,
 					partner_name: partner?.contact_name || "N/A",
-					internal_manager_name: seller?.name || "N/A"
+					internal_manager_name: seller?.name || "N/A",
+					city: customer.city,
+					state: customer.state
 				}
 			})
 
@@ -95,6 +99,8 @@ async function getCustomersForCurrentUser(): Promise<CustomerWithRelations[]> {
         kdi,
         company_name,
         cnpj,
+				city,
+				state,
         partners (
           contact_name
         ),
@@ -121,7 +127,9 @@ async function getCustomersForCurrentUser(): Promise<CustomerWithRelations[]> {
 					company_name: customer.company_name,
 					cnpj: customer.cnpj,
 					partner_name: partner?.contact_name || "N/A",
-					internal_manager_name: seller?.name || "N/A"
+					internal_manager_name: seller?.name || "N/A",
+					city: customer.city,
+					state: customer.state
 				}
 			})
 

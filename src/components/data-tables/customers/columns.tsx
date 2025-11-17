@@ -55,6 +55,10 @@ export const columns: ColumnDef<CustomerWithRelations>[] = [
 					</TooltipContent>
 				</Tooltip>
 			)
+		},
+		// permite filtro faceted
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
 		}
 	},
 	{
@@ -65,7 +69,37 @@ export const columns: ColumnDef<CustomerWithRelations>[] = [
 				<ArrowUpDown className="ml-2 h-4 w-4" />
 			</Button>
 		),
-		cell: ({ row }) => <div className="text-left">{row.getValue("internal_manager_name") || "-"}</div>
+		cell: ({ row }) => <div className="text-left">{row.getValue("internal_manager_name") || "-"}</div>,
+		// permite filtro faceted
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
+	},
+	{
+		accessorKey: "city",
+		header: ({ column }) => (
+			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+				Cidade
+				<ArrowUpDown className="ml-2 h-4 w-4" />
+			</Button>
+		),
+		cell: ({ row }) => <div className="text-left">{row.getValue("city") || "-"}</div>,
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
+	},
+	{
+		accessorKey: "state",
+		header: ({ column }) => (
+			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+				Estado
+				<ArrowUpDown className="ml-2 h-4 w-4" />
+			</Button>
+		),
+		cell: ({ row }) => <div className="text-left">{row.getValue("state") || "-"}</div>,
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
 	},
 	{
 		id: "actions",

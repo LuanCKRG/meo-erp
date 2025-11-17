@@ -10,4 +10,6 @@ export type CustomerWithRelations = {
 	cnpj: string
 	partner_name: string
 	internal_manager_name: string | null
+	city: string | null
+	state: string | null
 }

@@ -15,6 +15,8 @@ async function getAllCustomers(): Promise<CustomerWithRelations[]> {
         kdi,
         company_name,
         cnpj,
+				city,
+				state,
         partners (
           contact_name
         ),
@@ -40,7 +42,9 @@ async function getAllCustomers(): Promise<CustomerWithRelations[]> {
 				company_name: customer.company_name,
 				cnpj: customer.cnpj,
 				partner_name: partner?.contact_name || "N/A",
-				internal_manager_name: seller?.name || "N/A"
+				internal_manager_name: seller?.name || "N/A",
+				city: customer.city,
+				state: customer.state
 			}
 		})
 

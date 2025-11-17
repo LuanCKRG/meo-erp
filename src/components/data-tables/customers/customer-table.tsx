@@ -11,14 +11,13 @@ import {
 	useReactTable
 } from "@tanstack/react-table"
 
-import { getAllCustomers } from "@/actions/customers"
+import getCustomersForCurrentUser from "@/actions/customers/get-customers-for-current-user"
 import { columns } from "@/components/data-tables/customers/columns"
 import { CustomerTableToolbar } from "@/components/data-tables/customers/customer-table-toolbar"
 import { DataTable } from "@/components/ui/data-table"
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton"
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options"
 import { usePersistedTableState } from "@/hooks/use-persisted-table-state"
-import getCustomersForCurrentUser from "@/actions/customers/get-customers-for-current-user"
 
 const CUSTOMER_TABLE_STORAGE_KEY = "customer-table-state"
 
@@ -59,7 +58,9 @@ export const CustomerTable = () => {
 		company_name: "Razão Social",
 		cnpj: "CNPJ",
 		partner_name: "Parceiro",
-		internal_manager_name: "Gestor Interno"
+		internal_manager_name: "Gestor Interno",
+		city: "Cidade",
+		state: "Estado"
 	}
 
 	const toolbar = (
