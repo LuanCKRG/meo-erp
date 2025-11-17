@@ -148,7 +148,10 @@ export const columns: ColumnDef<PartnerWithSellerName>[] = [
 	{
 		accessorKey: "seller_name",
 		header: "Gestor Interno",
-		cell: ({ row }) => <div className="text-left">{row.original.seller_name || "-"}</div>
+		cell: ({ row }) => <div className="text-left">{row.original.seller_name || "-"}</div>,
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
 	},
 	{
 		accessorKey: "city",
