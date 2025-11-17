@@ -1,8 +1,8 @@
 "use client"
 
-import { Upload, X, File as FileIcon } from "lucide-react"
+import { File as FileIcon, Upload, X } from "lucide-react"
 import * as React from "react"
-import { useDropzone, type DropzoneOptions } from "react-dropzone"
+import { type DropzoneOptions, useDropzone } from "react-dropzone"
 
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
@@ -46,7 +46,7 @@ const FileInput = React.forwardRef<HTMLDivElement, FileInputProps>(({ value, onC
 			ref={ref}
 			{...getRootProps()}
 			className={cn(
-				"relative flex items-center justify-center w-full h-32 px-4 py-2 text-sm text-center border-2 border-dashed rounded-lg cursor-pointer border-border text-muted-foreground hover:bg-muted/50 transition-colors",
+				"relative flex items-center justify-center w-32 h-32 px-4 py-2 text-sm text-center border-2 border-dashed rounded-lg cursor-pointer border-border text-muted-foreground hover:bg-muted/50 transition-colors",
 				isDragActive && "border-primary bg-primary/10",
 				className
 			)}
@@ -64,9 +64,9 @@ const FileInput = React.forwardRef<HTMLDivElement, FileInputProps>(({ value, onC
 				</div>
 			) : (
 				<div className="flex flex-col items-center justify-center w-full h-full text-foreground">
-					<div className="flex items-center gap-3">
-						<FileIcon className="w-8 h-8 text-primary" />
-						<p className="font-medium truncate">{file.name}</p>
+					<div className="flex flex-col items-center gap-3">
+						<FileIcon className="size-6 text-primary" />
+						<p className="text-sm font-medium text-ellipsis">{file.name}</p>
 						<Button type="button" variant="ghost" size="icon" className="w-6 h-6 text-destructive hover:bg-destructive/10" onClick={handleRemove}>
 							<X className="w-4 h-4" />
 							<span className="sr-only">Remover arquivo</span>
