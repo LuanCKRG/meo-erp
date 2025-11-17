@@ -13,9 +13,12 @@ import { SimulationsTableActions } from "./simulations-table-actions"
 
 const formatCurrency = (value: number | null | undefined): string => {
 	if (value === null || value === undefined) return "N/A"
+
 	return new Intl.NumberFormat("pt-BR", {
 		style: "currency",
-		currency: "BRL"
+		currency: "BRL",
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 0
 	}).format(value)
 }
 
