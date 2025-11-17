@@ -124,12 +124,20 @@ export const columns: ColumnDef<SimulationWithRelations>[] = [
 					{statusTranslations[status]}
 				</Badge>
 			)
+		},
+		// NOVO: permite filtro faceted (DataTableFacetedFilter)
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
 		}
 	},
 	{
 		accessorKey: "created_by_user",
 		header: "Criado por",
-		cell: ({ row }) => row.original.created_by_user || "-"
+		cell: ({ row }) => row.original.created_by_user || "-",
+		// NOVO: permite filtro faceted (DataTableFacetedFilter)
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
 	},
 	{
 		accessorKey: "created_at",
@@ -139,7 +147,30 @@ export const columns: ColumnDef<SimulationWithRelations>[] = [
 				<ArrowUpDown className="ml-2 h-4 w-4" />
 			</Button>
 		),
-		cell: ({ row }) => formatDate(row.getValue("created_at"))
+		cell: ({ row }) => formatDate(row.getValue("created_at")),
+		// NOVO: filtro por intervalo de datas
+		filterFn: (row, id, value) => {
+			const raw = row.getValue(id) as string | Date
+			const rowDate = raw instanceof Date ? raw : new Date(raw)
+
+			const { from, to } = (value ?? {}) as { from?: string; to?: string }
+
+			if (!from && !to) return true
+
+			if (from) {
+				const fromDate = new Date(from)
+				// se a data da linha for antes do início, exclui
+				if (rowDate < fromDate) return false
+			}
+
+			if (to) {
+				const toDate = new Date(to)
+				// se a data da linha for depois do fim, exclui
+				if (rowDate > toDate) return false
+			}
+
+			return true
+		}
 	},
 	{
 		id: "actions",
