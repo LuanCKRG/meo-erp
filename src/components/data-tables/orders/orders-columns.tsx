@@ -162,7 +162,11 @@ export const columns: ColumnDef<OrderWithRelations>[] = [
 	{
 		accessorKey: "created_by_user",
 		header: "Criado por",
-		cell: ({ row }) => row.original.created_by_user || "-"
+		cell: ({ row }) => row.original.created_by_user || "-",
+		// permite filtro faceted (DataTableFacetedFilter)
+		filterFn: (row, id, value) => {
+			return value.includes(row.getValue(id))
+		}
 	},
 	{
 		accessorKey: "created_at",
@@ -172,7 +176,30 @@ export const columns: ColumnDef<OrderWithRelations>[] = [
 				<ArrowUpDown className="ml-2 h-4 w-4" />
 			</Button>
 		),
-		cell: ({ row }) => formatDate(row.getValue("created_at"))
+		cell: ({ row }) => formatDate(row.getValue("created_at")),
+		// filtro de intervalo de data: value = { from?: string; to?: string }
+		filterFn: (row, id, value) => {
+			const raw = row.getValue(id) as string | Date
+			const rowDate = raw instanceof Date ? raw : new Date(raw)
+
+			const { from, to } = (value ?? {}) as { from?: string; to?: string }
+
+			if (!from && !to) return true
+
+			if (from) {
+				const fromDate = new Date(from)
+				if (rowDate < fromDate) return false
+			}
+
+			if (to) {
+				const toDate = new Date(to)
+				// opcional: normalizar pro fim do dia, se quiser incluir o próprio dia
+				// toDate.setHours(23, 59, 59, 999)
+				if (rowDate > toDate) return false
+			}
+
+			return true
+		}
 	},
 	{
 		id: "actions",

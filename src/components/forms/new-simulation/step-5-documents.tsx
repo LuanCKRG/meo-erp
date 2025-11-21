@@ -33,7 +33,12 @@ export function SimulationStep5({ onSubmit, onBack, createOrderFromSimulation = 
 							<FormItem>
 								<FormLabel>{doc.label}</FormLabel>
 								<FormControl>
-									<FileInput value={field.value} onChange={field.onChange} onRemove={() => form.setValue(doc.name, undefined, { shouldValidate: true })} />
+									<FileInput
+										value={field.value}
+										onChange={field.onChange}
+										onRemove={() => form.setValue(doc.name, undefined, { shouldValidate: true })}
+										className="w-full"
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>

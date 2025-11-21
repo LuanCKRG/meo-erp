@@ -1,14 +1,14 @@
 "use client"
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { DollarSign, Download, Edit, Eye, FileDown, Loader2, RefreshCw, Trash2 } from "lucide-react"
+import { DollarSign, Download, Edit, Eye, FileDown, Info, Loader2, RefreshCw, Trash2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
-
+import { hasPermission } from "@/actions/auth"
 import { deleteOrder, generateOrderPdf, listOrderFiles } from "@/actions/orders"
 import { downloadSimulationFiles } from "@/actions/simulations"
-import { documentFields } from "@/lib/constants"
 import { EditOrderDialog } from "@/components/dialogs/edit-order-dialog"
+import { EditRatesDialog } from "@/components/dialogs/edit-rates-dialog"
 import { UpdateOrderStatusDialog } from "@/components/dialogs/update-order-status-dialog"
 import { ViewOrderSheet } from "@/components/dialogs/view-order-sheet"
 import { Button } from "@/components/ui/button"
@@ -22,9 +22,8 @@ import {
 	DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { documentFields } from "@/lib/constants"
 import type { OrderWithRelations } from "@/lib/definitions/orders"
-import { hasPermission } from "@/actions/auth"
-import { EditRatesDialog } from "@/components/dialogs/edit-rates-dialog"
 
 type DocumentFieldName = (typeof documentFields)[number]["name"]
 
@@ -139,6 +138,18 @@ export const OrdersTableActions = ({ order }: { order: OrderWithRelations }) => 
 	return (
 		<>
 			<div className="flex items-center justify-center gap-x-2 alternative-buttons">
+				{order.notes && (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button variant="ghost" size="icon" className="bg-transparent!">
+								<Info className="size-6 text-orange-400!" />
+								<span className="sr-only">Visualizar Detalhes</span>
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>Observações: {order.notes}</TooltipContent>
+					</Tooltip>
+				)}
+
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button variant="ghost" size="icon" onClick={() => setIsViewSheetOpen(true)}>

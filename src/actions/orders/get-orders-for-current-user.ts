@@ -60,6 +60,7 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 				labor_value,
 				other_costs,
 				customer_id,
+				notes,
 				customers (
 					id,
 					cnpj,
@@ -102,7 +103,8 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 					total_value,
 					status: order.status,
 					created_at: order.created_at,
-					created_by_user: order.created_by?.name || "N/A"
+					created_by_user: order.created_by?.name || "N/A",
+					notes: order.notes
 				}
 			})
 
@@ -144,6 +146,7 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 				labor_value,
 				other_costs,
 				customer_id,
+				notes,
 				customers (
 					id,
 					cnpj,
@@ -186,7 +189,8 @@ async function getOrdersForCurrentUser(): Promise<OrderWithRelations[]> {
 					total_value,
 					status: order.status,
 					created_at: order.created_at,
-					created_by_user: order.created_by?.name || "N/A"
+					created_by_user: order.created_by?.name || "N/A",
+					notes: order.notes
 				}
 			})
 

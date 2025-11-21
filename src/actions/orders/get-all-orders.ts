@@ -19,6 +19,7 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
         other_costs,
         created_at,
         status,
+				notes,
         customers (
           id,
           cnpj,
@@ -64,7 +65,8 @@ async function getAllOrders(): Promise<OrderWithRelations[]> {
 				total_value,
 				status: order.status,
 				created_at: order.created_at,
-				created_by_user: order.created_by?.name || "N/A"
+				created_by_user: order.created_by?.name || "N/A",
+				notes: order.notes
 			}
 		})
 

@@ -1,4 +1,3 @@
-
 "use client"
 
 import type { Table } from "@tanstack/react-table"
@@ -13,6 +12,24 @@ import type { OrderWithRelations } from "@/lib/definitions/orders"
 interface OrdersTableToolbarProps<TData> {
 	table: Table<TData>
 }
+
+const statusOptions = [
+	{ label: "Ag. Análise", value: "analysis_pending" },
+	{ label: "Análise Prévia", value: "pre_analysis" },
+	{ label: "Em Confirmação", value: "confirmation_pending" },
+	{ label: "Análise de Crédito", value: "credit_analysis" },
+	{ label: "Ag. Documentos", value: "documents_pending" },
+	{ label: "Análise Docs", value: "docs_analysis" },
+	{ label: "Análise Final", value: "final_analysis" },
+	{ label: "Aprovado", value: "approved" },
+	{ label: "Reprovado", value: "rejected" },
+	{ label: "Assinatura Contrato", value: "contract_signing" },
+	{ label: "Finalizado", value: "completed" },
+	{ label: "Cancelado", value: "canceled" },
+	{ label: "Pré-Aprovado", value: "pre_approved" },
+	{ label: "Pré-Aprovado (Laranja)", value: "pre_approved_orange" },
+	{ label: "Congelado", value: "frozen" }
+]
 
 export const OrdersTableToolbar = <TData,>({ table }: OrdersTableToolbarProps<TData>) => {
 	const isFiltered = table.getState().columnFilters.length > 0
@@ -53,6 +70,17 @@ export const OrdersTableToolbar = <TData,>({ table }: OrdersTableToolbarProps<TD
 		return Array.from(managers).map((manager) => ({ label: manager, value: manager }))
 	}, [table.getCoreRowModel().rows])
 
+	const uniqueCreators = useMemo(() => {
+		const creators = new Set<string>()
+		table.getCoreRowModel().rows.forEach((row) => {
+			const createdBy = (row.original as OrderWithRelations).created_by_user
+			if (createdBy) creators.add(createdBy)
+		})
+		return Array.from(creators).map((creator) => ({ label: creator, value: creator }))
+	}, [table.getCoreRowModel().rows])
+
+	const createdAtFilter = (table.getColumn("created_at")?.getFilterValue() as { from?: string; to?: string }) ?? {}
+
 	return (
 		<div className="flex items-center justify-between">
 			<div className="flex flex-1 flex-wrap items-center gap-2">
@@ -62,12 +90,58 @@ export const OrdersTableToolbar = <TData,>({ table }: OrdersTableToolbarProps<TD
 					onChange={(event) => table.getColumn("company_name")?.setFilterValue(event.target.value)}
 					className="h-8 w-[150px] lg:w-[250px]"
 				/>
+
+				{/* Estado */}
 				{table.getColumn("state") && <DataTableFacetedFilter column={table.getColumn("state")} title="Estado" options={uniqueStates} />}
+
+				{/* Cidade */}
 				{table.getColumn("city") && <DataTableFacetedFilter column={table.getColumn("city")} title="Cidade" options={uniqueCities} />}
+
+				{/* Parceiro */}
 				{table.getColumn("partner_name") && <DataTableFacetedFilter column={table.getColumn("partner_name")} title="Parceiro" options={uniquePartners} />}
+
+				{/* Gestor Interno */}
 				{table.getColumn("internal_manager") && (
 					<DataTableFacetedFilter column={table.getColumn("internal_manager")} title="Gestor Interno" options={uniqueManagers} />
 				)}
+
+				{/* 👇 NOVO: Status */}
+				{table.getColumn("status") && <DataTableFacetedFilter column={table.getColumn("status")} title="Status" options={statusOptions} />}
+
+				{/* 👇 NOVO: Criado por */}
+				{table.getColumn("created_by_user") && (
+					<DataTableFacetedFilter column={table.getColumn("created_by_user")} title="Criado por" options={uniqueCreators} />
+				)}
+
+				{/* 👇 NOVO: intervalo de datas (created_at) */}
+				{table.getColumn("created_at") && (
+					<div className="flex items-center gap-2">
+						<Input
+							type="date"
+							className="h-8 w-[140px]"
+							value={createdAtFilter.from ?? ""}
+							onChange={(e) =>
+								table.getColumn("created_at")?.setFilterValue({
+									...createdAtFilter,
+									from: e.target.value || undefined
+								})
+							}
+						/>
+						<span className="text-xs text-muted-foreground">até</span>
+						<Input
+							type="date"
+							className="h-8 w-[140px]"
+							value={createdAtFilter.to ?? ""}
+							onChange={(e) =>
+								table.getColumn("created_at")?.setFilterValue({
+									...createdAtFilter,
+									to: e.target.value || undefined
+								})
+							}
+						/>
+					</div>
+				)}
+
 				{isFiltered && (
 					<Button variant="ghost" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
 						Limpar

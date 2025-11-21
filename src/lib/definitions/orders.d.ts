@@ -19,4 +19,5 @@ export type OrderWithRelations = {
 	status: OrderStatus
 	created_at: string
 	created_by_user: string
+	notes: string | null
 }
