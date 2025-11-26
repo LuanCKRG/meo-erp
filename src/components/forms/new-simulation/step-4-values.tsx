@@ -230,10 +230,11 @@ const SimulationStep4 = ({
 						name="notes"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Observações</FormLabel>
+								<FormLabel className="text-[#1d9bf0]">Observações</FormLabel>
 								<FormControl>
 									<Textarea
-										placeholder="Adicione observações importantes sobre a simulação, como detalhes da instalação, condições especiais, etc."
+										className="border-[#1d9bf0]"
+										placeholder={"Documentação: Preencher com DRE da empresa\n\n" + "Reprovação por protestos: Preencher apenas alguns dias depois"}
 										{...field}
 									/>
 								</FormControl>
